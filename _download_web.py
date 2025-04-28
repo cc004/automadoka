@@ -6,7 +6,7 @@ import shutil
 async def get_latest_release_info(owner, repo):
     url = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(url, ssl=False) as response:
             if response.ok:
                 release_info = await response.json()
                 tag_name = release_info['tag_name']

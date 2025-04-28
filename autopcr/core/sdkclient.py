@@ -58,12 +58,6 @@ class sdkclient:
             headers = deepcopy(IOS_HEADERS)
         else:
             raise ValueError(f"Invalid platform {self._account.type}")
-
-        headers['RES-KEY'] = self.reskey
-        headers['PLATFORM'] = self.platform
-        headers['PLATFORM-ID'] = self.platform_id
-        headers['CHANNEL-ID'] = self.channel
-
         return headers
 
     @property

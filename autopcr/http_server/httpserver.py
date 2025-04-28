@@ -542,4 +542,4 @@ data: {ret}\n\n'''
 
     def run_forever(self, loop):
         self.quart.register_blueprint(self.app)
-        self.quart.run(host=self.host, port=self.port, loop=loop)
+        self.quart.run(host=self.host, port=self.port, loop=loop, debug=True)

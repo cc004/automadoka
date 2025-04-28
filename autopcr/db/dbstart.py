@@ -5,13 +5,7 @@ from ..util import aiorequests
 import brotli
 
 async def db_start():
-    dbs = glob.glob(os.path.join(CACHE_DIR, "db", "*.db"))
-    if dbs:
-        db = max(dbs)
-        version = int(os.path.basename(db).split('.')[0])
-    else:
-        version = await do_update_database()
-    await datamgr.try_update_database(version)
+    pass
 
 async def do_update_database() -> int:
     info = f'https://redive.estertion.win/last_version_cn.json'

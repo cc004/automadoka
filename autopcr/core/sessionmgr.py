@@ -85,43 +85,14 @@ class sessionmgr(Component[apiclient]):
         while True:
             try:
                 current = self._container.servers[self._container.active_server]
-                self._container.servers = [f'https://{server}'.replace('\t', '') for server in (await next.request(SourceIniIndexRequest())).server]
+                self._container.servers = ['https://api.mmme.pokelabo.jp']
                 try:
                     self._container.active_server = self._container.servers.index(current)
                 except ValueError:
                     self._container.active_server = 0
-                manifest = await next.request(SourceIniGetMaintenanceStatusRequest())
-                self._container._headers['MANIFEST-VER'] = manifest.required_manifest_ver
                 
                 await self._ensure_token(next)
                 
-                req = CheckGameStartRequest()
-                req.apptype = 0
-                req.campaign_data = ''
-                req.campaign_user = random.randint(0, 100000) & ~1
-                
-                if not (await next.request(req)).now_tutorial:
-                    raise PanicError("账号未过完教程")
-                
-                # await next.request(CheckAgreementRequest())
-
-                req = LoadIndexRequest()
-                req.carrier = "OPPO"
-                self.session_expire_time = (await next.request(req)).daily_reset_time
-
-                req = HomeIndexRequest()
-                req.message_id = 1
-                req.gold_history = 0
-                req.is_first = 1
-                req.tips_id_list = []
-                resp = await next.request(req)
-
-                if resp.quest_list and any(1 for quest in resp.quest_list if quest.quest_id == 11008001 and quest.result_type == eMissionStatusType.AlreadyReceive): # clear normal 8-1 and unlock daily task
-                    req = DailyTaskTopRequest()
-                    req.setting_alchemy_count = 1
-                    req.is_check_by_term_normal_gacha = 0
-                    await next.request(req)
-
                 self._logged = True
                 break
             except ApiException as e:

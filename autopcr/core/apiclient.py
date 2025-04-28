@@ -12,7 +12,7 @@ from hashlib import md5
 from Crypto.Cipher import AES
 from base64 import b64encode, b64decode
 from .sdkclient import sdkclient
-from ..constants import refresh_headers, DEBUG_LOG, MAX_API_RUNNING
+from ..constants import DEBUG_LOG, MAX_API_RUNNING
 import time, datetime
 import json
 from ..util.logger import instance as logger

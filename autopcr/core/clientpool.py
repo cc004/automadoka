@@ -6,7 +6,6 @@ from .sessionmgr import sessionmgr
 from ..model.error import PanicError
 from .misc import errorhandler, mutexhandler
 from .base import Component, Request, TResponse, RequestHandler
-from ..model.sdkrequests import ToolSdkLoginRequest
 from typing import Dict, Tuple
 from ..constants import SESSION_ERROR_MAX_RETRY, CLIENT_POOL_SIZE_MAX, CLIENT_POOL_MAX_AGE, CACHE_DIR, CLIENT_POOL_MAX_CLIENT_ALIVE
 import time, os, asyncio, pickle
