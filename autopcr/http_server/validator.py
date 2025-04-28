@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from collections import defaultdict
 from ..sdk.validator import remoteValidator, localValidator
-from ..sdk.bsgamesdk import captch
 from ..util.logger import instance as logger
 
 @dataclass_json

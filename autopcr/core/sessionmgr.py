@@ -3,7 +3,7 @@ from .apiclient import apiclient, ApiException
 from .sdkclient import sdkclient
 import json, os, random
 from ..model.models import *
-from ..constants import CACHE_DIR
+from ..constants import CACHE_DIR, APP_VER
 from ..util.logger import instance as logger
 import hashlib
 
@@ -20,58 +20,49 @@ class sessionmgr(Component[apiclient]):
         if not os.path.exists(self.cacheDir):
             os.makedirs(self.cacheDir)
 
-    @property
-    def cacheFile(self):
-        return os.path.join(self.cacheDir, self.id)
-
     async def _bililogin(self):
-        uid, access_key = await self.sdk.login()
-        self._sdkaccount = {
-                'uid': uid,
-                'access_key': access_key
-        }
-        with open(self.cacheFile, 'w') as fp:
-            json.dump(self._sdkaccount, fp)
+        privateKey, uuid = await self.sdk.login()
+        self._sdkaccount = privateKey, uuid
 
     async def _ensure_token(self, next: RequestHandler):
         try:
-            for _ in range(5):
-                if self._sdkaccount and self._sdkaccount['access_key']:
-                    try:
-                        req = ToolSdkLoginRequest(
-                            uid=self._sdkaccount['uid'],
-                            access_key=self._sdkaccount['access_key'],
-                            platform=str(self.sdk.platform_id),
-                            channel_id=str(self.sdk.channel)
-                        )
-                        if not (await next.request(req)).is_risk:
-                            break
-                        else:
-                            for _ in range(5):
-                                captch_done = await self.sdk.do_captcha()
-                                req = ToolSdkLoginRequest(
-                                    uid=self._sdkaccount['uid'],
-                                    access_key=self._sdkaccount['access_key'],
-                                    platform=str(self.sdk.platform_id),
-                                    channel_id=str(self.sdk.channel),
-                                    challenge=captch_done['challenge'],
-                                    validate_=captch_done['validate'],
-                                    seccode=captch_done['validate']+"|jordan",
-                                    captcha_type='1',
-                                    image_token='',
-                                    captcha_code='',
-                                )
-                                if not (await next.request(req)).is_risk:
-                                    break
-                            else:
-                                raise PanicError("登录失败，帐号存在风险")
-                    except ApiException:
-                        pass
-                
-                self._sdkaccount = None
+            if self._sdkaccount is None:
                 await self._bililogin()
-            else:
-                raise PanicError("登录失败")
+            
+            privateKey, uuid = self._sdkaccount
+            req = LoginApiLoginRequest(
+                appVersion=APP_VER,
+                urlParam=None,
+                deviceModel="Asus ASUS_I003DD",
+                osType=2,
+                osVersion="Android OS 9 / API-28 (PI/rel.cjw.20220518.114133)",
+                storeType=2,
+                graphicsDeviceId=0,
+                graphicsDeviceVendorId=0,
+                processorCount=4,
+                processorType="x86-64 SSE3 SSE4.1 SSE4.2 AVX",
+                supportedRenderTargetCount=8,
+                supports3DTextures=True,
+                supportsAccelerometer=True,
+                supportsComputeShaders=True,
+                supportsGyroscope=True,
+                supportsImageEffects=True,
+                supportsInstancing=True,
+                supportsLocationService=True,
+                supportsRenderTextures=True,
+                supportsRenderToCubemap=True,
+                supportsShadows=True,
+                supportsSparseTextures=False,
+                supportsStencil=1,
+                supportsVibration=False,
+                uuid=None,
+                xuid=0
+            )
+            self._container.privateKey = privateKey
+            self._container.uuid = uuid
+            resp = await next.request(req)
+            self._container.sessionId = resp.sessionId
+            self._container.userId = resp.userId
         except Exception as e:
             logger.exception(e)
             raise PanicError(f"登录出错: {e}")
@@ -79,30 +70,32 @@ class sessionmgr(Component[apiclient]):
             await self.sdk.invoke_post_login()
 
     async def _login(self, next: RequestHandler):
-        if os.path.exists(self.cacheFile):
-            with open(self.cacheFile, 'r') as fp:
-                self._sdkaccount = json.load(fp)
         while True:
             try:
-                current = self._container.servers[self._container.active_server]
-                self._container.servers = ['https://api.mmme.pokelabo.jp']
-                try:
-                    self._container.active_server = self._container.servers.index(current)
-                except ValueError:
-                    self._container.active_server = 0
+                self._container.servers = [self.sdk.apiroot]
+                self._container.active_server = 0
                 
                 await self._ensure_token(next)
-                
+                await next.request(UserApiGetInitDataListRequest())
+                await next.request(PartyApiGetCharacterBuildDataListRequest())
+                await next.request(CharacterApiGetCharacterListRequest())
+                await next.request(CollectionApiGetCollectionParamUpAchieveDataListRequest())
+                await next.request(CollectionApiGetCollectionDataListRequest())
+                await next.request(StyleApiGetStyleDataListRequest())
+                await next.request(UserApiGetUserParamDataRequest())
+                await next.request(ConfigApiGetConfigRequest())
+                await next.request(UserApiLoadOptionRequest())
+                await next.request(WebPayApiCancelLatestRequest())
+                await next.request(TermsApiGetUpdatedTermsRequest(storeType=2))
+
                 self._logged = True
                 break
             except ApiException as e:
-                if "维护" in str(e):
-                    raise PanicError(str(e))
-                pass
+                raise
 
     @property
     def is_session_expired(self):
-        return self._logged and self._container.time >= self.session_expire_time
+        raise NotImplementedError
 
     async def request(self, request: Request[TResponse], next: RequestHandler) -> TResponse:
         if not self._logged:
@@ -110,8 +103,7 @@ class sessionmgr(Component[apiclient]):
         try:
             return await next.request(request)
         except ApiException as ex:
-            if ex.status == 3 and self.auto_relogin:
-                self._logged = False
+            self._logged = False
             raise
 
     async def clear_session(self):

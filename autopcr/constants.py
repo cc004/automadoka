@@ -36,7 +36,6 @@ APP_SM = 'd93591340bd287528d48f1422bd712380o1e1E88A0177575728C9A399A9BD1F43A11D4
 
 # Headers
 DEFAULT_HEADERS = {
-  "x-game-server-url": "https://api.mmme.pokelabo.jp",
   "content-type": "application/x-msgpack",
   "x-timezone-offset": "28800",
   "x-language": "ja-Jpan",

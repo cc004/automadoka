@@ -1,8 +1,9 @@
 #type: ignore
 from re import T
-from typing import Generic, TypeVar, Optional
+from typing import Generic, TypeVar, Optional, List
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
+from ..constants import APP_SM
 
 class ErrorInfo(BaseModel):
     title: str = None
@@ -12,6 +13,12 @@ class ErrorInfo(BaseModel):
     def __str__(self) -> str:
         return f'{self.title}: {self.message} (code={self.status})'
 
+class ServerError(BaseModel):
+    domain: str
+    code: int
+    field: str
+    reason: str
+
 class ResponseBase(BaseModel):
     server_error: ErrorInfo = None
     update_bank_gold: int = None
@@ -19,27 +26,18 @@ class ResponseBase(BaseModel):
 
 TResponse = TypeVar('TResponse', bound=ResponseBase, covariant=True)
 
-class ResponseHeader(BaseModel):
-    sid: str = None
-    request_id: str = None
-    viewer_id: str = None
-    servertime: int = 0
-    result_code: int = -1
-    short_udid: str = None
-
 class Response(GenericModel, Generic[TResponse]):
-    data_headers: ResponseHeader = None
-    data: Optional[TResponse] = None
+    payload: Optional[TResponse] = None
+    url: str = None
+    status: int = None
+    errors: Optional[List[ServerError]] = None
 
 from pydantic.main import validate_model, object_setattr
 from typing import Any
 
 class Request(Generic[TResponse], BaseModel):
-    viewer_id: str = None
-    
-    @property
-    def crypted(self) -> bool: return True
-
+    lastHomeAccessTime: str = ''
+    sm: str = APP_SM
     @property
     def url(self) -> str:
         raise NotImplementedError()
@@ -60,3 +58,12 @@ class Request(Generic[TResponse], BaseModel):
             ) from e
         object_setattr(__pydantic_self__, '__fields_set__', fields_set)
         __pydantic_self__._init_private_attributes()
+
+class RequestBody(Generic[TResponse], BaseModel):
+    payload: Request[TResponse]
+    uuid: str
+    userId: int
+    sessionId: Optional[str]
+    actionToken: Optional[str]
+    ctag: Optional[str]
+    actionTime: int

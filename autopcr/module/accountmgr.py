@@ -17,7 +17,7 @@ import hashlib
 from ..db.database import db
 import datetime
 import traceback
-from ..core.clientpool import instance as clientpool, PoolClientWrapper
+from ..core.pcrclient import pcrclient
 from ..sdk.sdkclients import create
 from ..util.logger import instance as logger
 
@@ -174,19 +174,11 @@ class Account(ModuleManager):
         ret = self.data.single_result.get(module, [])
         return ret
 
-    async def get_client(self) -> PoolClientWrapper:
+    async def get_client(self) -> pcrclient:
         return await self.get_android_client()
 
-    async def get_ios_client(self) -> PoolClientWrapper: # Header TODO
-        client = await clientpool.get_client(create(self.data.channel, account(
-            self.data.username,
-            self.data.password,
-            platform.IOS
-        )))
-        return client
-
-    async def get_android_client(self) -> PoolClientWrapper:
-        client = await clientpool.get_client(create(self.data.channel, account(
+    async def get_android_client(self) -> pcrclient:
+        client = pcrclient(create(self.data.channel, account(
             self.data.username,
             self.data.password,
             platform.Android

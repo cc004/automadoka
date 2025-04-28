@@ -7,8 +7,8 @@ from abc import abstractmethod, abstractproperty
 from ..model.error import *
 from ..model.enums import *
 from ..db.database import db
+from ..core.pcrclient import pcrclient
 from .modulebase import Module, ModuleResult, eResultStatus
-from ..core.clientpool import PoolClientWrapper
 import traceback
 import os
 
@@ -70,7 +70,7 @@ class ModuleManager:
     def id(self) -> str: ...
 
     @abstractmethod
-    async def get_client() -> PoolClientWrapper: ...
+    async def get_client() -> pcrclient: ...
 
     @abstractmethod
     async def save_daily_result(self, resp: TaskResult, status: eResultStatus) -> TaskResultInfo: ...
@@ -89,11 +89,10 @@ class ModuleManager:
     async def __aenter__(self):
         self.client = await self.get_client()
         self.client.set_config(self.config)
-        await self.client.__aenter__()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.client.__aexit__(exc_type, exc_val, exc_tb)
+        pass
 
     async def is_cron_run(self, hour: int, minute: int) -> bool:
         for cron in self.modules_list.cron_modules:
@@ -151,7 +150,7 @@ class ModuleManager:
             )
 
         client = self.client
-        self.config["stamina_relative_not_run"] = any(db.is_campaign(campaign) for campaign in self.config.get("stamina_relative_not_run_campaign_before_one_day", []))
+        self.config["stamina_relative_not_run"] = False
 
         self.config.update(config)
 

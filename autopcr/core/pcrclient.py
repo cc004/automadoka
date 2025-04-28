@@ -55,7 +55,7 @@ class pcrclient(apiclient):
         return self._keys.get(key, self._base_keys.get(key, default))
     
     @property
-    def stamina_recover_cnt(self) -> int:
+    def stamina_recover_cnt(self):
         return self._get_key('stamina_recover_times', 0)
 
     def is_stamina_consume_not_run(self):

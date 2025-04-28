@@ -38,10 +38,10 @@ class sdkclient:
         self.post_login_evts.append(evt)
 
     '''
-    returns: uid, access_key
+    returns: privateKey, uuid
     '''
     @abstractmethod
-    async def login(self) -> Tuple[str, str]: ...
+    async def login(self) -> Tuple[bytes, str]: ...
 
     async def invoke_post_login(self):
         for evt in self.post_login_evts:
@@ -58,15 +58,12 @@ class sdkclient:
             headers = deepcopy(IOS_HEADERS)
         else:
             raise ValueError(f"Invalid platform {self._account.type}")
+        headers['x-game-server-url'] = self.apiroot
         return headers
 
     @property
-    @abstractmethod
-    def apiroot(self) -> str: ...
-
-    @property
-    @abstractmethod
-    def platform_id(self) -> str: ...
+    def apiroot(self) -> str:
+        ...
 
     @property
     def channel(self):
@@ -75,7 +72,3 @@ class sdkclient:
     @property
     def account(self):
         return self._account.username
-
-    @property
-    @abstractmethod
-    def reskey(self) -> str: ...
