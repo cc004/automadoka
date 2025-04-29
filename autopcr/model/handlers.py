@@ -8,6 +8,11 @@ def handles(cls):
     return None
 
 @handles
-class LoginApiLoginResponse(responses.LoginApiLoginResponse):
+class UserApiGetInitDataListResponse(responses.UserApiGetInitDataListResponse):
     async def update(self, mgr: datamgr, request):
-        pass
+        mgr.resp = self
+
+@handles
+class ConfigApiGetConfigResponse(responses.ConfigApiGetConfigResponse):
+    async def update(self, mgr: datamgr, request):
+        mgr.config = self

@@ -1,7 +1,7 @@
 from dataclasses import field
 from typing import Any
 from .cron import *
-from .test import test
+from .sweep import *
 
 @dataclass
 class ModuleList:
@@ -26,7 +26,11 @@ daily_modules = ModuleList(
     '日常',
     'daily',
     [
-        test
+        tower,
+        heart,
+        gather,
+        mission,
+        present
     ]
 )
 

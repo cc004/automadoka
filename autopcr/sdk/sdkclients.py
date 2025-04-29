@@ -273,6 +273,7 @@ class GreeClient:
 
 import os, re
 from ..constants import CACHE_DIR
+from requests import HTTPError
 
 class bsdkclient(sdkclient):
 
@@ -283,26 +284,29 @@ class bsdkclient(sdkclient):
         return os.path.join(os.path.join(CACHE_DIR, 'token'), self._account.username + '.json')
 
     async def login(self):
-        try:
-            with open(self.cacheFile, 'r') as fp:
-                account = json.load(fp)
-            gclient = GreeClient(base64.b64decode(account['privateKey']), account['uuid'])
-            await gclient.login()
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        for _ in range(5):
+            try:
+                with open(self.cacheFile, 'r') as fp:
+                    account = json.load(fp)
+                gclient = GreeClient(base64.b64decode(account['privateKey']), account['uuid'])
+                await gclient.login()
+                break
+            except HTTPError:
+                gclient = GreeClient()
+                await gclient.register()
+                await gclient.migrate_from(self._account.username, self._account.password)
+                await gclient.login()
 
-            gclient = GreeClient()
-            await gclient.register()
-            await gclient.migrate_from(self._account.username, self._account.password)
-            await gclient.login()
+                with open(self.cacheFile, 'w') as fp:
+                    json.dump({
+                        'privateKey': base64.b64encode(gclient.private_key).decode('utf8'),
+                        'uuid': gclient.uuid
+                    }, fp)
+            except:
+                pass
+        else:
+            raise ConnectionError
 
-            with open(self.cacheFile, 'w') as fp:
-                json.dump({
-                    'privateKey': base64.b64encode(gclient.private_key).decode('utf8'),
-                    'uuid': gclient.uuid
-                }, fp)
-        
         return gclient.private_key, gclient.uuid
 
     @property

@@ -45,6 +45,7 @@ class apiclient(Container["apiclient"]):
         super().__init__()
         self._headers = sdk.header()
         self._lck = Lock()
+        self._mst_cache = {}
 
     def actionTime(self) -> int:
         # Windows FILETIME 纪元（1601-01-01）到 Unix 纪元（1970-01-01）之间的秒数
@@ -81,9 +82,7 @@ class apiclient(Container["apiclient"]):
         self._headers['x-post-signature'] = crypto.ApiCrypto.sign(crypted, private_key_bytes=self.privateKey)
 
         try:
-            resp = await aiorequests.post(urlroot + request.url, data=crypted, headers=self._headers, timeout=10, proxies={
-                'https': 'http://localhost:8899'
-            }, verify=False)
+            resp = await aiorequests.post(urlroot + request.url, data=crypted, headers=self._headers, timeout=10)
 
             if resp.status_code != 200:
                 raise ApiException('', -1, resp.status_code)
@@ -120,3 +119,10 @@ class apiclient(Container["apiclient"]):
     async def request(self, request: Request[TResponse]) -> TResponse:
         async with self._lck:
             return await self._request_internal(request)
+    
+    async def mst(self, request: Request[TResponse]) -> TResponse:
+        if request.__class__ in self._mst_cache:
+            return self._mst_cache[request.__class__]
+        mst = await self.request(request)
+        self._mst_cache[request.__class__] = mst
+        return mst
