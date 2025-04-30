@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Tuple, Coroutine, Any, List, Callable
 from abc import abstractmethod
-from ..sdk.validator import remoteValidator
 from copy import deepcopy
 from ..constants import DEFAULT_HEADERS, IOS_HEADERS
 from ..util.logger import instance as logger
@@ -22,7 +21,7 @@ class account:
 
 class sdkclient:
 
-    def __init__(self, info: account, captchaVerifier=remoteValidator, logger=logger):
+    def __init__(self, info: account, captchaVerifier=None, logger=logger):
         self.captchaVerifier = captchaVerifier
         self.logger = logger
         if info.type == platform.Android:

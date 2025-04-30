@@ -1,10 +1,11 @@
 from .base import Component, RequestHandler
 from .apiclient import apiclient, ApiException
 from .sdkclient import sdkclient
-import json, os, random
+import os
 from ..model.models import *
 from ..constants import CACHE_DIR, APP_VER
 from ..util.logger import instance as logger
+from ..db.database import db
 import hashlib
 
 class sessionmgr(Component[apiclient]):
@@ -76,6 +77,9 @@ class sessionmgr(Component[apiclient]):
                 self._container.active_server = 0
                 
                 await self._ensure_token(next)
+                
+                await db.update(next)
+                
                 await next.request(UserApiGetInitDataListRequest())
                 await next.request(PartyApiGetCharacterBuildDataListRequest())
                 await next.request(CharacterApiGetCharacterListRequest())
@@ -87,8 +91,8 @@ class sessionmgr(Component[apiclient]):
                 await next.request(UserApiLoadOptionRequest())
                 await next.request(WebPayApiCancelLatestRequest())
                 await next.request(TermsApiGetUpdatedTermsRequest(storeType=2))
-
                 self._logged = True
+                
                 break
             except ApiException as e:
                 raise
@@ -97,7 +101,7 @@ class sessionmgr(Component[apiclient]):
     def is_session_expired(self):
         raise NotImplementedError
 
-    async def request(self, request: Request[TResponse], next: RequestHandler) -> TResponse:
+    async def request(self, request: RequestBase[TResponse], next: RequestHandler) -> TResponse:
         if not self._logged:
             await self._login(next)
         try:

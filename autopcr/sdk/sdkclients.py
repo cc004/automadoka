@@ -89,7 +89,7 @@ class GreeClient:
 
     @staticmethod
     def generate_device_id() -> str:
-        buf = random.randbytes(8)
+        buf = bytes([random.randint(0, 255) for _ in range(8)])
         return buf.hex()
 
     def __init__(self,
@@ -291,7 +291,7 @@ class bsdkclient(sdkclient):
                 gclient = GreeClient(base64.b64decode(account['privateKey']), account['uuid'])
                 await gclient.login()
                 break
-            except HTTPError:
+            except (RuntimeError, FileNotFoundError):
                 gclient = GreeClient()
                 await gclient.register()
                 await gclient.migrate_from(self._account.username, self._account.password)
@@ -302,7 +302,7 @@ class bsdkclient(sdkclient):
                         'privateKey': base64.b64encode(gclient.private_key).decode('utf8'),
                         'uuid': gclient.uuid
                     }, fp)
-            except:
+            except HTTPError:
                 pass
         else:
             raise ConnectionError

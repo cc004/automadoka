@@ -4,15 +4,15 @@ from ..model.modelbase import *
 T = TypeVar('T', bound="Container")
 
 class RequestHandler:
-    def __init__(self, next: Callable[[Request[TResponse]], Coroutine[Any, Any, TResponse]]):
+    def __init__(self, next: Callable[[RequestBase[TResponse]], Coroutine[Any, Any, TResponse]]):
         self._next = next
-    async def request(self, request: Request[TResponse]) -> TResponse:
+    async def request(self, request: RequestBase[TResponse]) -> TResponse:
         return await self._next(request)
 
 class Component(Generic[T]):
     def register_to(self, container: T):
         self._container = container
-    async def request(self, request: Request[TResponse],
+    async def request(self, request: RequestBase[TResponse],
         next: RequestHandler) -> TResponse:
         return await next.request(request)
     @property
@@ -26,8 +26,8 @@ class Container(Generic[T]):
         self._components.append(component)
         component.register_to(self)
         next = RequestHandler(self.request)
-        def request(request: Request[TResponse]) -> Coroutine[Any, Any, TResponse]:
+        def request(request: RequestBase[TResponse]) -> Coroutine[Any, Any, TResponse]:
             return component.request(request, next)
         self.request = request
-    async def request(self, request: Request[TResponse]) -> TResponse:
+    async def request(self, request: RequestBase[TResponse]) -> TResponse:
         raise NotImplementedError

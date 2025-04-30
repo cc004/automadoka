@@ -2,6 +2,8 @@ from dataclasses import field
 from typing import Any
 from .cron import *
 from .sweep import *
+from .stamina import *
+from .shop import *
 
 @dataclass
 class ModuleList:
@@ -26,6 +28,10 @@ daily_modules = ModuleList(
     '日常',
     'daily',
     [
+        basic,
+        event,
+        archive,
+        shop,
         tower,
         heart,
         gather,

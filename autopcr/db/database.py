@@ -1,47 +1,48 @@
-from typing import List, Dict, Set, Tuple, Union
-import typing
 import datetime
-from collections import Counter, defaultdict
-from .dbmgr import dbmgr
-from .models import *
-from ..util.linq import flow
-from queue import SimpleQueue
 from ..core.apiclient import apiclient
-from typing import TypeVar, Generic
+from ..core.base import RequestHandler
+from typing import TypeVar, List, Any
+from ..model import models
+from ..model.modelbase import MstRequestBase
+import re
 
+TMstType = TypeVar('TMstType', bound=Any, covariant=True)
 T = TypeVar("T")
 
-class lazy_property(Generic[T]):
-    def __init__(self, func):
-        self.func = func
-        self.attr_name = f"__cached_{func.__name__}"
-        self.version_attr = f"__cached_version_{func.__name__}"
-        self.__doc__ = func.__doc__
-
-    def __get__(self, instance, owner) -> T:
-        if instance is None:
-            return self # type: ignore
-
-        dbmgr = getattr(instance, "dbmgr", None)
-        if dbmgr is None:
-            raise ValueError("数据库未初始化完成，请稍等片刻")
-        current_version = dbmgr.ver
-        cached = getattr(instance, self.attr_name, None)
-        cached_version = getattr(instance, self.version_attr, None)
-
-        if cached is None or current_version != cached_version:
-            value = self.func(instance)  # 现在函数里自己处理 db
-            setattr(instance, self.attr_name, value)
-            setattr(instance, self.version_attr, current_version)
-            return value
-
-        return cached
-
 class database():
-    def update(self, dbmgr):
-        self.dbmgr = dbmgr
+    def __init__(self):
+        self._data_revision = {}
+        self._data_cache = {}
+        self._current_revision = {}
+        self._client: apiclient = None
+        
+    async def update(self, client: RequestHandler):
+        data_revision = {
+            x.name: x.revision for x in 
+            (await client.request(models.GetResourceMasterDataMstListRequest())).mstList
+        }
+        
+        self._current_revision = data_revision
+        self._client = client
+        
+    @staticmethod
+    def _get_mst_key(url: str) -> str:
+        # convert snake case to camel case
+        last = url.split('/')[-1]
+        return re.sub(r'_(\w)', lambda x: x.group(1).upper(), last)
     
-    def is_clan_battle_time(self): return False
+    async def mst(self, request: MstRequestBase[TMstType]) -> List[TMstType]:
+        mstName = database._get_mst_key(request.url)
+        if mstName in self._data_cache:
+            if self._data_revision[mstName] == self._current_revision[mstName]:
+                return self._data_cache[mstName]
+        mst = (await self._client.request(request)).mstList
+        self._data_cache[mstName] = mst
+        self._data_revision[mstName] = self._current_revision[mstName]
+        return mst
+    
+    def is_clan_battle_time(self):
+        return False
 
     def format_time(self, time: datetime.datetime) -> str:
         return time.strftime("%Y/%m/%d %H:%M:%S")

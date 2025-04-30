@@ -6,7 +6,7 @@ from asyncio import Lock
 from ..util.logger import instance as logger
 
 class errorhandler(Component[apiclient]):
-    async def request(self, request: Request[TResponse], next: RequestHandler) -> TResponse:
+    async def request(self, request: RequestBase[TResponse], next: RequestHandler) -> TResponse:
         retry_cnt = 5
         while True:
             try:
@@ -26,6 +26,6 @@ class errorhandler(Component[apiclient]):
 class mutexhandler(Component[apiclient]):
     def __init__(self):
         self._lck = Lock()
-    async def request(self, request: Request[TResponse], next: RequestHandler) -> TResponse:
+    async def request(self, request: RequestBase[TResponse], next: RequestHandler) -> TResponse:
         async with self._lck:
             return await next.request(request)

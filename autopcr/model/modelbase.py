@@ -1,6 +1,6 @@
 #type: ignore
 from re import T
-from typing import Generic, TypeVar, Optional, List
+from typing import Generic, TypeVar, Optional, List, Any
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 from ..constants import APP_SM
@@ -35,7 +35,7 @@ class Response(GenericModel, Generic[TResponse]):
 from pydantic.main import validate_model, object_setattr
 from typing import Any
 
-class Request(Generic[TResponse], BaseModel):
+class RequestBase(Generic[TResponse], BaseModel):
     lastHomeAccessTime: str = ''
     sm: str = APP_SM
     @property
@@ -59,8 +59,16 @@ class Request(Generic[TResponse], BaseModel):
         object_setattr(__pydantic_self__, '__fields_set__', fields_set)
         __pydantic_self__._init_private_attributes()
 
-class RequestBody(Generic[TResponse], BaseModel):
-    payload: Request[TResponse]
+TMstType = TypeVar('TMstType', bound=Any, covariant=True)
+
+class MstResponse(GenericModel, Generic[TMstType], ResponseBase):
+    mstList: List[TMstType] = None
+    
+class MstRequestBase(Generic[TMstType], RequestBase[MstResponse[TMstType]]):
+    pass
+
+class Request(Generic[TResponse], BaseModel):
+    payload: RequestBase[TResponse]
     uuid: str
     userId: int
     sessionId: Optional[str]

@@ -4,10 +4,6 @@ from .sdkclient import sdkclient
 from .sessionmgr import sessionmgr
 from .misc import errorhandler, mutexhandler
 from .datamgr import datamgr
-from ..db.database import db
-from typing import Callable, Tuple, Union
-import typing, math
-from collections import Counter
 from enum import Enum
 
 class eLoginStatus(Enum):

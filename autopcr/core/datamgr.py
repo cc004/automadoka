@@ -9,7 +9,7 @@ class datamgr(Component[apiclient]):
     resp: UserApiGetInitDataListResponse = None
     config: ConfigApiGetConfigResponse = None
     
-    async def request(self, request: Request[TResponse], next: RequestHandler) -> TResponse:
+    async def request(self, request: RequestBase[TResponse], next: RequestHandler) -> TResponse:
         resp = await next.request(request)
         if resp:
             await resp.update(self, request)

@@ -3,16 +3,15 @@ from re import search
 from .base import Container
 from ..model.modelbase import *
 from asyncio import Lock
-from typing import TypeVar
+from typing import TypeVar, Any
 from ..util import aiorequests, freqlimiter
-from json import loads
-from hashlib import md5
 from ..constants import DEBUG_LOG, MAX_API_RUNNING
 import time, datetime
 import json
 from ..util.logger import instance as logger
 from .sdkclient import sdkclient
 from . import crypto
+from ..util import type_utils
 
 class ApiException(Exception):
 
@@ -25,6 +24,8 @@ class NetworkException(Exception):
     pass
 
 TResponse = TypeVar('TResponse', bound=ResponseBase, covariant=True)
+TMstType = TypeVar('TMstType', bound=Any, covariant=True)
+
 
 class staticproperty:
     def __init__(self, func):
@@ -45,7 +46,6 @@ class apiclient(Container["apiclient"]):
         super().__init__()
         self._headers = sdk.header()
         self._lck = Lock()
-        self._mst_cache = {}
 
     def actionTime(self) -> int:
         # Windows FILETIME 纪元（1601-01-01）到 Unix 纪元（1970-01-01）之间的秒数
@@ -60,13 +60,13 @@ class apiclient(Container["apiclient"]):
 
     def access_home(self):
         self.lastHomeAccessTime = str(int(time.time()))
-
+    
     @freqlimiter.RunningLimiter(MAX_API_RUNNING)
-    async def _request_internal(self, request: Request[TResponse]) -> TResponse:
+    async def _request_internal(self, request: RequestBase[TResponse]) -> TResponse:
         if not request: return None
         # logger.info(f'{self.user_name} requested {request.__class__.__name__} at /{request.url}')
         request.lastHomeAccessTime = self.lastHomeAccessTime
-        req = RequestBody(
+        req = Request(
             payload=request,
             actionTime=self.actionTime(),
             sessionId=self.sessionId,
@@ -93,7 +93,7 @@ class apiclient(Container["apiclient"]):
         except:
             raise NetworkException
 
-        cls = request.__class__.__orig_bases__[0].__args__[0]
+        cls = type_utils.find_type_base(request.__class__, RequestBase)
 
         if DEBUG_LOG:
             with open('req.log', 'a') as fp:
@@ -103,7 +103,7 @@ class apiclient(Container["apiclient"]):
                 fp.write(f'response from {urlroot}\n')
                 fp.write(json.dumps(dict(resp.headers), indent=4, ensure_ascii=False) + '\n')
                 fp.write(json.dumps(response, indent=4, ensure_ascii=False) + '\n')
-
+        
         response: Response[TResponse] = Response[cls].parse_obj(response)
 
         if response.errors is not None:
@@ -116,13 +116,7 @@ class apiclient(Container["apiclient"]):
 
         return response.payload
 
-    async def request(self, request: Request[TResponse]) -> TResponse:
+    async def request(self, request: RequestBase[TResponse]) -> TResponse:
         async with self._lck:
             return await self._request_internal(request)
     
-    async def mst(self, request: Request[TResponse]) -> TResponse:
-        if request.__class__ in self._mst_cache:
-            return self._mst_cache[request.__class__]
-        mst = await self.request(request)
-        self._mst_cache[request.__class__] = mst
-        return mst

@@ -11,7 +11,6 @@ from quart_auth import AuthUser, QuartAuth, Unauthorized, current_user, login_us
 from quart_compress import Compress
 from quart_rate_limiter import RateLimiter, rate_limit, RateLimitExceeded
 
-from .validator import validate_dict, ValidateInfo, validate_ok_dict, enable_manual_validator
 from ..constants import CACHE_DIR, ALLOW_REGISTER, SUPERUSER
 from ..module.accountmgr import Account, AccountManager, instance as usermgr, AccountException, UserData, \
     PermissionLimitedException, UserDisabledException, UserException
@@ -54,8 +53,6 @@ class HttpServer:
         self.qq_mod = qq_mod
 
         self.app.after_request(self.log_request_info)
-
-        enable_manual_validator()
 
     def log_request_info(self, response):
         logger.info(
@@ -446,47 +443,12 @@ class HttpServer:
 
         @self.api.route('/query_validate', methods = ['GET'])
         @HttpServer.login_required()
-        @HttpServer.wrapaccountmgr(readonly = True)
-        async def query_validate(accountmgr: AccountManager):
+        async def query_validate():
             if "text/event-stream" not in request.accept_mimetypes:
                 return "", 400
 
-            server_id = secrets.token_urlsafe(8)
-            self.validate_server[accountmgr.qid] = server_id
-
-            async def send_events(qid, server_id):
-                for _ in range(30):
-                    if self.validate_server[qid] != server_id:
-                        break
-                    if qid in validate_dict and validate_dict[qid]:
-                        ret = validate_dict[qid].pop().to_json()
-                        id = secrets.token_urlsafe(8)
-                        yield f'''id: {id}
-retry: 1000
-data: {ret}\n\n'''
-                    else:
-                        await asyncio.sleep(1)
-
-            response = await quart.make_response(
-                send_events(accountmgr.qid, server_id),
-                {
-                    'Content-Type': 'text/event-stream',
-                    'Cache-Control': 'no-cache',
-                    'Transfer-Encoding': 'chunked',
-                },
-            )
-            response.timeout = None
-            return response
-
-        @self.api.route('/validate', methods = ['POST'])
-        async def validate(): # TODO think to check login or not
-            data = await request.get_json()
-            if 'id' not in data:
-                return "incorrect", 403
-            id = data['id']
-            validate_ok_dict[id] = ValidateInfo.from_dict(data)
-            return "", 200
-
+            return '', 204
+        
         @self.api_limit.route('/login/qq', methods = ['POST'])
         @rate_limit(1, timedelta(seconds=1))
         @rate_limit(3, timedelta(minutes=1))
@@ -516,9 +478,7 @@ data: {ret}\n\n'''
             if not qq or not password:
                 return "请输入QQ和密码", 400
             if self.qq_mod:
-                from ...server import is_valid_qq
-                if not await is_valid_qq(qq):
-                    return "无效的QQ", 400
+                return "无效的QQ", 400
             usermgr.create(str(qq), str(password))
             login_user(AuthUser(qq))
             return "欢迎回来，" + qq, 200
