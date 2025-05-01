@@ -5,14 +5,6 @@ from pydantic import BaseModel
 from pydantic.generics import GenericModel
 from ..constants import APP_SM
 
-class ErrorInfo(BaseModel):
-    title: str = None
-    message: str = None
-    status: int = 0
-
-    def __str__(self) -> str:
-        return f'{self.title}: {self.message} (code={self.status})'
-
 class ServerError(BaseModel):
     domain: str
     code: int
@@ -20,8 +12,7 @@ class ServerError(BaseModel):
     reason: str
 
 class ResponseBase(BaseModel):
-    server_error: ErrorInfo = None
-    update_bank_gold: int = None
+    status: int = None
     async def update(self, mgr: "datamgr", request): ...
 
 TResponse = TypeVar('TResponse', bound=ResponseBase, covariant=True)

@@ -4,6 +4,7 @@ from .cron import *
 from .sweep import *
 from .stamina import *
 from .shop import *
+from .common import *
 
 @dataclass
 class ModuleList:
@@ -28,6 +29,7 @@ daily_modules = ModuleList(
     '日常',
     'daily',
     [
+        loginbonus,
         basic,
         event,
         archive,
@@ -36,7 +38,8 @@ daily_modules = ModuleList(
         heart,
         gather,
         mission,
-        present
+        present,
+        info
     ]
 )
 

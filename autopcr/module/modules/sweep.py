@@ -64,7 +64,7 @@ class event(Module):
                     p.cardMstId1,p.cardMstId2,p.cardMstId3,p.cardMstId4,p.cardMstId5
                 ]
                 return sum(
-                    bonus_data.get(i, [0])[limit_break_count.get(i,0)]
+                    bonus_data.get(i, [0, 0, 0, 0, 0, 0])[limit_break_count.get(i,0)]
                     for i in ids
                 ), p
 
@@ -152,7 +152,7 @@ class archive(Module):
                     p.cardMstId1,p.cardMstId2,p.cardMstId3,p.cardMstId4,p.cardMstId5
                 ]
                 return sum(
-                    bonus_data.get(i, [0])[limit_break_count.get(i,0)]
+                    bonus_data.get(i, [0, 0, 0, 0, 0, 0])[limit_break_count.get(i,0)]
                     for i in ids
                 ), p
 
