@@ -242,9 +242,9 @@ class GreeClient:
             })
 
         result = await resp.json()
-        resp.raise_for_status()
         if result.get("result") != "OK":
             raise RuntimeError(json.dumps(result))
+        resp.raise_for_status()
         return result
 
     async def register_password(self, password: str):

@@ -24,12 +24,6 @@ class sdkclient:
     def __init__(self, info: account, captchaVerifier=None, logger=logger):
         self.captchaVerifier = captchaVerifier
         self.logger = logger
-        if info.type == platform.Android:
-            self.platform = '2'
-        elif info.type == platform.IOS:
-            self.platform = '1000'
-        else:
-            raise ValueError(f"Invalid platform {info.type}")
         self._account = info
         self.post_login_evts: List[Callable[[], Coroutine[Any, Any, None]]] = []
 

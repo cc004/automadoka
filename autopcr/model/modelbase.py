@@ -12,7 +12,6 @@ class ServerError(BaseModel):
     reason: str
 
 class ResponseBase(BaseModel):
-    status: int = None
     async def update(self, mgr: "datamgr", request): ...
 
 TResponse = TypeVar('TResponse', bound=ResponseBase, covariant=True)
