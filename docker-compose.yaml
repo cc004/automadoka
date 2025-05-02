@@ -7,3 +7,7 @@ services:
     container_name: automadoka
     volumes:
       - ./cache:/app/cache
+    # use proxy:
+    # environment:
+    #  - http_proxy=http://{your_proxy_host}:{your_proxy_port}
+    #  - https_proxy=http://{your_proxy_host}:{your_proxy_port}
