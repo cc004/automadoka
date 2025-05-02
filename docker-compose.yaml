@@ -1,0 +1,9 @@
+services:
+  automadoka:
+    image: ghcr.io/cc004/automadoka:latest
+    ports:
+      - 13200:13200
+    restart: always
+    container_name: automadoka
+    volumes:
+      - ./cache:/app/cache
