@@ -21,7 +21,7 @@ class shop(Module):
         for mst in shop_series_mst:
             if datetime.fromisoformat(mst.startTime) > now or datetime.fromisoformat(mst.endTime) < now:
                 continue
-            if mst.category != 2:
+            if mst.category != 3:
                 continue
             series = mst.shopSeriesMstId
             all_items = [s for s in shop_mst if s.shopGroupId in (mst.shopGroupId1, mst.shopGroupId2)]
