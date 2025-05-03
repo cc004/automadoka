@@ -1,0 +1,14 @@
+services:
+  automadoka:
+    image: ghcr.io/cc004/automadoka:latest
+    ports:
+      - 13200:13200
+    restart: always
+    container_name: automadoka
+    volumes:
+      - ./cache:/app/cache
+      - ./result:/app/result
+    # use proxy, uncomment the following lines and set your proxy host and port
+    # environment:
+    #  - http_proxy=http://{your_proxy_host}:{your_proxy_port}
+    #  - https_proxy=http://{your_proxy_host}:{your_proxy_port}
