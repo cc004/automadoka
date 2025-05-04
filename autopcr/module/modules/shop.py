@@ -29,9 +29,13 @@ class shop(Module):
                 s.shopMstId: s for s in shop.shopCountDataList if s.shopSeriesMstId == series
             }
             non_limited = [i for i in all_items if i.purchaseLimitCount == 0]
-            if any(i.purchaseLimitCount != 0 and purchased.get(i.shopMstId, None) and
-                purchased[i.shopMstId].purchaseCount != i.purchaseLimitCount
-                for i in all_items):
+            if any(
+                i.purchaseLimitCount != 0 and (
+                    i.shopMstId not in purchased or
+                    purchased[i.shopMstId].purchaseCount != i.purchaseLimitCount
+                )
+                for i in all_items
+            ):
                 self._log(f"商店{mst.title}含有未购买的限购物品，跳过")
                 continue
             if len(non_limited) != 1:
