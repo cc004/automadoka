@@ -4,6 +4,11 @@ import logging
 
 SERVER_PORT = int(os.getenv("AUTOPCR_SERVER_PORT", "13200"))
 
+PROXIES = {
+    'http': 'http://localhost:8888',
+    'https': 'http://localhost:8888'
+}
+
 CLIENT_POOL_SIZE_MAX = 100
 CLIENT_POOL_MAX_AGE = 3600 * 24
 CLIENT_POOL_MAX_CLIENT_ALIVE = 10

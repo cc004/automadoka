@@ -115,7 +115,7 @@ class basic(Module):
                         if x >=0: return x
                         else: return 0.01 * x
                     # 根据leakyrelu计算power变化量
-                    return (leakyrelu(target) - leakyrelu(target - given)) / target
+                    return (leakyrelu(target) - leakyrelu(target - given)) / given
                 
                 # 计算命中率
                 rate = sum(

@@ -4,7 +4,7 @@ from typing import Optional, Any
 
 import requests
 from requests import *
-
+from ..constants import PROXIES
 
 async def run_sync_func(func, *args, **kwargs) -> Any:
     return await asyncio.get_event_loop().run_in_executor(
@@ -61,11 +61,13 @@ class AsyncResponse:
 
 
 async def request(method, url, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(await run_sync_func(requests.request,
                                              method=method, url=url, **kwargs))
 
 
 async def get(url, params=None, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(
         await run_sync_func(requests.get, url=url, params=params, **kwargs))
 
@@ -80,6 +82,7 @@ async def head(url, **kwargs) -> AsyncResponse:
 
 
 async def post(url, data=None, json=None, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(await run_sync_func(requests.post, url=url,
                                              data=data, json=json, **kwargs))
 
