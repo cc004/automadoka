@@ -113,7 +113,7 @@ class basic(Module):
                 def calcrate(given, target):
                     def leakyrelu(x):
                         if x >=0: return x
-                        else: return 0.01 * x
+                        else: return -0.2 * ((-x) ** 0.5)
                     # 根据leakyrelu计算power变化量
                     return (leakyrelu(target) - leakyrelu(target - given)) / given
                 
