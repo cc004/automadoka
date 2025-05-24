@@ -2,6 +2,7 @@ from ..modulebase import *
 from ..config import *
 from ...core.pcrclient import pcrclient
 from ...model.models import *
+import math
 
 ONCE_STAMINA_COST = 10
 
@@ -110,10 +111,10 @@ class basic(Module):
                 for rw in [r for r in quest_reward if r.rewardGroupId == qr.rewardGroupId]:
                     add_reward(rw.objectId, rw.num)
 
-                def calcrate(given, target):
+                def calcrate(target, given):
                     def leakyrelu(x):
                         if x >=0: return x
-                        else: return -0.2 * ((-x) ** 0.5)
+                        else: return -math.log2(-x / given + 1) * given
                     # 根据leakyrelu计算power变化量
                     return (leakyrelu(target) - leakyrelu(target - given)) / given
                 
@@ -122,6 +123,9 @@ class basic(Module):
                     calcrate(cost.get(i,0), cnt)
                     for i, cnt in rewards.items()
                 )
+                mg_ = next(x for x in quest_group_mst if x.questGroupMstId == group_id)
+
+                self._log(f"{mg_.name}效率：{rate: .0%}")
                 if rate > max_rate:
                     max_rate = rate
                     max_group = group_id
