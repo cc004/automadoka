@@ -95,40 +95,40 @@ class basic(Module):
         max_group = 101
         max_rate = 0.0
         
-        if all(x <= 0 for x in cost.values()):
-            # 物品充足，直接返回
-            self._log(f"物品充足，仅刷取经验")
-        else:
-            for group_id, stage_id in cleared_group.items():
-                # 找到关卡记录
-                qr = next(q for q in quest_mst if q.questStageMstId == stage_id)
-                # 收集奖励
-                rewards: Dict[int,int] = {}
-                def add_reward(iid,cnt):
-                    if iid and cnt:
-                        rewards[iid] = rewards.get(iid,0) + cnt
+        for group_id, stage_id in cleared_group.items():
+            # 找到关卡记录
+            qr = next(q for q in quest_mst if q.questStageMstId == stage_id)
+            # 收集奖励
+            rewards: Dict[int,int] = {}
+            def add_reward(iid,cnt):
+                if iid and cnt:
+                    rewards[iid] = rewards.get(iid,0) + cnt
 
-                for rw in [r for r in quest_reward if r.rewardGroupId == qr.rewardGroupId]:
-                    add_reward(rw.objectId, rw.num)
+            for rw in [r for r in quest_reward if r.rewardGroupId == qr.rewardGroupId]:
+                add_reward(rw.objectId, rw.num)
 
-                def calcrate(target, given):
-                    def leakyrelu(x):
-                        if x >=0: return x
-                        else: return -math.log2(-x / given + 1) * given
-                    # 根据leakyrelu计算power变化量
-                    return (leakyrelu(target) - leakyrelu(target - given)) / given
-                
-                # 计算命中率
-                rate = sum(
-                    calcrate(cost.get(i,0), cnt)
-                    for i, cnt in rewards.items()
-                )
-                mg_ = next(x for x in quest_group_mst if x.questGroupMstId == group_id)
+            def calcrate(target, given):
+                def leakyrelu(x):
+                    if x >=0: return x
+                    else: return -math.log2(-x / given + 1) * given
+                # 根据leakyrelu计算power变化量
+                return (leakyrelu(target) - leakyrelu(target - given)) / given
+            
+            # 计算命中率
+            rate = sum(
+                calcrate(cost.get(i,0), cnt)
+                for i, cnt in rewards.items()
+            )
 
-                self._log(f"{mg_.name}效率：{rate: .0%}")
-                if rate > max_rate:
-                    max_rate = rate
-                    max_group = group_id
+            if all(cost.get(i, 0) <= 0 for i in rewards):
+                rate = -1
+            
+            mg_ = next(x for x in quest_group_mst if x.questGroupMstId == group_id)
+
+            self._log(f"{mg_.name}效率：{rate: .0%}")
+            if rate > max_rate:
+                max_rate = rate
+                max_group = group_id
 
         # 输出
         mg = next(q for q in quest_group_mst if q.questGroupMstId == max_group)
