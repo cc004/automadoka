@@ -42,5 +42,21 @@ class eventscenario(Module):
 
             self._log(f'已阅读活动剧情: {story_event[record.storyEventMstId].name} ({record.storyEventScenarioMstId})')
 
+@description('去除所有光之间红点')
+@name('阅读光之间内容')
+@default(True)
+class collection(Module):
+    async def do_task(self, client: pcrclient):
+        for collection in [
+            v for v in client.data.collection.values()
+            if v.isGet and not v.isAlreadyView
+        ]:
+            request = CollectionApiUpdateAlreadyViewRequest()
+            request.objectType = collection.objectType
+            request.objectIds = [collection.objectId]
+            await client.request(request)
+
+            self._log(f'已阅读光之间内容: {collection.objectType}::{collection.objectId}')
+
 
 
