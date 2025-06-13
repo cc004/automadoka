@@ -5,6 +5,7 @@ from .sessionmgr import sessionmgr
 from .misc import errorhandler, mutexhandler
 from .datamgr import datamgr
 from enum import Enum
+from ..db.database import db
 
 class eLoginStatus(Enum):
     NOT_LOGGED = 0
@@ -49,7 +50,7 @@ class pcrclient(apiclient):
 
     def _get_key(self, key, default=None):
         return self._keys.get(key, self._base_keys.get(key, default))
-    
+
     @property
     def stamina_recover_cnt(self):
         return self._get_key('stamina_recover_times', 0)

@@ -5,6 +5,7 @@ from .sweep import *
 from .stamina import *
 from .shop import *
 from .common import *
+from .tool import *
 
 @dataclass
 class ModuleList:
@@ -37,6 +38,7 @@ daily_modules = ModuleList(
         tower,
         heart,
         gather,
+        eventscenario,
         mission,
         present,
         info
