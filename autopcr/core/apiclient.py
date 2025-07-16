@@ -91,6 +91,8 @@ class apiclient(Container["apiclient"]):
 
             response = crypto.PackHelper.unpack(response)
         except:
+            import traceback
+            traceback.print_exc()
             raise NetworkException
 
         cls = type_utils.find_type_base(request.__class__, RequestBase)

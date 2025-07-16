@@ -5,8 +5,6 @@ import logging
 SERVER_PORT = int(os.getenv("AUTOPCR_SERVER_PORT", "13200"))
 
 PROXIES = {
-    'http': 'http://localhost:8888',
-    'https': 'http://localhost:8888'
 }
 
 CLIENT_POOL_SIZE_MAX = 100
@@ -36,8 +34,8 @@ CLAN_BATTLE_FORBID_PATH = os.path.join(CONFIG_PATH, 'clan_battle_forbidden.txt')
 LOG_PATH = os.path.join(ROOT_DIR, 'log/')
 LOG_LEVEL = logging.INFO
 
-APP_VER = '1.5.0'
-APP_SM = 'deda27532977f68184ce90503854c5989o1e1E88A0177575728C9A399A9BD1F43A11D4100065n'
+APP_VER = '2.0.0'
+APP_SM = 'd7e1c0422e4edc0799cfef4c927150519o001E88A0177575728C9A399A9BD1F43A11D4100065n'
 
 # Headers
 DEFAULT_HEADERS = {

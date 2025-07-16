@@ -7,10 +7,12 @@ from datetime import datetime, timedelta, timezone
 @description('自动使用最高加成扫荡当前已通关活动')
 @name('扫荡活动')
 @default(True)
+@booltype('event_force_sweep', '强制扫荡未通关活动', False)
 class event(Module):
     async def do_task(self, client: pcrclient):
         party_data_list = [p for p in client.data.resp.partyDataList if p.partyType == 1]
         
+        quest_mst = await db.mst(MstApiGetQuestStageMstListRequest())
         story_event = {
             m.storyEventMstId: m for m in
             await db.mst(MstApiGetStoryEventMstListRequest())
@@ -41,13 +43,16 @@ class event(Module):
         
         for info in story_top.storyEventDataList:
             mst = story_event[info.storyEventMstId]
+            max_available = max(
+                story_quest[x.questStageMstId] for x in quest_mst if x.questGroupMstId == mst.storyQuestGroupId
+            )
             to_sweep = sorted(
                 [x for x in story_top.userQuestStageDataList
                 if x.questGroupMstId == mst.storyQuestGroupId],
                 key=lambda x: story_quest[x.questStageMstId],
                 reverse=True
             )
-            if not to_sweep or story_quest[to_sweep[0].questStageMstId] != 1000:
+            if not to_sweep or story_quest[to_sweep[0].questStageMstId] != max_available:
                 self._log(f"活动 {mst.name} 未完全通关.")
                 continue
 
@@ -56,7 +61,7 @@ class event(Module):
                 continue
 
             quest_id = to_sweep[0].questStageMstId
-            bonus_data = story_bonus[mst.storyEventMstId]
+            bonus_data = story_bonus.get(mst.storyEventMstId, {})
 
             def party_bonus(p: PartyPartyDataRecord):
                 ids = [
@@ -89,6 +94,7 @@ class archive(Module):
         
         party_data_list = [p for p in client.data.resp.partyDataList if p.partyType == 1]
         
+        quest_mst = await db.mst(MstApiGetQuestStageMstListRequest())
         story_event = {
             m.storyEventMstId: m for m in
             await db.mst(MstApiGetStoryEventMstListRequest())
@@ -131,6 +137,11 @@ class archive(Module):
         
         for info in archive_top.storyEventInfoList:
             mst = story_event[info.storyEventMstId]
+            
+            max_available = max(
+                story_quest[x.questStageMstId] for x in quest_mst if x.questGroupMstId == mst.storyQuestGroupId
+            )
+
             to_sweep = sorted(
                 [x for x in archive_top.userQuestStageDataList
                 if x.questGroupMstId == mst.storyQuestGroupId],
@@ -138,12 +149,12 @@ class archive(Module):
                 reverse=True
             )
             
-            if not to_sweep or story_quest[to_sweep[0].questStageMstId] != 1000:
+            if not to_sweep or story_quest[to_sweep[0].questStageMstId] != max_available:
                 self._log(f"档案活动 {mst.name} 未完全通关.")
                 continue
 
             quest_id = to_sweep[0].questStageMstId
-            bonus_data = story_bonus[mst.storyEventMstId]
+            bonus_data = story_bonus.get(mst.storyEventMstId, {})
 
             # 计算最优队伍
             def party_bonus(p):
