@@ -136,6 +136,9 @@ class ExplorationBattleApiFinalizeStageForUserV4Response(ResponseBase):
     miniTutorialData: TutorialMiniTutorialDataRecord = None
     isStoreReview: bool = None
     acquiredRewardMoney: int = None
+    userQuestMissionDataList: List[QuestOutGameUserQuestMissionDataRecord] = None
+    questMissionInfoList: List[ExplorationBattleQuestMissionInfo] = None
+    isUserExpStoredMessage: bool = None
 class ExplorationBattleApiGetExplorationInfoResponse(ResponseBase):
     stageInfo: ExplorationBattleStageInfo = None
     allyBattleUnitList: List[QuestBattleBattleUnit] = None
@@ -148,35 +151,9 @@ class DebugSubscriptionApiIsValidSubscriptionResponse(ResponseBase):
     isValid: bool = None
 class DebugSubscriptionApiDoSubscribeForceResponse(ResponseBase):
     isSuccess: bool = None
-class ConfigApiGetConfigResponse(ResponseBase):
-    loginBonusConfig: LoginBonusLoginBonusConfig = None
-    characterConfig: CharacterCharacterConfig = None
-    cardConfig: CardCardConfig = None
-    collectionConfig: CollectionCollectionConfig = None
-    styleConfig: StyleStyleConfig = None
-    pvpConfig: PvpPvpConfig = None
-    talismanConfig: TalismanTalismanConfig = None
-    missionConfig: MissionMissionConfig = None
-    guildConfig: GuildGuildConfig = None
-    gveConfig: GveGveConfig = None
-    presentBoxConfig: PresentPresentBoxConfig = None
-    userConfig: UserUserConfig = None
-    questConfig: QuestOutGameQuestConfig = None
-    tutorialConfig: TutorialTutorialConfig = None
-    towerConfig: TowerTowerConfig = None
-    partyConfig: PartyPartyConfig = None
-    subscriptionConfig: ShopSubscriptionConfig = None
-    storyEventConfig: StoryEventStoryEventConfig = None
-    chatConfig: ChatChatConfig = None
-    firestoreConfig: ConfigFirestoreConfig = None
-    termsConfig: TermsTermsConfig = None
-    gatheringConfig: GatheringGatheringConfig = None
-    gvgConfig: GvgGvgConfig = None
-    scoreAttackConfig: ScoreAttackScoreAttackConfig = None
-    appResourceConfig: ConfigAppResourceConfig = None
-    isPreRelease: bool = None
 class AppVersionApiGetReviewVersionDataResponse(ResponseBase):
     isReviewVersion: bool = None
+    appealTitleInfo: AppVersionAppealTitleInfo = None
 class AkamaiApiCreateTokenResponse(ResponseBase):
     token: str = None
 class TowerApiGetTowerTopResponse(ResponseBase):
@@ -238,6 +215,11 @@ class StyleApiStyleParamUpResponse(ResponseBase):
     itemDataList: List[ItemItemDataRecord] = None
     userParamData: UserUserParamDataRecord = None
     partyDataList: List[PartyPartyDataRecord] = None
+class StyleApiStyleParamUpVer2Response(ResponseBase):
+    styleData: StyleStyleDataRecord = None
+    itemDataList: List[ItemItemDataRecord] = None
+    userParamData: UserUserParamDataRecord = None
+    partyDataList: List[PartyPartyDataRecord] = None
 class StyleApiUpdateAlreadyViewResponse(ResponseBase):
     styleDataList: List[StyleStyleDataRecord] = None
 class StoryEventApiGetTopResponse(ResponseBase):
@@ -272,9 +254,32 @@ class ShopApiBuyResponse(ResponseBase):
     viewData: ShopBuyViewData = None
     shopCountData: ShopShopCountDataRecord = None
     objectDataRecord: ObjectObjectDataRecord = None
+    receivedObjectDataList: List[ShopReceivedObjectData] = None
+    partyDataList: List[PartyPartyDataRecord] = None
 class ShopApiGetShopPaymentMstListResponse(ResponseBase):
     shopPaymentMstList: List[ShopShopPaymentMstRecord] = None
     shopPaymentBonusRewardMstList: List[ShopShopPaymentBonusRewardMstRecord] = None
+    isDisplayWebShopButton: bool = None
+class SelectionAbilityApiGetSelectionAbilityDataListResponse(ResponseBase):
+    selectionAbilityDataList: List[SelectionAbilitySelectionAbilityDataRecord] = None
+class SelectionAbilityApiDeleteSelectionAbilityResponse(ResponseBase):
+    selectionAbilityData: SelectionAbilitySelectionAbilityDataRecord = None
+    itemDataList: List[ItemItemDataRecord] = None
+class SelectionAbilityApiLearnSubSelectionAbilityResponse(ResponseBase):
+    selectionAbilityData: SelectionAbilitySelectionAbilityDataRecord = None
+    itemDataList: List[ItemItemDataRecord] = None
+    userParamData: UserUserParamDataRecord = None
+    styleData: StyleStyleDataRecord = None
+    partyDataList: List[PartyPartyDataRecord] = None
+class SelectionAbilityApiSetSelectionAbilityResponse(ResponseBase):
+    selectionAbilityData: SelectionAbilitySelectionAbilityDataRecord = None
+    itemDataList: List[ItemItemDataRecord] = None
+    userParamData: UserUserParamDataRecord = None
+    styleData: StyleStyleDataRecord = None
+    partyDataList: List[PartyPartyDataRecord] = None
+class SelectionAbilityApiEnableMainSelectionAbilityResponse(ResponseBase):
+    selectionAbilityData: SelectionAbilitySelectionAbilityDataRecord = None
+    itemDataList: List[ItemItemDataRecord] = None
 class ScoreAttackApiGetScoreAttackTopResponse(ResponseBase):
     selfRanking: int = None
     userScoreAttackData: ScoreAttackUserScoreAttackDataRecord = None
@@ -305,6 +310,8 @@ class ScoreAttackApiFinalizeStageForUserResponse(ResponseBase):
     partyData: PartyPartyDataRecord = None
 class ScoreAttackApiRetireResponse(ResponseBase):
     isSuccess: bool = None
+class ScoreAttackApiGetRankingUserCharacterBuildDetailResponse(ResponseBase):
+    characterBuildDetailList: List[PartyCharacterBuildDetail] = None
 class PvpApiGetPvpTopResponse(ResponseBase):
     pvpTopInfo: PvpPvpTopInfo = None
 class PvpApiGetRankingInfoResponse(ResponseBase):
@@ -314,6 +321,7 @@ class PvpApiGetRankingInfoResponse(ResponseBase):
 class PvpApiGetCandidateEnemyUserListResponse(ResponseBase):
     selfUserInfo: PvpPvpUserInfo = None
     candidateEnemyUserInfoList: List[PvpPvpUserInfo] = None
+    remainRechooseCount: int = None
 class PvpApiGetEnemyUserInfoResponse(ResponseBase):
     enemyUserInfo: PvpPvpUserInfo = None
     leaderStyleMstId: int = None
@@ -417,6 +425,31 @@ class UserApiLoadOptionResponse(ResponseBase):
     paymentAlert: bool = None
     battleDirectionSkip: bool = None
     battleActionTimeView: bool = None
+    savedOnce: bool = None
+    sameCharaOnParty: bool = None
+    battleSpeedType: int = None
+    battleAuto: int = None
+    bgmSwitchType: int = None
+    questPartyDataId: int = None
+    pvpPartyDataId: int = None
+    characterHeartPartyDataId: int = None
+    characterHeartUnlockNormalStageMstId: int = None
+    characterHeartUnlockNightmareStageMstId: int = None
+    characterHeartLastPlayedStageMstId: int = None
+    notShowTodayHomeAppeal: bool = None
+    characterTalkAutoStateIndex: int = None
+    advIsAuto: bool = None
+    advFastAutoIndex: int = None
+    dungeonIsFast: bool = None
+    dungeonIsManual: bool = None
+    confirmWalpurgisAttentionPopup: bool = None
+    homeAppealLocalInfo: List[UserHomeAppealLocalInfo] = None
+    enhanceQuestUserLocalInfo: UserEnhanceQuestUserLocalInfo = None
+    mainQuestUserLocalInfo: UserMainQuestUserLocalInfo = None
+    storyEventLocalInfo: List[UserStoryEventLocalInfo] = None
+    sortInfo: List[UserSortInfo] = None
+    sortDescInfo: List[UserSortDescInfo] = None
+    filterInfo: List[UserFilterInfo] = None
 class UserApiUserSearchResponse(ResponseBase):
     userParamDataList: List[UserUserParamDataRecord] = None
     userProfileDataList: List[UserUserProfileDataRecord] = None
@@ -493,6 +526,7 @@ class HomeApiGetHomeInfoResponse(ResponseBase):
     pvpRoomId: str = None
     gvgRoomId: str = None
     scoreAttackRoomId: int = None
+    bonusGachaMstId: int = None
     achievedConditionGroupIds: List[int] = None
     userSubscriptionDataList: List[UserUserSubscriptionDataRecord] = None
     finishedMiniTutorialNumberList: List[int] = None
@@ -500,6 +534,7 @@ class HomeApiGetHomeInfoResponse(ResponseBase):
     bgmCueName: str = None
     gatheringTime: str = None
     userLevelUpInfo: UserUserLevelUpInfo = None
+    isUserExpStoredMessage: bool = None
     userGatheringData: GatheringUserGatheringDataRecord = None
     nextChallengeFieldStageMstId: int = None
 class GvgApiGetTopResponse(ResponseBase):
@@ -743,6 +778,7 @@ class GatheringApiReceiveRewardResponse(ResponseBase):
     receivedRewardList: List[ObjectObjectViewData] = None
     userGatheringData: GatheringUserGatheringDataRecord = None
     objectDataRecord: ObjectObjectDataRecord = None
+    isUserExpStoredMessage: bool = None
 class GatheringApiShortcutGatheringResponse(ResponseBase):
     receivedRewardList: List[ObjectObjectViewData] = None
     userGatheringData: GatheringUserGatheringDataRecord = None
@@ -752,6 +788,7 @@ class GachaApiGetGachaTopResponse(ResponseBase):
 class GachaApiGachaExecResponse(ResponseBase):
     gachaCountDataList: List[GachaGachaCountDataRecord] = None
     gachaGainBonusList: List[ObjectObjectViewData] = None
+    gachaSeriesGainBonusList: List[ObjectObjectViewData] = None
     objectDataRecord: ObjectObjectDataRecord = None
     gachaRecord: GachaGachaRecord = None
     gachaSeriesRecord: GachaGachaSeriesRecord = None
@@ -759,8 +796,14 @@ class GachaApiGachaExecResponse(ResponseBase):
     isCeilingPointAchieved: bool = None
     partyDataList: List[PartyPartyDataRecord] = None
     isStoreReview: bool = None
+    bonusGachaRecord: GachaGachaRecord = None
+    bonusGachaSeriesRecord: GachaGachaSeriesRecord = None
+    gachaSeriesBonusList: List[GachaGachaSeriesBonusRecord] = None
+    candidateRarityList: List[int] = None
 class GachaApiUpdateAlreadyViewResponse(ResponseBase):
     newBadgeGachaSeriesMstIdList: List[int] = None
+class GachaApiGetGachaGemTextListResponse(ResponseBase):
+    gachaGemTextInfoList: List[GachaGachaGemTextInfo] = None
 class QuestOutGameApiGetUserQuestStageListResponse(ResponseBase):
     questStageMstIdList: List[int] = None
     userQuestStageDataList: List[QuestOutGameUserQuestStageDataRecord] = None
@@ -775,6 +818,37 @@ class QuestOutGameApiSetUserTrainingQuestRankUpEffectResponse(ResponseBase):
 class QuestOutGameApiGetUserQuestCharacterHeartListResponse(ResponseBase):
     userQuestCharacterHeartData: QuestOutGameUserQuestCharacterHeartDataRecord = None
     userQuestCharacterHeartPartySaveDataList: List[QuestOutGameUserQuestCharacterHeartPartySaveDataRecord] = None
+class QuestOutGameApiGetUserQuestMissionDataListResponse(ResponseBase):
+    userQuestMissionDataList: List[QuestOutGameUserQuestMissionDataRecord] = None
+class ConfigApiGetConfigResponse(ResponseBase):
+    loginBonusConfig: LoginBonusLoginBonusConfig = None
+    characterConfig: CharacterCharacterConfig = None
+    cardConfig: CardCardConfig = None
+    collectionConfig: CollectionCollectionConfig = None
+    styleConfig: StyleStyleConfig = None
+    pvpConfig: PvpPvpConfig = None
+    talismanConfig: TalismanTalismanConfig = None
+    missionConfig: MissionMissionConfig = None
+    guildConfig: GuildGuildConfig = None
+    gveConfig: GveGveConfig = None
+    presentBoxConfig: PresentPresentBoxConfig = None
+    userConfig: UserUserConfig = None
+    questConfig: QuestOutGameQuestConfig = None
+    tutorialConfig: TutorialTutorialConfig = None
+    towerConfig: TowerTowerConfig = None
+    partyConfig: PartyPartyConfig = None
+    subscriptionConfig: ShopSubscriptionConfig = None
+    storyEventConfig: StoryEventStoryEventConfig = None
+    chatConfig: ChatChatConfig = None
+    firestoreConfig: ConfigFirestoreConfig = None
+    termsConfig: TermsTermsConfig = None
+    gatheringConfig: GatheringGatheringConfig = None
+    gvgConfig: GvgGvgConfig = None
+    scoreAttackConfig: ScoreAttackScoreAttackConfig = None
+    appResourceConfig: ConfigAppResourceConfig = None
+    isPreRelease: bool = None
+    purgeConfig: ConfigPurgeConfig = None
+    selectionAbilityConfig: SelectionAbilitySelectionAbilityConfig = None
 class CollectionApiGetCollectionDataListResponse(ResponseBase):
     collectionDataList: List[CollectionCollectionDataRecord] = None
     collectionIllustAchieveDataList: List[CollectionCollectionIllustAchieveDataRecord] = None
@@ -818,6 +892,8 @@ class ChatApiLeaveDirectChatRoomResponse(ResponseBase):
 class ChatApiApproveEnterChatRoomResponse(ResponseBase):
     isSuccess: bool = None
     miniTutorialData: TutorialMiniTutorialDataRecord = None
+class ChatApiDeleteOwnChatMessageResponse(ResponseBase):
+    isSuccess: bool = None
 class ChatApiGetChatBlockUserListResponse(ResponseBase):
     userDisplayInfoList: List[UserUserDisplayInfo] = None
 class ChatApiBlockChatUserResponse(ResponseBase):
@@ -913,6 +989,7 @@ class QuestBattleApiFinalizeStageForUserResponse(ResponseBase):
     beforeStamina: int = None
     userQuestStageData: QuestOutGameUserQuestStageDataRecord = None
     acquiredQuestRewardMstIds: List[int] = None
+    acquiredQuestBonusRewardInfoList: List[QuestBattleAcquiredQuestBonusRewardInfo] = None
     canReplay: bool = None
     remainPlayCount: int = None
     objectDataRecord: ObjectObjectDataRecord = None
@@ -933,6 +1010,11 @@ class QuestBattleApiFinalizeStageForUserResponse(ResponseBase):
     canQuestCharacterHeartNextStage: bool = None
     userTowerData: TowerUserTowerDataRecord = None
     acquiredRewardMoney: int = None
+    isSkipTrainingQuestNotClearUnderNowRank: bool = None
+    selectionAbilityDataList: List[SelectionAbilitySelectionAbilityDataRecord] = None
+    acquiredSelectionAbilityInfoList: List[SelectionAbilityAcquiredSelectionAbilityInfo] = None
+    selectionAbilityConversionItemDataList: List[SelectionAbilitySelectionAbilityConversionItemData] = None
+    isUserExpStoredMessage: bool = None
 class QuestBattleApiRetireResponse(ResponseBase):
     isSuccess: bool = None
     userParamData: UserUserParamDataRecord = None
@@ -945,6 +1027,7 @@ class QuestBattleApiSkipQuestBattleResponse(ResponseBase):
     beforeStamina: int = None
     userQuestStageData: QuestOutGameUserQuestStageDataRecord = None
     acquiredQuestRewardMstIds: List[int] = None
+    acquiredQuestBonusRewardInfoList: List[QuestBattleAcquiredQuestBonusRewardInfo] = None
     canReplay: bool = None
     remainPlayCount: int = None
     objectDataRecord: ObjectObjectDataRecord = None
@@ -963,11 +1046,13 @@ class QuestBattleApiSkipQuestBattleResponse(ResponseBase):
     userQuestCharacterHeartData: QuestOutGameUserQuestCharacterHeartDataRecord = None
     userQuestCharacterHeartPartySaveData: QuestOutGameUserQuestCharacterHeartPartySaveDataRecord = None
     acquiredRewardMoney: int = None
+    isUserExpStoredMessage: bool = None
 class QuestBattleApiGetBackGroundInfoResponse(ResponseBase):
     questRoomData: QuestBattleQuestRoomData = None
     userQuestStageData: QuestOutGameUserQuestStageDataRecord = None
 class ExplorationApiGetTopInfoV4Response(ResponseBase):
     isFirstEntry: bool = None
+    totalPowerSkipRate: int = None
     fieldStageUserData: ExplorationFieldStageUserDataRecord = None
     collectionDataList: List[CollectionCollectionDataRecord] = None
 class ExplorationApiReachFieldPointResponse(ResponseBase):
@@ -984,6 +1069,15 @@ class ExplorationApiDungeonGoalResponse(ResponseBase):
     fieldStageCollectionInfo: CollectionFieldStageCollectionInfo = None
     partyDataList: List[PartyPartyDataRecord] = None
     miniTutorialData: TutorialMiniTutorialDataRecord = None
+class ExplorationApiSkipFieldPointResponse(ResponseBase):
+    dungeonResult: ExplorationDungeonResult = None
+    battleResult: ExplorationBattleExplorationBattleResult = None
+    objectDataRecordByDungeon: ObjectObjectDataRecord = None
+    partyDataListByDungeon: List[PartyPartyDataRecord] = None
+    miniTutorialDataByDungeon: TutorialMiniTutorialDataRecord = None
+    objectDataRecordByBattle: ObjectObjectDataRecord = None
+    partyDataListByBattle: List[PartyPartyDataRecord] = None
+    miniTutorialDataByBattle: TutorialMiniTutorialDataRecord = None
 class ExplorationApiResetDungeonProgressResponse(ResponseBase):
     fieldStageUserData: ExplorationFieldStageUserDataRecord = None
 class ExplorationApiGetEnableStageListResponse(ResponseBase):

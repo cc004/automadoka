@@ -32,6 +32,7 @@ class GachaGachaType(IntEnum):
     StartDash = 3
     Comeback = 4
     Tutorial = 5
+    Bonus = 6
 
 class GachaGachaDrawType(IntEnum):
     Normal = 1

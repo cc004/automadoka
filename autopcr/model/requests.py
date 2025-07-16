@@ -201,6 +201,10 @@ class MstApiGetCharacterTeamMstListRequest(MstRequestBase[CharacterCharacterTeam
     @property
     def url(self) -> str:
         return "/api/mst/get_character_team_mst_list"
+class MstApiGetReplaceCharacterNameMstListRequest(MstRequestBase[CharacterReplaceCharacterNameMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_replace_character_name_mst_list"
 class MstApiGetStyleMstListRequest(MstRequestBase[StyleStyleMstRecord]):
     @property
     def url(self) -> str:
@@ -497,6 +501,10 @@ class MstApiGetSoundMstListRequest(MstRequestBase[SoundSoundMstRecord]):
     @property
     def url(self) -> str:
         return "/api/mst/get_sound_mst_list"
+class MstApiGetStreamableBgmMstListRequest(MstRequestBase[SoundStreamableBgmMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_streamable_bgm_mst_list"
 class MstApiGetCollectionIllustMstListRequest(MstRequestBase[CollectionCollectionIllustMstRecord]):
     @property
     def url(self) -> str:
@@ -605,6 +613,10 @@ class MstApiGetScoreAttackTotalScoreRewardMstListRequest(MstRequestBase[ScoreAtt
     @property
     def url(self) -> str:
         return "/api/mst/get_score_attack_total_score_reward_mst_list"
+class MstApiGetScoreAttackRankingRewardMstListRequest(MstRequestBase[ScoreAttackScoreAttackRankingRewardMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_score_attack_ranking_reward_mst_list"
 class MstApiGetCalculationPointPolicyMstListRequest(MstRequestBase[CalcPointCalculationPointPolicyMstRecord]):
     @property
     def url(self) -> str:
@@ -617,6 +629,34 @@ class MstApiGetGuildMissionTransitionMstListRequest(MstRequestBase[GuildMissionG
     @property
     def url(self) -> str:
         return "/api/mst/get_guild_mission_transition_mst_list"
+class MstApiGetMovieReplaceMstListRequest(MstRequestBase[MovieMovieReplaceMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_movie_replace_mst_list"
+class MstApiGetQuestMissionMstListRequest(MstRequestBase[QuestOutGameQuestMissionMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_quest_mission_mst_list"
+class MstApiGetSelectionAbilityMstListRequest(MstRequestBase[SelectionAbilitySelectionAbilityMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_selection_ability_mst_list"
+class MstApiGetSelectionAbilityLotteryMstListRequest(MstRequestBase[SelectionAbilitySelectionAbilityLotteryMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_selection_ability_lottery_mst_list"
+class MstApiGetSelectionAbilityLotteryRateMstListRequest(MstRequestBase[SelectionAbilitySelectionAbilityLotteryRateMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_selection_ability_lottery_rate_mst_list"
+class MstApiGetSteamAchievementMstListRequest(MstRequestBase[SteamSteamAchievementMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_steam_achievement_mst_list"
+class MstApiGetQuestCampaignMstListRequest(MstRequestBase[QuestOutGameQuestCampaignMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_quest_campaign_mst_list"
 class MapGveApiGetTopInfoRequest(RequestBase[MapGveApiGetTopInfoResponse]):
     @property
     def url(self) -> str:
@@ -705,6 +745,7 @@ class ExplorationBattleApiGetExplorationInfoRequest(RequestBase[ExplorationBattl
 class ExplorationBattleApiRetireRequest(RequestBase[ExplorationBattleApiRetireResponse]):
     battleLog: str = None
     isSystemRetire: bool = None
+    isUpdateRetire: bool = None
     @property
     def url(self) -> str:
         return "/api/exploration_battle/retire"
@@ -720,10 +761,6 @@ class DebugSubscriptionApiDoSubscribeForceRequest(RequestBase[DebugSubscriptionA
     @property
     def url(self) -> str:
         return "/api/debug/debug_subscription/do_subscribe_force"
-class ConfigApiGetConfigRequest(RequestBase[ConfigApiGetConfigResponse]):
-    @property
-    def url(self) -> str:
-        return "/api/config/get_config"
 class AppVersionApiGetReviewVersionDataRequest(RequestBase[AppVersionApiGetReviewVersionDataResponse]):
     storeType: int = None
     appVersion: str = None
@@ -801,6 +838,12 @@ class StyleApiStyleParamUpRequest(RequestBase[StyleApiStyleParamUpResponse]):
     @property
     def url(self) -> str:
         return "/api/style/style_param_up"
+class StyleApiStyleParamUpVer2Request(RequestBase[StyleApiStyleParamUpVer2Response]):
+    styleMstId: int = None
+    targetParamUpPriority: int = None
+    @property
+    def url(self) -> str:
+        return "/api/style/style_param_up_ver2"
 class StyleApiUpdateAlreadyViewRequest(RequestBase[StyleApiUpdateAlreadyViewResponse]):
     styleMstIds: List[int] = None
     @property
@@ -845,6 +888,37 @@ class ShopApiGetShopPaymentMstListRequest(RequestBase[ShopApiGetShopPaymentMstLi
     @property
     def url(self) -> str:
         return "/api/shop/get_shop_payment_mst_list"
+class SelectionAbilityApiGetSelectionAbilityDataListRequest(RequestBase[SelectionAbilityApiGetSelectionAbilityDataListResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/selection_ability/get_selection_ability_data_list"
+class SelectionAbilityApiDeleteSelectionAbilityRequest(RequestBase[SelectionAbilityApiDeleteSelectionAbilityResponse]):
+    styleMstId: int = None
+    selectionAbilityMstIds: List[int] = None
+    @property
+    def url(self) -> str:
+        return "/api/selection_ability/delete_selection_ability"
+class SelectionAbilityApiLearnSubSelectionAbilityRequest(RequestBase[SelectionAbilityApiLearnSubSelectionAbilityResponse]):
+    styleMstId: int = None
+    selectionAbilityNum: int = None
+    lockIds: List[int] = None
+    @property
+    def url(self) -> str:
+        return "/api/selection_ability/learn_sub_selection_ability"
+class SelectionAbilityApiSetSelectionAbilityRequest(RequestBase[SelectionAbilityApiSetSelectionAbilityResponse]):
+    styleMstId: int = None
+    selectionAbilityNums: List[int] = None
+    selectionAbilityMstIds: List[int] = None
+    itemMstIds: List[int] = None
+    @property
+    def url(self) -> str:
+        return "/api/selection_ability/set_selection_ability"
+class SelectionAbilityApiEnableMainSelectionAbilityRequest(RequestBase[SelectionAbilityApiEnableMainSelectionAbilityResponse]):
+    styleMstId: int = None
+    selectionAbilityNum: int = None
+    @property
+    def url(self) -> str:
+        return "/api/selection_ability/enable_main_selection_ability"
 class ScoreAttackApiGetScoreAttackTopRequest(RequestBase[ScoreAttackApiGetScoreAttackTopResponse]):
     scoreAttackMstId: int = None
     @property
@@ -876,9 +950,16 @@ class ScoreAttackApiFinalizeStageForUserRequest(RequestBase[ScoreAttackApiFinali
 class ScoreAttackApiRetireRequest(RequestBase[ScoreAttackApiRetireResponse]):
     battleLog: str = None
     isSystemRetire: bool = None
+    isUpdateRetire: bool = None
     @property
     def url(self) -> str:
         return "/api/score_attack/retire"
+class ScoreAttackApiGetRankingUserCharacterBuildDetailRequest(RequestBase[ScoreAttackApiGetRankingUserCharacterBuildDetailResponse]):
+    scoreAttackMstId: int = None
+    targetUserId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/score_attack/get_ranking_user_character_build_detail"
 class PvpApiGetPvpTopRequest(RequestBase[PvpApiGetPvpTopResponse]):
     @property
     def url(self) -> str:
@@ -908,6 +989,7 @@ class PvpApiInitializeStageRequest(RequestBase[PvpApiInitializeStageResponse]):
 class PvpApiRetireRequest(RequestBase[PvpApiRetireResponse]):
     battleLog: str = None
     isSystemRetire: bool = None
+    isUpdateRetire: bool = None
     @property
     def url(self) -> str:
         return "/api/pvp/retire"
@@ -1012,6 +1094,31 @@ class UserApiSaveOptionRequest(RequestBase[UserApiSaveOptionResponse]):
     paymentAlert: bool = None
     battleDirectionSkip: bool = None
     battleActionTimeView: bool = None
+    savedOnce: bool = None
+    sameCharaOnParty: bool = None
+    battleSpeedType: int = None
+    battleAuto: int = None
+    bgmSwitchType: int = None
+    questPartyDataId: int = None
+    pvpPartyDataId: int = None
+    characterHeartPartyDataId: int = None
+    characterHeartUnlockNormalStageMstId: int = None
+    characterHeartUnlockNightmareStageMstId: int = None
+    characterHeartLastPlayedStageMstId: int = None
+    notShowTodayHomeAppeal: bool = None
+    characterTalkAutoStateIndex: int = None
+    advIsAuto: bool = None
+    advFastAutoIndex: int = None
+    dungeonIsFast: bool = None
+    dungeonIsManual: bool = None
+    confirmWalpurgisAttentionPopup: bool = None
+    homeAppealLocalInfo: List[UserHomeAppealLocalInfo] = None
+    enhanceQuestUserLocalInfo: UserEnhanceQuestUserLocalInfo = None
+    mainQuestUserLocalInfo: UserMainQuestUserLocalInfo = None
+    storyEventLocalInfo: List[UserStoryEventLocalInfo] = None
+    sortInfo: List[UserSortInfo] = None
+    sortDescInfo: List[UserSortDescInfo] = None
+    filterInfo: List[UserFilterInfo] = None
     @property
     def url(self) -> str:
         return "/api/user/save_option"
@@ -1189,6 +1296,7 @@ class GvgApiGetGvgInfoRequest(RequestBase[GvgApiGetGvgInfoResponse]):
 class GvgApiRetireRequest(RequestBase[GvgApiRetireResponse]):
     battleLog: str = None
     isSystemRetire: bool = None
+    isUpdateRetire: bool = None
     @property
     def url(self) -> str:
         return "/api/gvg/retire"
@@ -1256,6 +1364,7 @@ class GveApiFinalizeStageForUserRequest(RequestBase[GveApiFinalizeStageForUserRe
 class GveApiRetireRequest(RequestBase[GveApiRetireResponse]):
     battleLog: str = None
     isSystemRetire: bool = None
+    isUpdateRetire: bool = None
     @property
     def url(self) -> str:
         return "/api/gve/retire"
@@ -1421,6 +1530,8 @@ class GatheringApiShortcutGatheringRequest(RequestBase[GatheringApiShortcutGathe
     def url(self) -> str:
         return "/api/gathering/shortcut_gathering"
 class GachaApiGetGachaTopRequest(RequestBase[GachaApiGetGachaTopResponse]):
+    revisionFile: str = None
+    revisionAssetBundle: str = None
     @property
     def url(self) -> str:
         return "/api/gacha/get_gacha_top"
@@ -1434,6 +1545,10 @@ class GachaApiUpdateAlreadyViewRequest(RequestBase[GachaApiUpdateAlreadyViewResp
     @property
     def url(self) -> str:
         return "/api/gacha/update_already_view"
+class GachaApiGetGachaGemTextListRequest(RequestBase[GachaApiGetGachaGemTextListResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/gacha/get_gacha_gem_text_list"
 class QuestOutGameApiGetUserQuestStageListRequest(RequestBase[QuestOutGameApiGetUserQuestStageListResponse]):
     questCategoryMstId: int = None
     @property
@@ -1457,6 +1572,14 @@ class QuestOutGameApiGetUserQuestCharacterHeartListRequest(RequestBase[QuestOutG
     @property
     def url(self) -> str:
         return "/api/quest_out_game/get_user_quest_character_heart_list"
+class QuestOutGameApiGetUserQuestMissionDataListRequest(RequestBase[QuestOutGameApiGetUserQuestMissionDataListResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/quest_out_game/get_user_quest_mission_data_list"
+class ConfigApiGetConfigRequest(RequestBase[ConfigApiGetConfigResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/config/get_config"
 class CollectionApiGetCollectionDataListRequest(RequestBase[CollectionApiGetCollectionDataListResponse]):
     objectType: ObjectObjectType = None
     @property
@@ -1535,6 +1658,12 @@ class ChatApiApproveEnterChatRoomRequest(RequestBase[ChatApiApproveEnterChatRoom
     @property
     def url(self) -> str:
         return "/api/chat/approve_enter_chat_room"
+class ChatApiDeleteOwnChatMessageRequest(RequestBase[ChatApiDeleteOwnChatMessageResponse]):
+    roomDocumentId: str = None
+    messageDocumentId: str = None
+    @property
+    def url(self) -> str:
+        return "/api/chat/delete_own_chat_message"
 class ChatApiGetChatBlockUserListRequest(RequestBase[ChatApiGetChatBlockUserListResponse]):
     @property
     def url(self) -> str:
@@ -1738,6 +1867,7 @@ class QuestBattleApiFinalizeStageForUserRequest(RequestBase[QuestBattleApiFinali
 class QuestBattleApiRetireRequest(RequestBase[QuestBattleApiRetireResponse]):
     battleLog: str = None
     isSystemRetire: bool = None
+    isUpdateRetire: bool = None
     @property
     def url(self) -> str:
         return "/api/quest_battle/retire"
@@ -1783,6 +1913,12 @@ class ExplorationApiDungeonGoalRequest(RequestBase[ExplorationApiDungeonGoalResp
     @property
     def url(self) -> str:
         return "/api/exploration/dungeon_goal"
+class ExplorationApiSkipFieldPointRequest(RequestBase[ExplorationApiSkipFieldPointResponse]):
+    fieldPointMstId: int = None
+    partyDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/exploration/skip_field_point"
 class ExplorationApiResetDungeonProgressRequest(RequestBase[ExplorationApiResetDungeonProgressResponse]):
     fieldStageMstId: int = None
     @property

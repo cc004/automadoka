@@ -224,6 +224,10 @@ class CharacterCharacterTeamMstRecord(BaseModel):
     characterTeamMstId: int = None
     name: str = None
     sortOrder: int = None
+class CharacterReplaceCharacterNameMstRecord(BaseModel):
+    replaceCharacterNameMstId: int = None
+    styleMstId: int = None
+    overrideCharacterName: str = None
 class StyleStyleMstRecord(BaseModel):
     styleMstId: int = None
     name: str = None
@@ -309,6 +313,7 @@ class QuestOutGameQuestStageMstRecord(BaseModel):
     useStamina: int = None
     prevQuestStageMstId: int = None
     conditionGroupId: int = None
+    questMissionGroupId: int = None
     resourceName: str = None
     recommendationElementCsv: str = None
     recommendationPartyPower: int = None
@@ -332,6 +337,7 @@ class QuestOutGameQuestStageMstRecord(BaseModel):
     endDirectionName: str = None
     overrideComponentPrefabName: str = None
     isAutoModeOff: int = None
+    selectionAbilityLotteryMstId: int = None
     element: int = None
     recommendationElement: int = None
 class QuestOutGameQuestConditionMstRecord(BaseModel):
@@ -525,6 +531,7 @@ class ExplorationFieldSeriesMstRecord(BaseModel):
     startTime: str = None
     endTime: str = None
     sortOrder: int = None
+    advMstId: int = None
 class ExplorationFieldStageMstRecord(BaseModel):
     fieldStageMstId: int = None
     fieldSeriesMstId: int = None
@@ -658,6 +665,7 @@ class UserUserLevelUpMstRecord(BaseModel):
     backGroundPlayLimitSeconds: int = None
     subStyleSlotNum: int = None
     maxStamina: int = None
+    startTime: str = None
 class ShopShopSeriesMstRecord(BaseModel):
     shopSeriesMstId: int = None
     title: str = None
@@ -723,6 +731,9 @@ class HomeHomeAppealMstRecord(BaseModel):
     bannerText4: str = None
     textColor: str = None
     partsColor: str = None
+    styleMstId1: int = None
+    styleMstId2: int = None
+    styleMstId3: int = None
     styleFigureMstId1: int = None
     styleFigureMstId2: int = None
     styleFigureMstId3: int = None
@@ -730,6 +741,7 @@ class HomeHomeAppealMstRecord(BaseModel):
     transitionSceneParam: str = None
     startTime: str = None
     endTime: str = None
+    targetRegionType: int = None
     sortOrder: int = None
 class TipsTipsMstRecord(BaseModel):
     tipsMstId: int = None
@@ -804,6 +816,7 @@ class StyleStyleFigureMstRecord(BaseModel):
     modelName: str = None
     iconName: str = None
     voiceCueSheetName: str = None
+    sortOrder: int = None
 class StyleStyleFigureStoryMstRecord(BaseModel):
     styleFigureStoryMstId: int = None
     styleFigureMstId: int = None
@@ -837,6 +850,7 @@ class StyleStyleParamUpMstRecord(BaseModel):
     useItemNum2: int = None
     useItemMstId3: int = None
     useItemNum3: int = None
+    startTime: str = None
 class StyleStyleParamUpCostMstRecord(BaseModel):
     styleParamUpCostMstId: int = None
     useMoney: int = None
@@ -852,6 +866,10 @@ class StyleStyleParamUpCostMstRecord(BaseModel):
     useItemNum5: int = None
     useItemMstId6: int = None
     useItemNum6: int = None
+    useItemMstId7: int = None
+    useItemNum7: int = None
+    useItemMstId8: int = None
+    useItemNum8: int = None
 class StyleStyleParamUpEffectMstRecord(BaseModel):
     styleParamUpEffectMstId: int = None
     name: str = None
@@ -957,6 +975,10 @@ class SoundSoundMstRecord(BaseModel):
     unlockType: int = None
     unlockId: int = None
     releaseTime: str = None
+class SoundStreamableBgmMstRecord(BaseModel):
+    streamableBgmMstId: int = None
+    cueSheetName: str = None
+    cueName: str = None
 class CollectionCollectionIllustMstRecord(BaseModel):
     collectionIllustMstId: int = None
     name: str = None
@@ -1030,6 +1052,7 @@ class StoryEventStoryEventMstRecord(BaseModel):
     name: str = None
     storyQuestGroupId: int = None
     scoreAttackMstId: int = None
+    maxPlayCountPerDay: int = None
     eventItemId: int = None
     shopSeriesMstId: int = None
     bonusStyleIds: str = None
@@ -1041,9 +1064,11 @@ class StoryEventStoryEventMstRecord(BaseModel):
     bannerImageName: str = None
     bossCameraAssetName: str = None
     description: str = None
+    soundMstId: int = None
 class StoryEventStoryEventQuestStageMstRecord(BaseModel):
     questStageMstId: int = None
     eventItemNum: int = None
+    filmNo: int = None
 class TutorialMiniTutorialMstRecord(BaseModel):
     miniTutorialMstId: int = None
     miniTutorialNumber: int = None
@@ -1057,7 +1082,10 @@ class StoryEventStoryEventScenarioMstRecord(BaseModel):
     storyEventMstId: int = None
     advMstId: int = None
     conditionQuestStageMstId: int = None
+    conditionScenarioMstId: int = None
     sortOrder: int = None
+    filmNo: int = None
+    viewType: int = None
 class StoryEventStoryEventScenarioRewardMstRecord(BaseModel):
     storyEventScenarioRewardMstId: int = None
     storyEventScenarioMstId: int = None
@@ -1168,12 +1196,14 @@ class ScoreAttackScoreAttackMstRecord(BaseModel):
     reprintNum: int = None
     highScoreRewardGroupId: int = None
     totalScoreRewardGroupId: int = None
+    rankingRewardGroupId: int = None
     dioramaBackgroundMstId: int = None
 class ScoreAttackScoreAttackStageMstRecord(BaseModel):
     scoreAttackStageMstId: int = None
     scoreAttackMstId: int = None
     questStageMstId: int = None
     difficulty: int = None
+    dioramaBackgroundMstId: int = None
 class ScoreAttackScoreAttackHighScoreRewardMstRecord(BaseModel):
     scoreAttackHighScoreRewardMstId: int = None
     groupId: int = None
@@ -1185,6 +1215,13 @@ class ScoreAttackScoreAttackTotalScoreRewardMstRecord(BaseModel):
     scoreAttackTotalScoreRewardMstId: int = None
     groupId: int = None
     score: int = None
+    objectReceiveType: int = None
+    objectId: int = None
+    num: int = None
+class ScoreAttackScoreAttackRankingRewardMstRecord(BaseModel):
+    scoreAttackRankingRewardMstId: int = None
+    groupId: int = None
+    ranking: int = None
     objectReceiveType: int = None
     objectId: int = None
     num: int = None
@@ -1220,6 +1257,56 @@ class GuildMissionGuildMissionTransitionMstRecord(BaseModel):
     guildMissionMstId: int = None
     transitionSceneName: str = None
     transitionSceneParam: int = None
+class MovieMovieReplaceMstRecord(BaseModel):
+    movieReplaceMstId: int = None
+    path: str = None
+    isStreamable: bool = None
+    bgmOffPath: str = None
+    englishPath: str = None
+    bgmOffEnglishPath: str = None
+class QuestOutGameQuestMissionMstRecord(BaseModel):
+    questMissionMstId: int = None
+    questMissionGroupId: int = None
+    sortOrder: int = None
+    conditionType: int = None
+    conditionCount: int = None
+class SelectionAbilitySelectionAbilityMstRecord(BaseModel):
+    selectionAbilityMstId: int = None
+    selectionAbilityType: int = None
+    selectionAbilityEffectId: int = None
+    rarity: int = None
+    targetType: int = None
+    name: str = None
+    description: str = None
+    abilityEffectType: str = None
+    value1: int = None
+    value2: int = None
+    styleMstId: int = None
+    resourceIconName: str = None
+    sortOrder: int = None
+class SelectionAbilitySelectionAbilityLotteryMstRecord(BaseModel):
+    selectionAbilityLotteryMstId: int = None
+    selectionAbilityLotteryGroupId: int = None
+    selectionAbilityType: int = None
+class SelectionAbilitySelectionAbilityLotteryRateMstRecord(BaseModel):
+    selectionAbilityLotteryGroupId: int = None
+    objectId: int = None
+class SteamSteamAchievementMstRecord(BaseModel):
+    steamAchievementMstId: int = None
+    apiName: str = None
+    conditionType: int = None
+    conditionId: int = None
+    achievementValueType: int = None
+    max: int = None
+    releaseTime: str = None
+class QuestOutGameQuestCampaignMstRecord(BaseModel):
+    questCampaignMstId: int = None
+    questMapMstId: int = None
+    campaignType: int = None
+    campaignValue: int = None
+    startTime: str = None
+    endTime: str = None
+    description: str = None
 class MapGveMapGveUserDataRecord(BaseModel):
     userId: int = None
     mapGveMstId: int = None
@@ -1304,6 +1391,7 @@ class StyleStyleDataRecord(BaseModel):
     skillInfoList: List[StyleSkillInfo] = None
     passiveSkillInfoList: List[StylePassiveSkillInfo] = None
     limitBreakPassiveSkillInfoList: List[StylePassiveSkillInfo] = None
+    selectionAbilityPassiveSkillInfoList: List[StylePassiveSkillInfo] = None
     subPassiveSkillInfo: StylePassiveSkillInfo = None
     specialAttackSkillInfo: StyleSpecialAttackSkillInfo = None
     leaderSkillInfo: StyleLeaderSkillInfo = None
@@ -1311,6 +1399,7 @@ class StyleStyleDataRecord(BaseModel):
     lastParamUpPriority: int = None
     paramUpEffectInfoList: List[StyleParamUpEffectInfo] = None
     limitBreakParamUpEffectInfoList: List[StyleParamUpEffectInfo] = None
+    selectionAbilityParamUpEffectInfoList: List[StyleParamUpEffectInfo] = None
     isAlreadyView: bool = None
 class CollectionCollectionDataRecord(BaseModel):
     userId: int = None
@@ -1419,6 +1508,17 @@ class TutorialFeatureRelease(BaseModel):
 class TutorialMiniTutorialDataRecord(BaseModel):
     userId: int = None
     finishedMiniTutorialNumberList: List[int] = None
+class QuestOutGameUserQuestMissionDataRecord(BaseModel):
+    userId: int = None
+    questStageMstId: int = None
+    reprintNum: int = None
+    questMissionMstId: int = None
+    isClear: bool = None
+    count: int = None
+class ExplorationBattleQuestMissionInfo(BaseModel):
+    questMissionMstId: int = None
+    currentBattleCount: int = None
+    isFirstClearCurrentBattle: bool = None
 class ExplorationBattleStageInfo(BaseModel):
     questDataId: int = None
     questStageMstId: int = None
@@ -1473,6 +1573,35 @@ class QuestBattleBattleUnit(BaseModel):
     passiveSkillInfoList: List[QuestBattlePassiveSkillInfo] = None
     leaderSkillInfo: QuestBattleLeaderSkillInfo = None
     talismanParamInfoList: List[QuestBattleTalismanParamInfo] = None
+class SelectionAbilitySelectionAbilityDataRecord(BaseModel):
+    styleMstId: int = None
+    userId: int = None
+    mainSelectionAbilityMstId1: int = None
+    mainSelectionAbilityMstId2: int = None
+    mainSelectionAbilityMstId3: int = None
+    mainSelectionAbilityMstId4: int = None
+    mainSelectionAbilityMstId5: int = None
+    mainSelectionAbilityMstId2Enabled: bool = None
+    mainSelectionAbilityMstId3Enabled: bool = None
+    mainSelectionAbilityMstId4Enabled: bool = None
+    mainSelectionAbilityMstId5Enabled: bool = None
+    subSelectionAbilityMstIds1: str = None
+    subSelectionLocks1: str = None
+    subSelectionTempLocksReserved1: str = None
+    subSelectionAbilityMstIds2: str = None
+    subSelectionLocks2: str = None
+    subSelectionTempLocksReserved2: str = None
+    subSelectionAbilityMstIds3: str = None
+    subSelectionLocks3: str = None
+    subSelectionTempLocksReserved3: str = None
+    subSelectionAbilityMstIds4: str = None
+    subSelectionLocks4: str = None
+    subSelectionTempLocksReserved4: str = None
+    subSelectionAbilityMstIds5: str = None
+    subSelectionLocks5: str = None
+    subSelectionTempLocksReserved5: str = None
+    stockSelectionAbilityMstIds: str = None
+    updatedTime: str = None
 class PartyCharacterBuildDetail(BaseModel):
     styleData: StyleStyleDataRecord = None
     characterData: CharacterCharacterDataRecord = None
@@ -1480,316 +1609,14 @@ class PartyCharacterBuildDetail(BaseModel):
     cardDataList: List[CardCardDataRecord] = None
     talismanDataList: List[TalismanTalismanDataRecord] = None
     subStyleDataList: List[StyleStyleDataRecord] = None
+    subStyleCharacterDataList: List[CharacterCharacterDataRecord] = None
     subCardDataList: List[CardCardDataRecord] = None
-class LoginBonusLoginBonusConfig(BaseModel):
-    loginBonusRefreshHour: int = None
-class CharacterAwakeCostInfo(BaseModel):
-    awakeLevel: int = None
-    onlyMaterialNum: int = None
-    genericMaterialNum: int = None
-class CharacterRegionRecord(BaseModel):
-    regionId: int = None
-    name: str = None
-class CharacterSeriesRecord(BaseModel):
-    seriesId: int = None
-    name: str = None
-class CharacterLevelUpCost(BaseModel):
-    level: int = None
-    exp: int = None
-    goldPerExp: int = None
-class CharacterCharacterConfig(BaseModel):
-    awakeCostInfo: List[CharacterAwakeCostInfo] = None
-    region: List[CharacterRegionRecord] = None
-    series: List[CharacterSeriesRecord] = None
-    genericAwakeItemMstId: int = None
-    namaeCharacterMstId: int = None
-    namaeObjectRewardGroupId: int = None
-    levelUpCost: List[CharacterLevelUpCost] = None
-class CardCardGenericLimitBreakRecord(BaseModel):
-    rarity: int = None
-    itemMstId: int = None
-class CardCardMaxLevelRecord(BaseModel):
-    rarity: int = None
-    limitBreakCount: int = None
-    maxLevel: int = None
-class CardCardSellRecord(BaseModel):
-    rarity: int = None
-    itemMstId: int = None
-    num: int = None
-    gold: int = None
-class CardUnlockSubCardDataSlotRecord(BaseModel):
-    achievedLevel: int = None
-    slot: int = None
-class CardSubCardReflectRateRecord(BaseModel):
-    equippedNum: int = None
-    rate: int = None
-class CardCardLimitBreakRarityRecord(BaseModel):
-    rarity: int = None
-    itemMstId: int = None
-    num: int = None
-class CardCardConfig(BaseModel):
-    genericLimitBreakInfo: List[CardCardGenericLimitBreakRecord] = None
-    maxLevelInfo: List[CardCardMaxLevelRecord] = None
-    sellCardInfo: List[CardCardSellRecord] = None
-    unlockSubCardDataSlot: List[CardUnlockSubCardDataSlotRecord] = None
-    subCardReflectRate: List[CardSubCardReflectRateRecord] = None
-    cardLimitBreakRarityInfo: List[CardCardLimitBreakRarityRecord] = None
-class CollectionCollectionConfig(BaseModel):
-    gainGemNum: int = None
-    hiddenGalleryCardMstIdList: List[int] = None
-class StyleStyleLimitBreakRarityRecord(BaseModel):
-    rarity: int = None
-    itemMstId: int = None
-    num: int = None
-class StyleStyleLimitBreakCostRecord(BaseModel):
-    rarity: int = None
-    itemMstId: int = None
-    num: int = None
-class StyleLimitBreakBonusRecord(BaseModel):
-    limitBreakCount: int = None
-    bonus: int = None
-class StyleLimitBreakCharacterMaxLevelRecord(BaseModel):
-    rarity: int = None
-    limitBreakCount: int = None
-    maxLevel: int = None
-class StyleUnlockSubStyleDataSlotRecord(BaseModel):
-    achievedLevel: int = None
-    styleLevel: int = None
-    fieldStageMstId: int = None
-    conditionTxt: str = None
-    slot: int = None
-    miniTutorialNumber: int = None
-class StyleLimitBreakSpecialAttackMaxLevelRecord(BaseModel):
-    limitBreakCount: int = None
-    maxLevel: int = None
-class StyleParamUpMaxPriorityInfo(BaseModel):
-    styleLevel: int = None
-    maxPriority: int = None
-class StyleLevelUpCost(BaseModel):
-    level: int = None
-    exp: int = None
-    goldPerExp: int = None
-class StyleStyleConfig(BaseModel):
-    styleLimitBreakRarityInfo: List[StyleStyleLimitBreakRarityRecord] = None
-    limitBreakCostInfo: List[StyleStyleLimitBreakCostRecord] = None
-    limitBreakBonus: List[StyleLimitBreakBonusRecord] = None
-    limitBreakCharacterMaxLevel: List[StyleLimitBreakCharacterMaxLevelRecord] = None
-    limitBreakPassiveSkill1TargetCount: int = None
-    limitBreakSpecialAttackEffectTargetCount: int = None
-    unlockSubStyleDataSlot: List[StyleUnlockSubStyleDataSlotRecord] = None
-    maxSkillLevel: int = None
-    defaultSpecialAttackMaxLevel: int = None
-    limitBreakSpecialAttackMaxLevel: List[StyleLimitBreakSpecialAttackMaxLevelRecord] = None
-    paramUpMaxPriorityInfo: List[StyleParamUpMaxPriorityInfo] = None
-    levelUpCost: List[StyleLevelUpCost] = None
-    unlockSubStyleFieldStageMstId: int = None
-class PvpWinStreakBonusRate(BaseModel):
-    winStreakCount: int = None
-    correctedBonusRate: int = None
-class PvpPvpConfig(BaseModel):
-    maxFreePlayCountPerDay: int = None
-    maxPlayCountPerDay: int = None
-    addPlayCountGemNum: int = None
-    outOfRangeRanking: int = None
-    winStreakBonusRateList: List[PvpWinStreakBonusRate] = None
-    rewardItemMstId: int = None
-    shopSeriesMstId: int = None
-class TalismanTalismanRarityRecord(BaseModel):
-    rarity: int = None
-    gold: int = None
-    levelUpCostGold: int = None
-class TalismanTalismanConfig(BaseModel):
-    talismanNumLimit: int = None
-    rarityInfo: List[TalismanTalismanRarityRecord] = None
-    maxSellNum: int = None
-    useLevelUpTalismanNum: int = None
-class MissionMissionConfig(BaseModel):
-    beginnerMissionFirstMissionTitleMstId: int = None
-    subscriptionMissionDoubleTermRewardScale: int = None
-class GuildMinMaxInfo(BaseModel):
-    min: int = None
-    max: int = None
-class GuildValidatorInfo(BaseModel):
-    length: GuildMinMaxInfo = None
-class GuildGuildValidator(BaseModel):
-    guildName: GuildValidatorInfo = None
-    guildDescription: GuildValidatorInfo = None
-    guildNameOrId: GuildValidatorInfo = None
-class GuildGuildConfig(BaseModel):
-    maxGuildMemberNum: int = None
-    guildRoleMstIdOfMember: int = None
-    guildRoleMstIdOfGuildMaster: int = None
-    guildRoleMstIdOfGuildSubMaster: int = None
-    maxGuildSubMasterNum: int = None
-    masterMigrateNotLoginDay: int = None
-    maxJoinRequestNum: int = None
-    maxReceiveJoinRequestNum: int = None
-    maxScoutNum: int = None
-    maxReceiveScoutNum: int = None
-    validator: GuildGuildValidator = None
-class GveMedalData(BaseModel):
-    objectReceiveType: int = None
-    objectId: int = None
-    num: int = None
-class GveGveConfig(BaseModel):
-    dayPlayCount: int = None
-    chainInitialLevel: int = None
-    chainMaxLevel: int = None
-    damageApiInterval: int = None
-    participationMedal: GveMedalData = None
-class PresentPresentBoxConfig(BaseModel):
-    defaultExpireTime: str = None
-class UserUserConfig(BaseModel):
-    staminaRecoverSec: int = None
-    maxStamina: int = None
-    staminaUpperLimit: int = None
-    staminaRecoverMaxCountInDay: int = None
-    staminaRecoverGemInfoGemNum: int = None
-    staminaRecoverGemInfoRecoverAmount: int = None
-    staminaRecoverGemInfoMaxCountInDay: int = None
-    restrictSetNameDays: int = None
-    maxUserNameLength: int = None
-    playerIdDigitNum: int = None
-    defaultUserTitleMstId: int = None
-    storeReviewMinPendingDays: int = None
-    userExpMax: int = None
-    maxCommentLength: int = None
-class QuestOutGameQuestConfig(BaseModel):
-    backGroundPlayAddLapTimeSeconds: int = None
-    characterHeartDailyBattleClearLimit: int = None
-class TutorialTutorialStepRecord(BaseModel):
-    name: str = None
-    value: int = None
-class TutorialTutorialBattleFixedAllyInfo(BaseModel):
-    questStageMstId: int = None
-    styleMstId: int = None
-    styleMstIds: List[int] = None
-class TutorialUnlockConditionTxtInfo(BaseModel):
-    miniTutorialNumber: int = None
-    unlockConditionTxt: str = None
-class TutorialReleaseStageTalkConfig(BaseModel):
-    releaseStageName: str = None
-    releaseFlag: int = None
-    releaseTalkFlag: int = None
-    talkId: int = None
-class TutorialTutorialConfig(BaseModel):
-    tutorialStepList: List[TutorialTutorialStepRecord] = None
-    finishTutorialStep: int = None
-    tutorialBattleFixedAllyInfoList: List[TutorialTutorialBattleFixedAllyInfo] = None
-    unlockConditionTxtInfoList: List[TutorialUnlockConditionTxtInfo] = None
-    releaseStageTalkConfigList: List[TutorialReleaseStageTalkConfig] = None
-    dungeonMstList: List[str] = None
-    battleMstList: List[str] = None
-class TowerTowerConfig(BaseModel):
-    resetTowerSkipNum: int = None
-    maxTowerSkipNumForItem: int = None
-    maxSkipNumForItemRecoveryInADay: int = None
-    saveFloor: List[int] = None
-class PartyFixParamsPowerRate(BaseModel):
-    hp: int = None
-    atk: int = None
-    _def: int = Field(alias='def')
-    speed: int = None
-class PartyRoleCoefficientInfo(BaseModel):
-    role: int = None
-    hp: int = None
-    atk: int = None
-    _def: int = Field(alias='def')
-class PartyRateParamsPowerRate(BaseModel):
-    criticalRate: int = None
-    criticalDamageRate: int = None
-    breakDamageRate: int = None
-    healRate: int = None
-    recoveryEpRate: int = None
-    effectHitRate: int = None
-    effectParryRate: int = None
-class PartySkillCoefficientPerLevel(BaseModel):
-    skillLevel: int = None
-    coefficient: int = None
-class PartySkillPowerRateInfo(BaseModel):
-    baseConst: float = None
-    exponent: float = None
-    addConst: int = None
-    coefficientPerLevel: List[PartySkillCoefficientPerLevel] = None
-class PartyPowerRate(BaseModel):
-    fixParams: PartyFixParamsPowerRate = None
-    roleCoefficientInfoList: List[PartyRoleCoefficientInfo] = None
-    skillPowerBaseValue: int = None
-    specialAttackCoefficient: int = None
-    skillCoefficient: int = None
-    passiveSkillCoefficient: int = None
-    normalAttackCoefficient: int = None
-    rateParams: PartyRateParamsPowerRate = None
-    specialAttack: PartySkillPowerRateInfo = None
-    skill: PartySkillPowerRateInfo = None
-    passiveSkill: PartySkillPowerRateInfo = None
-    normalAttack: PartySkillPowerRateInfo = None
-class PartySubStyleDataParamRate(BaseModel):
-    slot: int = None
-    achievedLevel: int = None
-    rate: int = None
-class PartyPartyConfig(BaseModel):
-    partyNumMax: int = None
-    nameLengthMax: int = None
-    defaultSoloPartyName: str = None
-    defaultBattlePartyName: str = None
-    powerRate: PartyPowerRate = None
-    subStyleDataParamRate: int = None
-    subStyleDataParamRateInfo: List[PartySubStyleDataParamRate] = None
-class ShopServiceInfo(BaseModel):
-    label: str = None
-    firstFree: bool = None
-    rewardDetailAnnounceMstId: int = None
-    resourceName: str = None
-    titleDescription: str = None
-    description: List[str] = None
-    notesIos: List[str] = None
-    notesAndroid: List[str] = None
-class ShopSubscriptionConfig(BaseModel):
-    subscriptionLabelList: List[str] = None
-    serviceList: List[ShopServiceInfo] = None
-class StoryEventStoryEventConfig(BaseModel):
-    keyItemMstId: int = None
-    keyItemNum: int = None
-    archiveEventItemId: int = None
-    maxPlayCountPerDay: int = None
-    maxPlayCountPerDayArchive: int = None
-    playCountRecoverGemInfoGemNum: int = None
-    playCountRecoverGemInfoRecoverAmount: int = None
-    playCountRecoverGemInfoMaxCountInDay: int = None
-    playCountRecoverGemInfoMaxCount: int = None
-class ChatChatConfig(BaseModel):
-    directChatRoomListLimit: int = None
-    groupChatRoomListLimit: int = None
-    groupChatRoomCreationLimit: int = None
-    groupChatRoomMemberLimit: int = None
-    chatBlockUserLimit: int = None
-    chatsExpireDays: int = None
-class ConfigFirestoreConfig(BaseModel):
-    firestoreCollectionPath: str = None
-class TermsTermsConfig(BaseModel):
-    latestTermNumChat: int = None
-    termsUpdatedTextChat: List[TermsTermsInfo] = None
-class GatheringGatheringShortcutAmountRecord(BaseModel):
-    times: int = None
-    amount: int = None
-class GatheringGatheringShortcutCountConfig(BaseModel):
-    incAmount: List[GatheringGatheringShortcutAmountRecord] = None
-class GatheringGatheringConfig(BaseModel):
-    gatheringMaxHours: int = None
-    gatheringShortcutHours: int = None
-    perMinutes: int = None
-    gatheringShortcutCount: GatheringGatheringShortcutCountConfig = None
-class GvgGvgConfig(BaseModel):
-    preLeagueMatchDayList: List[int] = None
-class ScoreAttackScoreAttackConfig(BaseModel):
-    topRankingViewNumber: int = None
-    outOfRankingViewNumber: int = None
-class ConfigAppResourceConfig(BaseModel):
-    allowedBgmList: List[str] = None
-    allowedStreamingMovieList: List[str] = None
-    replaceStreamingMovieList: List[str] = None
-    forEnglishStreamingMovieList: List[str] = None
+    selectionAbilityData: SelectionAbilitySelectionAbilityDataRecord = None
+class AppVersionAppealTitleInfo(BaseModel):
+    titleResourceName: str = None
+    homeResourceName: str = None
+    startTime: str = None
+    endTime: str = None
 class TowerUserTowerDataRecord(BaseModel):
     userId: int = None
     eventType: int = None
@@ -1826,6 +1653,7 @@ class StoryEventStoryEventInfo(BaseModel):
     isOpen: bool = None
     isUnlocked: bool = None
     isPlayable: bool = None
+    openForceScenarioMstId: int = None
 class QuestOutGameUserQuestGroupDataRecord(BaseModel):
     userId: int = None
     questGroupMstId: int = None
@@ -1849,6 +1677,11 @@ class ShopShopCountDataRecord(BaseModel):
     resetTime: str = None
 class ShopBuyViewData(BaseModel):
     isSuccess: bool = None
+class ShopReceivedObjectData(BaseModel):
+    objectReceiveType: int = None
+    objectId: int = None
+    num: int = None
+    isSendPresent: bool = None
 class ShopShopPaymentMstRecord(BaseModel):
     shopPaymentMstId: int = None
     groupId: int = None
@@ -1963,6 +1796,7 @@ class PvpMatchHistory(BaseModel):
     offenseSetUserTitleMstIds: str = None
     offenseBeforeRanking: int = None
     defenseUserId: int = None
+    isDeletedAccount: bool = None
     defensePlayerName: str = None
     defensePlayerRank: int = None
     defensePartyPower: int = None
@@ -2019,6 +1853,30 @@ class CollectionCollectionParamUpAchieveDataRecord(BaseModel):
     collectionParamUpMstId: int = None
     achievedLevel: int = None
     viewedLevel: int = None
+class UserHomeAppealLocalInfo(BaseModel):
+    homeAppealMstId: int = None
+    isViewed: bool = None
+class UserEnhanceQuestUserLocalInfo(BaseModel):
+    userId: int = None
+    lastSelectedQuestRank: str = None
+class UserMainQuestUserLocalInfo(BaseModel):
+    userId: int = None
+    latestUnlockedStageData: str = None
+    enteredStageData: str = None
+    lastPlayedFieldStageMstId: int = None
+    lastPlayedQuestInfo: str = None
+class UserStoryEventLocalInfo(BaseModel):
+    dataLabel: str = None
+    jsonParam: str = None
+class UserSortInfo(BaseModel):
+    sortType: str = None
+    sortParameter: str = None
+class UserSortDescInfo(BaseModel):
+    sortDescType: str = None
+    sortDescParameter: bool = None
+class UserFilterInfo(BaseModel):
+    filterType: str = None
+    filterParameter: str = None
 class UserUserDisplayInfo(BaseModel):
     userId: int = None
     name: str = None
@@ -2089,6 +1947,7 @@ class HomeHomeViewData(BaseModel):
     enableTowerBadge: bool = None
     enableMainQuestBadge: bool = None
     enableNewGachaBadge: bool = None
+    enableFreeGachaBadge: bool = None
     enableGachaBadge: bool = None
     enableUnionBadge: bool = None
     enablePvpBadge: bool = None
@@ -2259,6 +2118,7 @@ class GachaGachaRecord(BaseModel):
     startTime: str = None
     endTime: str = None
     sortNum: int = None
+    ticketGachaMstId: int = None
 class GachaGachaStepUpRecord(BaseModel):
     gachaSeriesMstId: int = None
     step: int = None
@@ -2286,6 +2146,7 @@ class GachaGachaSeriesRecord(BaseModel):
     shopSeriesMstId: int = None
     bannerMstId: int = None
     resourceName: str = None
+    bonusGachaSeriesMstId: int = None
 class GachaGachaAppealRecord(BaseModel):
     gachaSeriesMstId: int = None
     movieResourceName1: str = None
@@ -2299,6 +2160,9 @@ class GachaGachaAppealRecord(BaseModel):
     styleMstId1: int = None
     styleMstId2: int = None
     styleMstId3: int = None
+    stampType1: int = None
+    stampType2: int = None
+    stampType3: int = None
 class GachaGachaBonusRecord(BaseModel):
     gachaBonusMstId: int = None
     gachaMstId: int = None
@@ -2343,6 +2207,9 @@ class GachaPickUpInfo(BaseModel):
     objectReceiveType: int = None
     objectType: int = None
     objectId: int = None
+class GachaGachaGemTextInfo(BaseModel):
+    gachaMstId: int = None
+    text: str = None
 class QuestOutGameUserQuestTrainingDataRecord(BaseModel):
     userId: int = None
     questGroupMstId: int = None
@@ -2370,6 +2237,352 @@ class QuestOutGameUserQuestCharacterHeartPartySaveDataRecord(BaseModel):
     member5: int = None
     cardMstId5: int = None
     subStyleMstIds5: str = None
+class LoginBonusLoginBonusConfig(BaseModel):
+    loginBonusRefreshHour: int = None
+class CharacterAwakeCostInfo(BaseModel):
+    awakeLevel: int = None
+    onlyMaterialNum: int = None
+    genericMaterialNum: int = None
+class CharacterRegionRecord(BaseModel):
+    regionId: int = None
+    name: str = None
+class CharacterSeriesRecord(BaseModel):
+    seriesId: int = None
+    name: str = None
+class CharacterLevelUpCost(BaseModel):
+    level: int = None
+    exp: int = None
+    goldPerExp: int = None
+class CharacterCharacterConfig(BaseModel):
+    awakeCostInfo: List[CharacterAwakeCostInfo] = None
+    region: List[CharacterRegionRecord] = None
+    series: List[CharacterSeriesRecord] = None
+    genericAwakeItemMstId: int = None
+    namaeCharacterMstId: int = None
+    namaeObjectRewardGroupId: int = None
+    levelUpCost: List[CharacterLevelUpCost] = None
+class CardCardGenericLimitBreakRecord(BaseModel):
+    rarity: int = None
+    itemMstId: int = None
+class CardCardMaxLevelRecord(BaseModel):
+    rarity: int = None
+    limitBreakCount: int = None
+    maxLevel: int = None
+class CardCardSellRecord(BaseModel):
+    rarity: int = None
+    itemMstId: int = None
+    num: int = None
+    gold: int = None
+class CardUnlockSubCardDataSlotRecord(BaseModel):
+    achievedLevel: int = None
+    slot: int = None
+class CardSubCardReflectRateRecord(BaseModel):
+    equippedNum: int = None
+    rate: int = None
+class CardCardLimitBreakRarityRecord(BaseModel):
+    rarity: int = None
+    itemMstId: int = None
+    num: int = None
+class CardCardConfig(BaseModel):
+    genericLimitBreakInfo: List[CardCardGenericLimitBreakRecord] = None
+    maxLevelInfo: List[CardCardMaxLevelRecord] = None
+    sellCardInfo: List[CardCardSellRecord] = None
+    unlockSubCardDataSlot: List[CardUnlockSubCardDataSlotRecord] = None
+    subCardReflectRate: List[CardSubCardReflectRateRecord] = None
+    cardLimitBreakRarityInfo: List[CardCardLimitBreakRarityRecord] = None
+class CollectionCollectionConfig(BaseModel):
+    gainGemNum: int = None
+    hiddenGalleryCardMstIdList: List[int] = None
+    notDispCollectionStyleFigureMstIds: List[int] = None
+class StyleStyleLimitBreakRarityRecord(BaseModel):
+    rarity: int = None
+    itemMstId: int = None
+    num: int = None
+class StyleStyleLimitBreakCostRecord(BaseModel):
+    rarity: int = None
+    itemMstId: int = None
+    num: int = None
+class StyleLimitBreakBonusRecord(BaseModel):
+    limitBreakCount: int = None
+    bonus: int = None
+class StyleLimitBreakCharacterMaxLevelRecord(BaseModel):
+    rarity: int = None
+    limitBreakCount: int = None
+    maxLevel: int = None
+class StyleUnlockSubStyleDataSlotRecord(BaseModel):
+    achievedLevel: int = None
+    styleLevel: int = None
+    fieldStageMstId: int = None
+    conditionTxt: str = None
+    slot: int = None
+    miniTutorialNumber: int = None
+class StyleLimitBreakSpecialAttackMaxLevelRecord(BaseModel):
+    limitBreakCount: int = None
+    maxLevel: int = None
+class StyleParamUpMaxPriorityInfo(BaseModel):
+    styleLevel: int = None
+    maxPriority: int = None
+class StyleLevelUpCost(BaseModel):
+    level: int = None
+    exp: int = None
+    goldPerExp: int = None
+class StyleStyleConfig(BaseModel):
+    styleLimitBreakRarityInfo: List[StyleStyleLimitBreakRarityRecord] = None
+    limitBreakCostInfo: List[StyleStyleLimitBreakCostRecord] = None
+    limitBreakBonus: List[StyleLimitBreakBonusRecord] = None
+    limitBreakCharacterMaxLevel: List[StyleLimitBreakCharacterMaxLevelRecord] = None
+    limitBreakPassiveSkill1TargetCount: int = None
+    limitBreakSpecialAttackEffectTargetCount: int = None
+    unlockSubStyleDataSlot: List[StyleUnlockSubStyleDataSlotRecord] = None
+    maxSkillLevel: int = None
+    defaultSpecialAttackMaxLevel: int = None
+    limitBreakSpecialAttackMaxLevel: List[StyleLimitBreakSpecialAttackMaxLevelRecord] = None
+    paramUpMaxPriorityInfo: List[StyleParamUpMaxPriorityInfo] = None
+    levelUpCost: List[StyleLevelUpCost] = None
+    unlockSubStyleFieldStageMstId: int = None
+class PvpWinStreakBonusRate(BaseModel):
+    winStreakCount: int = None
+    correctedBonusRate: int = None
+class PvpPvpConfig(BaseModel):
+    maxFreePlayCountPerDay: int = None
+    maxPlayCountPerDay: int = None
+    addPlayCountGemNum: int = None
+    outOfRangeRanking: int = None
+    winStreakBonusRateList: List[PvpWinStreakBonusRate] = None
+    rewardItemMstId: int = None
+    shopSeriesMstId: int = None
+class TalismanTalismanRarityRecord(BaseModel):
+    rarity: int = None
+    gold: int = None
+    levelUpCostGold: int = None
+class TalismanTalismanConfig(BaseModel):
+    talismanNumLimit: int = None
+    rarityInfo: List[TalismanTalismanRarityRecord] = None
+    maxSellNum: int = None
+    useLevelUpTalismanNum: int = None
+class MissionMissionConfig(BaseModel):
+    beginnerMissionFirstMissionTitleMstId: int = None
+    subscriptionMissionDoubleTermRewardScale: int = None
+class GuildMinMaxInfo(BaseModel):
+    min: int = None
+    max: int = None
+class GuildValidatorInfo(BaseModel):
+    length: GuildMinMaxInfo = None
+class GuildGuildValidator(BaseModel):
+    guildName: GuildValidatorInfo = None
+    guildDescription: GuildValidatorInfo = None
+    guildNameOrId: GuildValidatorInfo = None
+class GuildGuildConfig(BaseModel):
+    maxGuildMemberNum: int = None
+    guildRoleMstIdOfMember: int = None
+    guildRoleMstIdOfGuildMaster: int = None
+    guildRoleMstIdOfGuildSubMaster: int = None
+    maxGuildSubMasterNum: int = None
+    masterMigrateNotLoginDay: int = None
+    maxJoinRequestNum: int = None
+    maxReceiveJoinRequestNum: int = None
+    maxScoutNum: int = None
+    maxReceiveScoutNum: int = None
+    validator: GuildGuildValidator = None
+class GveMedalData(BaseModel):
+    objectReceiveType: int = None
+    objectId: int = None
+    num: int = None
+class GveGveConfig(BaseModel):
+    dayPlayCount: int = None
+    chainInitialLevel: int = None
+    chainMaxLevel: int = None
+    damageApiInterval: int = None
+    participationMedal: GveMedalData = None
+class PresentPresentBoxConfig(BaseModel):
+    defaultExpireTime: str = None
+class UserUserConfig(BaseModel):
+    staminaRecoverSec: int = None
+    maxStamina: int = None
+    staminaUpperLimit: int = None
+    staminaRecoverMaxCountInDay: int = None
+    staminaRecoverGemInfoGemNum: int = None
+    staminaRecoverGemInfoRecoverAmount: int = None
+    staminaRecoverGemInfoMaxCountInDay: int = None
+    restrictSetNameDays: int = None
+    maxUserNameLength: int = None
+    playerIdDigitNum: int = None
+    defaultUserTitleMstId: int = None
+    storeReviewMinPendingDays: int = None
+    userExpMax: int = None
+    maxCommentLength: int = None
+class QuestOutGameDropNumSubscriptionRateInfo(BaseModel):
+    regular: int = None
+    premium: int = None
+class QuestOutGameDropNumRateInfo(BaseModel):
+    subscription: QuestOutGameDropNumSubscriptionRateInfo = None
+class QuestOutGameQuestConfig(BaseModel):
+    backGroundPlayAddLapTimeSeconds: int = None
+    characterHeartDailyBattleClearLimit: int = None
+    dropNumUpRate: QuestOutGameDropNumRateInfo = None
+class TutorialTutorialStepRecord(BaseModel):
+    name: str = None
+    value: int = None
+class TutorialTutorialBattleFixedAllyInfo(BaseModel):
+    questStageMstId: int = None
+    styleMstId: int = None
+    styleMstIds: List[int] = None
+class TutorialUnlockConditionTxtInfo(BaseModel):
+    miniTutorialNumber: int = None
+    unlockConditionTxt: str = None
+class TutorialReleaseStageTalkConfig(BaseModel):
+    releaseStageName: str = None
+    releaseFlag: int = None
+    releaseTalkFlag: int = None
+    talkId: int = None
+class TutorialTutorialConfig(BaseModel):
+    tutorialStepList: List[TutorialTutorialStepRecord] = None
+    finishTutorialStep: int = None
+    tutorialBattleFixedAllyInfoList: List[TutorialTutorialBattleFixedAllyInfo] = None
+    unlockConditionTxtInfoList: List[TutorialUnlockConditionTxtInfo] = None
+    releaseStageTalkConfigList: List[TutorialReleaseStageTalkConfig] = None
+    dungeonMstList: List[str] = None
+    battleMstList: List[str] = None
+class TowerTowerConfig(BaseModel):
+    resetTowerSkipNum: int = None
+    maxTowerSkipNumForItem: int = None
+    maxSkipNumForItemRecoveryInADay: int = None
+    saveFloor: List[int] = None
+class PartyFixParamsPowerRate(BaseModel):
+    hp: int = None
+    atk: int = None
+    _def: int = Field(alias='def')
+    speed: int = None
+class PartyRoleCoefficientInfo(BaseModel):
+    role: int = None
+    hp: int = None
+    atk: int = None
+    _def: int = Field(alias='def')
+class PartyRateParamsPowerRate(BaseModel):
+    criticalRate: int = None
+    criticalDamageRate: int = None
+    breakDamageRate: int = None
+    healRate: int = None
+    recoveryEpRate: int = None
+    effectHitRate: int = None
+    effectParryRate: int = None
+class PartySkillCoefficientPerLevel(BaseModel):
+    skillLevel: int = None
+    coefficient: int = None
+class PartySkillPowerRateInfo(BaseModel):
+    baseConst: float = None
+    exponent: float = None
+    addConst: int = None
+    coefficientPerLevel: List[PartySkillCoefficientPerLevel] = None
+class PartyPowerRate(BaseModel):
+    fixParams: PartyFixParamsPowerRate = None
+    roleCoefficientInfoList: List[PartyRoleCoefficientInfo] = None
+    skillPowerBaseValue: int = None
+    specialAttackCoefficient: int = None
+    skillCoefficient: int = None
+    passiveSkillCoefficient: int = None
+    normalAttackCoefficient: int = None
+    rateParams: PartyRateParamsPowerRate = None
+    specialAttack: PartySkillPowerRateInfo = None
+    skill: PartySkillPowerRateInfo = None
+    passiveSkill: PartySkillPowerRateInfo = None
+    normalAttack: PartySkillPowerRateInfo = None
+class PartySubStyleDataParamRate(BaseModel):
+    slot: int = None
+    achievedLevel: int = None
+    rate: int = None
+class PartyPartyConfig(BaseModel):
+    partyNumMax: int = None
+    nameLengthMax: int = None
+    defaultSoloPartyName: str = None
+    defaultBattlePartyName: str = None
+    powerRate: PartyPowerRate = None
+    subStyleDataParamRate: int = None
+    subStyleDataParamRateInfo: List[PartySubStyleDataParamRate] = None
+class ShopServiceInfo(BaseModel):
+    label: str = None
+    firstFree: bool = None
+    rewardDetailAnnounceMstId: int = None
+    resourceName: str = None
+    titleDescription: str = None
+    description: List[str] = None
+    notesIos: List[str] = None
+    notesAndroid: List[str] = None
+class ShopSubscriptionConfig(BaseModel):
+    subscriptionLabelList: List[str] = None
+    serviceList: List[ShopServiceInfo] = None
+class StoryEventStoryEventConfig(BaseModel):
+    keyItemMstId: int = None
+    keyItemNum: int = None
+    archiveEventItemId: int = None
+    maxPlayCountPerDay: int = None
+    maxPlayCountPerDayArchive: int = None
+    playCountRecoverGemInfoGemNum: int = None
+    playCountRecoverGemInfoRecoverAmount: int = None
+    playCountRecoverGemInfoMaxCountInDay: int = None
+    playCountRecoverGemInfoMaxCount: int = None
+class ChatChatConfig(BaseModel):
+    directChatRoomListLimit: int = None
+    groupChatRoomListLimit: int = None
+    groupChatRoomCreationLimit: int = None
+    groupChatRoomMemberLimit: int = None
+    chatBlockUserLimit: int = None
+    chatsExpireDays: int = None
+class ConfigFirestoreConfig(BaseModel):
+    firestoreCollectionPath: str = None
+class TermsTermsConfig(BaseModel):
+    latestTermNumChat: int = None
+    termsUpdatedTextChat: List[TermsTermsInfo] = None
+class GatheringGatheringShortcutAmountRecord(BaseModel):
+    times: int = None
+    amount: int = None
+class GatheringGatheringShortcutCountConfig(BaseModel):
+    incAmount: List[GatheringGatheringShortcutAmountRecord] = None
+class GatheringGatheringConfig(BaseModel):
+    gatheringMaxHours: int = None
+    gatheringShortcutHours: int = None
+    perMinutes: int = None
+    gatheringShortcutCount: GatheringGatheringShortcutCountConfig = None
+class GvgGvgConfig(BaseModel):
+    preLeagueMatchDayList: List[int] = None
+class ScoreAttackScoreAttackConfig(BaseModel):
+    topRankingViewNumber: int = None
+    outOfRankingViewNumber: int = None
+class ConfigAppResourceConfig(BaseModel):
+    allowedBgmList: List[str] = None
+    allowedStreamingMovieList: List[str] = None
+    replaceStreamingMovieList: List[str] = None
+    forEnglishStreamingMovieList: List[str] = None
+class ConfigPurgeDataRecord(BaseModel):
+    id: int = None
+    purgeType: int = None
+    target: int = None
+    pathList: List[str] = None
+class ConfigPurgeConfig(BaseModel):
+    purgeDataList: List[ConfigPurgeDataRecord] = None
+class SelectionAbilityMainSelectionAbilityRarityInfo(BaseModel):
+    rarity: int = None
+    maxSubSelectionAbilityNum: int = None
+    gainSubSelectionAbilityItemNum: int = None
+class SelectionAbilitySubSelectionAbilityRarityInfo(BaseModel):
+    rarity: int = None
+    gainSubSelectionAbilityItemNum: int = None
+class SelectionAbilityEnableMainSelectionAbilityInfo(BaseModel):
+    selectionAbilityNum: int = None
+    itemNum: int = None
+class SelectionAbilitySelectionAbilityConfig(BaseModel):
+    enableMainSelectionAbilityItemMstId: int = None
+    enableMainSelectionAbilityItemNum: int = None
+    lockSubSelectionAbilityItemMstId: int = None
+    lockSubSelectionAbilityItemNum: int = None
+    learnSubSelectionAbilityItemMstId: int = None
+    learnSubSelectionAbilityItemNum: int = None
+    learnSubSelectionAbilityGoldNum: int = None
+    maxMainSelectionAbilityNum: int = None
+    maxStockSelectionAbilityNum: int = None
+    mainRarityInfoList: List[SelectionAbilityMainSelectionAbilityRarityInfo] = None
+    subRarityInfoList: List[SelectionAbilitySubSelectionAbilityRarityInfo] = None
+    enableMainSelectionAbility: List[SelectionAbilityEnableMainSelectionAbilityInfo] = None
 class CollectionCollectionIllustAchieveDataRecord(BaseModel):
     userId: int = None
     collectionIllustMstId: int = None
@@ -2394,6 +2607,49 @@ class CharacterCharacterHeartLevelUpInfo(BaseModel):
     beforeHeartExp: int = None
     afterHeartLevel: int = None
     afterHeartExp: int = None
+class QuestBattleAcquiredQuestBonusRewardInfo(BaseModel):
+    objectReceiveType: int = None
+    objectId: int = None
+    addNum: int = None
+class SelectionAbilityAcquiredSelectionAbilityInfo(BaseModel):
+    styleMstId: int = None
+    selectionAbilityMstId: int = None
+class SelectionAbilitySelectionAbilityConversionItemData(BaseModel):
+    styleMstId: int = None
+    selectionAbilityMstId: int = None
+    conversionSelectionAbilityMstId: int = None
+    conversionItemMstId: int = None
+    conversionItemNum: int = None
+class ExplorationDungeonResult(BaseModel):
+    fieldStageUserData: ExplorationFieldStageUserDataRecord = None
+    acquiredQuestRewardMstIds: List[int] = None
+    achievedConditionGroupIds: List[int] = None
+    fieldStageCollectionInfo: CollectionFieldStageCollectionInfo = None
+    clearedDungeonEventMstIds: List[int] = None
+class ExplorationBattleExplorationBattleResult(BaseModel):
+    result: QuestBattleResult = None
+    beforeLevel: int = None
+    afterLevel: int = None
+    beforeExp: int = None
+    afterExp: int = None
+    beforeStamina: int = None
+    fieldStageUserData: ExplorationFieldStageUserDataRecord = None
+    acquiredQuestRewardMstIds: List[int] = None
+    acquiredOtherCollectionQuestRewardMstIds: List[int] = None
+    canReplay: bool = None
+    remainPlayCount: int = None
+    keyItemDataList: List[ItemItemDataRecord] = None
+    characterLevelUpInfoList: List[CharacterCharacterLevelUpInfo] = None
+    styleLevelUpInfoList: List[StyleStyleLevelUpInfo] = None
+    achievedConditionGroupIds: List[int] = None
+    fieldStageCollectionInfo: CollectionFieldStageCollectionInfo = None
+    featureReleaseList: List[TutorialFeatureRelease] = None
+    nextBattleQuestStageMstId: int = None
+    nextBattleFieldPointMstId: int = None
+    isFirstClear: bool = None
+    isStoreReview: bool = None
+    acquiredRewardMoney: int = None
+    isUserExpStoredMessage: bool = None
 class ExplorationQuestMapEffectedInfo(BaseModel):
     questMapMstId: int = None
     difficulty: int = None
