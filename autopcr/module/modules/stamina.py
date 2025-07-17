@@ -8,7 +8,7 @@ ONCE_STAMINA_COST = 10
 
 @description('消耗体力石购买体力')
 @name('购买体力')
-@inttype('stamina_buy_count', '购买次数', 1, [i for i in range(1, 8)])
+@inttype('stamina_buy_count', '购买次数', 1, [i for i in range(1, 9)])
 @default(False)
 class stamina_buy(Module):
     async def do_task(self, client: pcrclient):
@@ -18,6 +18,9 @@ class stamina_buy(Module):
         
         buy_count -= client.data.resp.userParamData.recoveryCount
 
+        if buy_count <= 0:
+            raise SkipError("体力购买次数已达上限")
+        
         req = UserApiSetStaminaRecoverRequest()
         req.recoverType = 1 # 体力石购买
         req.itemMstId = 202001 # 体力石
