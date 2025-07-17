@@ -45,21 +45,24 @@ class super_sweep(Module):
         acquires = {}
 
         for _ in range(repeat_times):
-            req = QuestBattleApiInitializeStageRequest()
-            req.questStageMstId = quest_id
-            req.partyDataId = team
-            req.repeatNum = 0
-            req.backGroundPlay = False
-            req.isArchiveEvent = False
+            try:
+                req = QuestBattleApiInitializeStageRequest()
+                req.questStageMstId = quest_id
+                req.partyDataId = team
+                req.repeatNum = 0
+                req.backGroundPlay = False
+                req.isArchiveEvent = False
 
-            await client.request(req)
+                await client.request(req)
 
-            req = QuestBattleApiFinalizeStageForUserRequest()
-            req.autoMode = 2 # full auto
-            req.battleLog = self.get_config('force_battle_log')
-            req.result = 1
+                req = QuestBattleApiFinalizeStageForUserRequest()
+                req.autoMode = 2 # full auto
+                req.battleLog = self.get_config('force_battle_log')
+                req.result = 1
 
-            res = await client.request(req)
+                res = await client.request(req)
+            except Exception:
+                break
 
             for sa in res.acquiredSelectionAbilityInfoList + res.selectionAbilityConversionItemDataList:
                 sname = styleMst.get(sa.styleMstId, '未知风格')
