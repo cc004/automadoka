@@ -6,6 +6,7 @@ from .stamina import *
 from .shop import *
 from .common import *
 from .collection import *
+from .tool import *
 
 @dataclass
 class ModuleList:
@@ -31,6 +32,8 @@ daily_modules = ModuleList(
     'daily',
     [
         loginbonus,
+        stamina_buy,
+        super_sweep,
         basic,
         event,
         archive,

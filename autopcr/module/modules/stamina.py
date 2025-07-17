@@ -6,6 +6,27 @@ import math
 
 ONCE_STAMINA_COST = 10
 
+@description('消耗体力石购买体力')
+@name('购买体力')
+@inttype('stamina_buy_count', '购买次数', 1, [i for i in range(1, 8)])
+@default(False)
+class stamina_buy(Module):
+    async def do_task(self, client: pcrclient):
+
+        # 2) 计算需要购买的体力次数
+        buy_count = self.get_config('stamina_buy_count')
+        
+        buy_count -= client.data.resp.userParamData.recoveryCount
+
+        req = UserApiSetStaminaRecoverRequest()
+        req.recoverType = 1 # 体力石购买
+        req.itemMstId = 202001 # 体力石
+        req.num = buy_count
+
+        await client.request(req)
+
+        self._log(f"购买了 {buy_count} 次体力，当前体力: {client.data.resp.userParamData.stamina}")
+
 @description('根据角色缺口扫荡最高等级素材本，如果材料溢出则扫荡经验本')
 @name('智能体力扫荡')
 @inttype('basic_stamina_5star', "5星角色魔力突破目标", 120, [i for i in range(1, 121)])

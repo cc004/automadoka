@@ -30,3 +30,8 @@ class CollectionApiUpdateAlreadyViewResponse(responses.CollectionApiUpdateAlread
         for record in self.collectionDataList:
             mgr.collection[(record.objectType, record.objectId)] = record
 
+@handles
+class UserApiSetStaminaRecoverResponse(responses.UserApiSetStaminaRecoverResponse):
+    async def update(self, mgr: datamgr, request):
+        mgr.resp.userParamData = self.userParamData
+
