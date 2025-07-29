@@ -3,7 +3,7 @@ from typing import List, Set
 from ..config import *
 from ..modulebase import *
 from ...core.pcrclient import pcrclient
-from ...core.apiclient import apiclient
+from ...core.apiclient import apiclient, ApiException
 from ...db.database import db
 from ...model.models import *
 import random
@@ -16,6 +16,7 @@ from collections import Counter
 @texttype('force_battle_quest_id', '关卡ID', '411105')
 @texttype('force_battle_team', '队伍ID/名称', '20')
 @texttype('force_battle_log', '战斗日志', '')
+@inttype('force_battle_auto_mode', '自动模式', 0, [0, 1, 2])
 @description('开了就是开了？')
 class super_sweep(Module):
     async def do_task(self, client: pcrclient):
@@ -27,7 +28,7 @@ class super_sweep(Module):
             team = int(team)
         except ValueError:
             parties = client.data.resp.partyDataList
-            team = next((party.partyIndex for party in parties if party.name == team), None)
+            team = next((party.partyDataId for party in parties if party.name == team), None)
         
         if team is None:
             raise AbortError(f"队伍 '{team}' 未找到，请检查队伍ID或名称。")
@@ -56,13 +57,18 @@ class super_sweep(Module):
                 await client.request(req)
 
                 req = QuestBattleApiFinalizeStageForUserRequest()
-                req.autoMode = 2 # full auto
+                req.autoMode = self.get_config('force_battle_auto_mode')
                 req.battleLog = self.get_config('force_battle_log')
                 req.result = 1
 
                 res = await client.request(req)
-            except Exception:
+            except ApiException as e:
+                self._log(f"战斗失败: {str(e)} (code={e.result_code})")
                 break
+            
+            with open('temp.log', 'a') as fp:
+                fp.write(res.json())
+                fp.write('\n')
 
             for sa in res.acquiredSelectionAbilityInfoList + res.selectionAbilityConversionItemDataList:
                 sname = styleMst.get(sa.styleMstId, '未知风格')
@@ -81,7 +87,3 @@ class super_sweep(Module):
             for ability, count in ability_counts.items():
                 ability_str = f"{ability} x{count}"
                 self._log(f"  - {ability_str}")
-
-        with open('temp.log', 'a') as fp:
-            fp.write(res.json())
-            fp.write('\n')

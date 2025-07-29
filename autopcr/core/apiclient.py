@@ -98,7 +98,7 @@ class apiclient(Container["apiclient"]):
         cls = type_utils.find_type_base(request.__class__, RequestBase)
 
         if DEBUG_LOG:
-            with open('req.log', 'a') as fp:
+            with open('req.log', 'a', encoding='utf8') as fp:
                 # fp.write(f'{self.user_name} requested {request.__class__.__name__} at /{request.url}\n')
                 fp.write(json.dumps(self._headers, indent=4, ensure_ascii=False) + '\n')
                 fp.write(json.dumps(json.loads(request.json(by_alias=True)), indent=4, ensure_ascii=False) + '\n')
