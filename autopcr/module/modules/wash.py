@@ -41,7 +41,7 @@ class super_wash(Module):
             return
 
         selection_ability_data_list = res.selectionAbilityDataList
-        selection_ability_data_dict = {item["styleMstId"]: item for item in selection_ability_data_list}
+        selection_ability_data_dict = {item.styleMstId: item for item in selection_ability_data_list}
                     
         init_sub_ids_str = getattr(selection_ability_data_dict.get(style_id), field_name)
         init_current_sub_ids = set(init_sub_ids_str.split(',')) if init_sub_ids_str else set()
