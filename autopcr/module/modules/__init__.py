@@ -7,6 +7,7 @@ from .shop import *
 from .common import *
 from .collection import *
 from .tool import *
+from .wash import *
 
 @dataclass
 class ModuleList:
@@ -82,5 +83,6 @@ tool_modules = ModuleList(
     '工具',
     'tool',
     [
+        super_wash
     ]
 )
