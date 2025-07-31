@@ -16,6 +16,7 @@ from collections import Counter
 @texttype('filter_style_mst_id', '目标角色ID', '10010701')
 @texttype('filter_style_selection_index', '目标技能石序列（1代表1号槽）', '1')
 @texttype('filter_sub_selection_key', '目标词条ID列表', '4054,4034')
+@booltype('filter_style_intersection_logic', '是否启用【或/OR】逻辑', False)
 @description('洗洗洗洗洗洗洗洗洗')
 class super_wash(Module):
     async def do_task(self, client: pcrclient):
@@ -24,6 +25,7 @@ class super_wash(Module):
         repeat_times = self.get_config('filter_sub_selection_times')
         field_name = f"subSelectionAbilityMstIds{selection_index}"
         filter_keys_raw = self.get_config('filter_sub_selection_key')
+        is_intersection_logic = self.get_config('filter_style_intersection_logic')
         if isinstance(filter_keys_raw, str):
             filter_keys = set(filter_keys_raw.split(','))
         elif isinstance(filter_keys_raw, list):
@@ -45,7 +47,7 @@ class super_wash(Module):
                     
         init_sub_ids_str = getattr(selection_ability_data_dict.get(style_id), field_name)
         init_current_sub_ids = set(init_sub_ids_str.split(',')) if init_sub_ids_str else set()
-        if filter_keys.issubset(init_current_sub_ids):
+        if (filter_keys.intersection(init_current_sub_ids) if is_intersection_logic else filter_keys.issubset(init_current_sub_ids)):
             self._log("词条已符合，无需洗练")
             return
 
@@ -96,7 +98,7 @@ class super_wash(Module):
 
             acquires.setdefault(style_name, []).extend(ability_names)
 
-            if filter_keys.issubset(current_sub_ids):
+            if (filter_keys.intersection(current_sub_ids) if is_intersection_logic else filter_keys.issubset(current_sub_ids)):
                 self._log("已洗到全部目标词条，STOP")
                 break
 
