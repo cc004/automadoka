@@ -85,6 +85,7 @@ class apiclient(Container["apiclient"]):
             resp = await aiorequests.post(urlroot + request.url, data=crypted, headers=self._headers, timeout=10)
 
             if resp.status_code != 200:
+                print(f'Error: {resp.status_code} at {urlroot + request.url}')
                 raise ApiException('', -1, resp.status_code)
 
             response = await resp.content

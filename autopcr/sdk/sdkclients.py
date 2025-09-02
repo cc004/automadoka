@@ -1,5 +1,5 @@
 from ..core.sdkclient import sdkclient
-from ..constants import BSDK, QSDK, APP_SM, APP_VER
+from ..constants import BSDK, QSDK, BSDKRSA, APP_SM, APP_VER
 import base64
 import hashlib
 import hmac
@@ -313,17 +313,23 @@ class bsdkclient(sdkclient):
     def apiroot(self):
         return 'https://api.mmme.pokelabo.jp'
 
-    @property
-    def platform_id(self) -> str:
-        return str(self.platform)
-    
 
 class qsdkclient(bsdkclient):
     pass
-                  
+        
+class bsdkrsaclient(sdkclient):
+
+    async def login(self):
+        return self._account.password, self._account.username
+
+    @property
+    def apiroot(self):
+        return 'https://api.mmme.pokelabo.jp'
+       
 sdkclients = {
     BSDK: bsdkclient,
-    QSDK: qsdkclient
+    QSDK: qsdkclient,
+    BSDKRSA: bsdkrsaclient
 }
 
 def create(channel, *args, **kwargs) -> sdkclient:

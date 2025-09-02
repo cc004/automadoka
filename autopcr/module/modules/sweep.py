@@ -43,9 +43,14 @@ class event(Module):
         
         for info in story_top.storyEventDataList:
             mst = story_event[info.storyEventMstId]
-            max_available = max(
-                story_quest[x.questStageMstId] for x in quest_mst if x.questGroupMstId == mst.storyQuestGroupId
-            )
+            available = [story_quest[x.questStageMstId] for x in quest_mst if x.questGroupMstId == mst.storyQuestGroupId]
+
+            if not available:
+                self._log(f"活动 {mst.name} 没有可扫荡的关卡.")
+                continue
+
+            max_available = max(available)
+
             to_sweep = sorted(
                 [x for x in story_top.userQuestStageDataList
                 if x.questGroupMstId == mst.storyQuestGroupId],
@@ -223,6 +228,7 @@ class tower(Module):
 
 @description('扫荡最高好感的心之器')
 @name('扫荡心之器')
+@booltype('heart_force_sweep', '强制扫荡未解锁的最高心之器', False)
 @default(True)
 class heart(Module):
     async def do_task(self, client: pcrclient):
@@ -256,11 +262,29 @@ class heart(Module):
             None
         )
         if rec is None:
-             raise SkipError("最高经验的心之器尚未通关")
-        
+            if not self.get_config('heart_force_sweep'):
+                raise SkipError("最高经验的心之器尚未通关")
+            max_exp_quest = max(
+                (q for q in quest_mst
+                if q.questGroupMstId == 301 and any(
+                    r.questStageMstId == q.questStageMstId
+                    for r in heart_record.userQuestCharacterHeartPartySaveDataList
+                )),
+                key=lambda q: q.characterHeartExp
+            )
+            
+            rec = next(
+                (r for r in heart_record.userQuestCharacterHeartPartySaveDataList
+                if r.questStageMstId == max_exp_quest.questStageMstId),
+                None
+            )
+
+        if rec is None:
+            raise SkipError("未通关任何心之器")
+
         req_skip_heart = QuestBattleApiSkipQuestBattleRequest()
         req_skip_heart.isArchiveEvent = False
-        req_skip_heart.partyDataId = max(party_data_list, key=lambda p: p.partyPower).partyDataId
+        req_skip_heart.partyDataId = 0 #max(party_data_list, key=lambda p: p.partyPower).partyDataId
         req_skip_heart.questStageMstId = rec.questStageMstId
         req_skip_heart.repeatNum = remaining
         await client.request(req_skip_heart)
