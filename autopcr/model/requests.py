@@ -657,6 +657,30 @@ class MstApiGetQuestCampaignMstListRequest(MstRequestBase[QuestOutGameQuestCampa
     @property
     def url(self) -> str:
         return "/api/mst/get_quest_campaign_mst_list"
+class MstApiGetMultiRaidMstListRequest(MstRequestBase[MultiRaidMultiRaidMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_multi_raid_mst_list"
+class MstApiGetMultiRaidStageMstListRequest(MstRequestBase[MultiRaidMultiRaidStageMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_multi_raid_stage_mst_list"
+class MstApiGetMultiRaidBattleBonusMstListRequest(MstRequestBase[MultiRaidMultiRaidBattleBonusMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_multi_raid_battle_bonus_mst_list"
+class MstApiGetMultiRaidDailyBonusRewardMstListRequest(MstRequestBase[MultiRaidMultiRaidDailyBonusRewardMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_multi_raid_daily_bonus_reward_mst_list"
+class MstApiGetMultiRaidScoreRewardMstListRequest(MstRequestBase[MultiRaidMultiRaidScoreRewardMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_multi_raid_score_reward_mst_list"
+class MstApiGetMultiRaidLoseRewardMstListRequest(MstRequestBase[MultiRaidMultiRaidLoseRewardMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_multi_raid_lose_reward_mst_list"
 class MapGveApiGetTopInfoRequest(RequestBase[MapGveApiGetTopInfoResponse]):
     @property
     def url(self) -> str:
@@ -696,6 +720,12 @@ class LoginApiLoginRequest(RequestBase[LoginApiLoginResponse]):
     @property
     def url(self) -> str:
         return "/api/login"
+class LikeApiExecLikeRequest(RequestBase[LikeApiExecLikeResponse]):
+    targetUserId: int = None
+    value: int = None
+    @property
+    def url(self) -> str:
+        return "/api/like/exec_like"
 class InAppSnsApiCreateLoginUrlRequest(RequestBase[InAppSnsApiCreateLoginUrlResponse]):
     platform: int = None
     @property
@@ -919,6 +949,13 @@ class SelectionAbilityApiEnableMainSelectionAbilityRequest(RequestBase[Selection
     @property
     def url(self) -> str:
         return "/api/selection_ability/enable_main_selection_ability"
+class SelectionAbilityApiLearnMainSelectionAbilityUseItemRequest(RequestBase[SelectionAbilityApiLearnMainSelectionAbilityUseItemResponse]):
+    styleMstId: int = None
+    itemMstIds: List[int] = None
+    itemNums: List[int] = None
+    @property
+    def url(self) -> str:
+        return "/api/selection_ability/learn_main_selection_ability_use_item"
 class ScoreAttackApiGetScoreAttackTopRequest(RequestBase[ScoreAttackApiGetScoreAttackTopResponse]):
     scoreAttackMstId: int = None
     @property
@@ -1176,6 +1213,70 @@ class PresentApiReceiveRequest(RequestBase[PresentApiReceiveResponse]):
     @property
     def url(self) -> str:
         return "/api/present/receive"
+class MultiRaidApiGetTopRequest(RequestBase[MultiRaidApiGetTopResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/get_top"
+class MultiRaidApiGetMultiRaidStageDataListRequest(RequestBase[MultiRaidApiGetMultiRaidStageDataListResponse]):
+    isRescue: bool = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/get_multi_raid_stage_data_list"
+class MultiRaidApiInitializeStageRequest(RequestBase[MultiRaidApiInitializeStageResponse]):
+    multiRaidStageMstId: int = None
+    partyDataId: int = None
+    rescueType: int = None
+    multiRaidStageDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/initialize_stage"
+class MultiRaidApiFinalizeStageForUserRequest(RequestBase[MultiRaidApiFinalizeStageForUserResponse]):
+    result: int = None
+    questDataId: int = None
+    battleLog: str = None
+    autoMode: int = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/finalize_stage_for_user"
+class MultiRaidApiGetMultiRaidInfoRequest(RequestBase[MultiRaidApiGetMultiRaidInfoResponse]):
+    questDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/get_multi_raid_info"
+class MultiRaidApiSendRescueRequest(RequestBase[MultiRaidApiSendRescueResponse]):
+    multiRaidStageDataId: int = None
+    rescueType: int = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/send_rescue"
+class MultiRaidApiRetireRequest(RequestBase[MultiRaidApiRetireResponse]):
+    questDataId: int = None
+    battleLog: str = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/retire"
+class MultiRaidApiRecoverStaminaRequest(RequestBase[MultiRaidApiRecoverStaminaResponse]):
+    num: int = None
+    itemMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/recover_stamina"
+class MultiRaidApiAddDamageRequest(RequestBase[MultiRaidApiAddDamageResponse]):
+    questDataId: int = None
+    damage: int = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/add_damage"
+class MultiRaidApiSyncBattleInfoRequest(RequestBase[MultiRaidApiSyncBattleInfoResponse]):
+    questDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/sync_battle_info"
+class MultiRaidApiReceiveRewardRequest(RequestBase[MultiRaidApiReceiveRewardResponse]):
+    questDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/receive_reward"
 class MissionApiGetMissionDataListRequest(RequestBase[MissionApiGetMissionDataListResponse]):
     missionType: int = None
     @property
@@ -1919,6 +2020,11 @@ class ExplorationApiSkipFieldPointRequest(RequestBase[ExplorationApiSkipFieldPoi
     @property
     def url(self) -> str:
         return "/api/exploration/skip_field_point"
+class ExplorationApiClearFieldPointStoryRequest(RequestBase[ExplorationApiClearFieldPointStoryResponse]):
+    fieldPointMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/exploration/clear_field_point_story"
 class ExplorationApiResetDungeonProgressRequest(RequestBase[ExplorationApiResetDungeonProgressResponse]):
     fieldStageMstId: int = None
     @property

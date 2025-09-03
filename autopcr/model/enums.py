@@ -26,6 +26,15 @@ class QuestBattleResult(IntEnum):
     Retire = 4
     Skip = 5
 
+class MultiRaidRoomResult(IntEnum):
+    Init = -1
+    None_ = 0
+    Win = 1
+    LoseForRoundLimit = 2
+    LoseForDead = 3
+    Timeout = 4
+    Retire = 5
+
 class GachaGachaType(IntEnum):
     Normal = 1
     StepUp = 2
