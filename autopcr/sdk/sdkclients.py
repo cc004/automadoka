@@ -233,8 +233,7 @@ class GreeClient:
                     "Content-Type":"application/json",
                     "Authorization": auth_header,
                     **self.common_headers
-                }
-            )
+                })
         else:
             resp = await aiorequests.get(url, headers={
                 "Authorization": auth_header,
