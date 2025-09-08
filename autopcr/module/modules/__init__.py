@@ -83,6 +83,7 @@ tool_modules = ModuleList(
     '工具',
     'tool',
     [
-        super_wash
+        super_wash,
+        raid_support
     ]
 )

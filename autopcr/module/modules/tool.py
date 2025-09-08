@@ -4,6 +4,7 @@ from ..config import *
 from ..modulebase import *
 from ...core.pcrclient import pcrclient
 from ...core.apiclient import apiclient, ApiException
+from ...core.sdkclient import account, platform
 from ...db.database import db
 from ...model.models import *
 import random
@@ -87,3 +88,48 @@ class super_sweep(Module):
             for ability, count in ability_counts.items():
                 ability_str = f"{ability} x{count}"
                 self._log(f"  - {ability_str}")
+
+from raid.raidworker import raidworker
+
+@name('魔女救世')
+@default(False)
+@texttype('raid_support_account', '小号引继码', '')
+@texttype('raid_support_password', '小号密码', '')
+@booltype('raid_suppport_ignore_host', '忽略本人为房主的房间', True)
+@description('秒掉当前参与的所有团战')
+class raid_support(Module):
+    async def do_task(self, client: pcrclient):
+        raid_top = await client.request(MultiRaidApiGetTopRequest())
+
+        sdktype = client.session.sdk.__class__
+
+        client2 = raidworker(
+            self.get_config('raid_support_account'),
+            self.get_config('raid_support_password'),
+            'Raid Worker'
+        )
+
+        await client2.prepare()
+        stamina = await client2.now_stamina()
+        
+        stamina_cost = {
+            stage.multiRaidStageMstId: stage.useStaminaForRescue
+            for stage in await db.mst(MstApiGetMultiRaidStageMstListRequest())
+        }
+
+        ignore = self.get_config('raid_suppport_ignore_host')
+
+        for raid in raid_top.multiRaidStageDataList:
+            if ignore and raid.hostUserId == client.data.resp.userParamData.userId:
+                self._log(f"跳过团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 因为是自己开的")
+                continue
+            if raid.isClosed:
+                self._log(f"跳过团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 因为已经结束")
+                continue
+            cost = stamina_cost[raid.multiRaidStageMstId]
+            if stamina < cost:
+                self._log(f"体力不足，无法继续秒团战 (当前体力 {stamina}，需要 {cost})")
+                break
+            stamina -= cost
+            await client2.add_damage(raid, raid.hp)
+            self._log(f"已秒掉团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) {raid.hp} 伤害 by {raid.hostUserName}")
