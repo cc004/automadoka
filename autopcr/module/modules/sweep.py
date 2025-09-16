@@ -304,8 +304,8 @@ class gather(Module):
         now = datetime.now(timezone.utc).astimezone()
         gather_time = now - datetime.fromisoformat(gathering_top.userGatheringData.gatheringTime)
 
-        if gather_time < timedelta(hours=5):
-            raise SkipError("宝箱时间未超过5小时，不收取")
+        if gather_time < timedelta(hours=10):
+            raise SkipError("宝箱时间未超过10小时，不收取")
         await client.request(GatheringApiReceiveRewardRequest())
         self._log(f"收集了当前宝箱")
 

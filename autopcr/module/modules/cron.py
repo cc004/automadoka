@@ -24,18 +24,24 @@ class CronModule(Module):
             return True
         else:
             return False
+    
+    def judge_module_run(self, module: type) -> bool:
+        return True
+
+from .raid import support_raid
 
 class NormalCronModule(CronModule):
-    def get_clanbattle_run_status(self) -> bool: ...
-
     async def is_cron_condition(self) -> bool:
-        is_clan_battle_run = self.get_clanbattle_run_status()
-        is_clan_battle_time = db.is_clan_battle_time()
-        return not is_clan_battle_time or is_clan_battle_run
+        return True
+
+class SupportCronModule(CronModule):
+    async def is_cron_condition(self) -> bool:
+        return True
+    def judge_module_run(self, module: type) -> bool:
+        return module == support_raid
 
 
 @timetype("time_cron1", "执行时间", "05:00")
-@booltype("clanbattle_run_cron1", "会战期间执行", False)
 @description('定时执行')
 @name("定时任务1")
 @default(False)
@@ -43,11 +49,8 @@ class NormalCronModule(CronModule):
 class cron1(NormalCronModule):
     def get_cron_time(self) -> str:
         return self.get_config("time_cron1")
-    def get_clanbattle_run_status(self) -> bool:
-        return self.get_config("clanbattle_run_cron1")
 
 @timetype("time_cron2", "执行时间", "09:00")
-@booltype("clanbattle_run_cron2", "会战期间执行", False)
 @description('定时执行')
 @name("定时任务2")
 @default(False)
@@ -55,12 +58,9 @@ class cron1(NormalCronModule):
 class cron2(NormalCronModule):
     def get_cron_time(self) -> str:
         return self.get_config("time_cron2")
-    def get_clanbattle_run_status(self) -> bool:
-        return self.get_config("clanbattle_run_cron2")
 
 
 @timetype("time_cron3", "执行时间", "13:00")
-@booltype("clanbattle_run_cron3", "会战期间执行", False)
 @description('定时执行')
 @name("定时任务3")
 @default(False)
@@ -68,11 +68,8 @@ class cron2(NormalCronModule):
 class cron3(NormalCronModule):
     def get_cron_time(self) -> str:
         return self.get_config("time_cron3")
-    def get_clanbattle_run_status(self) -> bool:
-        return self.get_config("clanbattle_run_cron3")
 
 @timetype("time_cron4", "执行时间", "17:00")
-@booltype("clanbattle_run_cron4", "会战期间执行", False)
 @description('定时执行')
 @name("定时任务4")
 @default(False)
@@ -80,11 +77,8 @@ class cron3(NormalCronModule):
 class cron4(NormalCronModule):
     def get_cron_time(self) -> str:
         return self.get_config("time_cron4")
-    def get_clanbattle_run_status(self) -> bool:
-        return self.get_config("clanbattle_run_cron4")
 
 @timetype("time_cron5", "执行时间", "21:00")
-@booltype("clanbattle_run_cron5", "会战期间执行", False)
 @description('定时执行')
 @name("定时任务5")
 @default(False)
@@ -92,11 +86,8 @@ class cron4(NormalCronModule):
 class cron5(NormalCronModule):
     def get_cron_time(self) -> str:
         return self.get_config("time_cron5")
-    def get_clanbattle_run_status(self) -> bool:
-        return self.get_config("clanbattle_run_cron5")
 
 @timetype("time_cron6", "执行时间", "01:00")
-@booltype("clanbattle_run_cron6", "会战期间执行", False)
 @description('定时执行')
 @name("定时任务6")
 @default(False)
@@ -104,5 +95,58 @@ class cron5(NormalCronModule):
 class cron6(NormalCronModule):
     def get_cron_time(self) -> str:
         return self.get_config("time_cron6")
-    def get_clanbattle_run_status(self) -> bool:
-        return self.get_config("clanbattle_run_cron6")
+
+@timetype("time_cron1_", "执行时间", "05:05")
+@description('定时执行')
+@name("定时任务1（仅执行支援）")
+@default(False)
+@notrunnable
+class cron1_(SupportCronModule):
+    def get_cron_time(self) -> str:
+        return self.get_config("time_cron1_")
+
+@timetype("time_cron2_", "执行时间", "09:05")
+@description('定时执行')
+@name("定时任务2（仅执行支援）")
+@default(False)
+@notrunnable
+class cron2_(SupportCronModule):
+    def get_cron_time(self) -> str:
+        return self.get_config("time_cron2_")
+
+
+@timetype("time_cron3_", "执行时间", "13:05")
+@description('定时执行')
+@name("定时任务3（仅执行支援）")
+@default(False)
+@notrunnable
+class cron3_(SupportCronModule):
+    def get_cron_time(self) -> str:
+        return self.get_config("time_cron3_")
+
+@timetype("time_cron4_", "执行时间", "17:05")
+@description('定时执行')
+@name("定时任务4（仅执行支援）")
+@default(False)
+@notrunnable
+class cron4_(SupportCronModule):
+    def get_cron_time(self) -> str:
+        return self.get_config("time_cron4_")
+
+@timetype("time_cron5_", "执行时间", "21:05")
+@description('定时执行')
+@name("定时任务5（仅执行支援）")
+@default(False)
+@notrunnable
+class cron5_(SupportCronModule):
+    def get_cron_time(self) -> str:
+        return self.get_config("time_cron5_")
+
+@timetype("time_cron6_", "执行时间", "01:05")
+@description('定时执行')
+@name("定时任务6（仅执行支援）")
+@default(False)
+@notrunnable
+class cron6_(SupportCronModule):
+    def get_cron_time(self) -> str:
+        return self.get_config("time_cron6_")

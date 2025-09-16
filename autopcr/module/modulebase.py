@@ -12,6 +12,7 @@ from enum import Enum
 from datetime import datetime
 from ..db.database import db
 from ..util.logger import instance as logger
+from typing import Any
 
 def default(val):
     return lambda cls:_wrap_init(cls, lambda self: setattr(self, 'default', val))
@@ -27,29 +28,6 @@ def notimplemented(cls):
 
 def notrunnable(cls):
     return _wrap_init(cls, lambda self: setattr(self, 'runnable', False))
-
-def notlogin(check_data = False):
-    def setter(self):
-        self.tags.append("不登录")
-        self.need_login = False
-        old_do_check = self.do_check
-        async def new_do_check(client: pcrclient) -> Tuple[bool, str]:
-            ok, msg = await old_do_check(client)
-            if not ok: 
-                return ok, msg
-            if check_data and not client.data.ready:
-                return False, '无缓存，请登录'
-            return True, ''
-        self.do_check = new_do_check
-        if check_data:
-            old_do_task = self.do_task
-            async def new_do_task(client: pcrclient):
-                self._log(f"[{db.format_time(datetime.fromtimestamp(client.data.data_time))}]")
-                await old_do_task(client)
-            self.do_task = new_do_task
-
-
-    return lambda cls: _wrap_init(cls, setter)
 
 def tag_stamina_consume(cls):
     def setter(self):
@@ -179,10 +157,13 @@ class Module:
         else:
             return True, ""
 
+    def config_string(self) -> str:
+        return '\n'.join([f"{self.config[key].desc}: {self.get_config_str(key)}" for key in self.config])
+    
     async def do_from(self, client: pcrclient) -> ModuleResult:
         result: ModuleResult = ModuleResult(
                 name=self.name,
-                config = '\n'.join([f"{self.config[key].desc}: {self.get_config_str(key)}" for key in self.config]),
+                config = self.config_string(),
             )
         try:
             self.log.clear()
@@ -191,9 +172,6 @@ class Module:
             if self.need_login:
                 if client.logged == eLoginStatus.NOT_LOGGED or not client.data.ready:
                     await client.login()
-                elif client.logged == eLoginStatus.NEED_REFRESH:
-                    client.data.update_stamina_recover()
-                    await client.refresh()
 
             ok, msg = await self.do_check(client)
             if not ok:
@@ -225,9 +203,6 @@ class Module:
 
         return result
 
-    def cron_hook(self) -> int:
-        return None
-
     def get_config_str(self, key) -> str:
         value = self.get_config(key)
         if isinstance(value, list):
@@ -239,7 +214,7 @@ class Module:
             raise ValueError(f"config {key} not found")
         return self.config[key]
 
-    def get_config(self, key):
+    def get_config(self, key) -> Any:
         if key == self.key:
             default = self.default
         else:

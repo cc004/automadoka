@@ -45,9 +45,9 @@ async def real_run_cron(accountmgr: AccountManager, accounts_to_run, cur):
         nonlocal cur
         async with accountmgr.load(account) as mgr:
             try:
-                await mgr.pre_cron_run(cur.hour, cur.minute)
+                cron = await mgr.pre_cron_run(cur.hour, cur.minute)
                 write_cron_log(eCronOperation.START, cur, accountmgr.qid, account, eResultStatus.SUCCESS)
-                res = await mgr.do_daily()
+                res = await mgr.do_daily(cron)
                 status = res.status
                 cur = datetime.datetime.now()
                 write_cron_log(eCronOperation.FINISH, cur,  accountmgr.qid, account, status)
