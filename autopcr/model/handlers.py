@@ -35,3 +35,10 @@ class UserApiSetStaminaRecoverResponse(responses.UserApiSetStaminaRecoverRespons
     async def update(self, mgr: datamgr, request):
         mgr.resp.userParamData = self.userParamData
 
+
+@handles
+class MultiRaidApiReceiveRewardResponse(responses.MultiRaidApiReceiveRewardResponse):
+    async def update(self, mgr: datamgr, request):
+        with open('raid_reward.log', 'a') as fp:
+            fp.write(self.json())
+            fp.write('\n')

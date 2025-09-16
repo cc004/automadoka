@@ -1,5 +1,5 @@
 from ..core.sdkclient import sdkclient
-from ..constants import BSDK, QSDK, BSDKRSA, APP_SM, APP_VER
+from ..constants import BSDK, QSDK, BSDKRSA, APP_SM, APP_VER, QSDKRSA
 import base64
 import hashlib
 import hmac
@@ -80,13 +80,17 @@ class Util:
         param_str = "&".join(items)
         return f"{Util.encode(method)}&{Util.encode(Util.base_url(url))}&{Util.encode(param_str)}"
 
-
-# —— 主客户端 —— #
+    
 class GreeClient:
-    APP_ID = "863165203288142"
-    APP_SECRET = "858931807c393c548db2a5f725bb6b45"
-    BASE_URL = "https://gl-pkl-jp-payment.gree-apps.net/v1.0"
+    @property
+    def APP_ID(self) -> str: ...
 
+    @property
+    def APP_SECRET(self) -> str: ...
+
+    @property
+    def BASE_URL(self) -> str: ...
+    
     @staticmethod
     def generate_device_id() -> str:
         buf = bytes([random.randint(0, 255) for _ in range(8)])
@@ -270,11 +274,44 @@ class GreeClient:
         })
         self.uuid = migrated["src_uuid"]
 
+
+class JpGreeClient(GreeClient):
+    @property
+    def APP_ID(self) -> str:
+        return '863165203288142'
+
+    @property
+    def APP_SECRET(self) -> str:
+        return '858931807c393c548db2a5f725bb6b45'
+
+    @property
+    def BASE_URL(self) -> str:
+        return 'https://gl-pkl-jp-payment.gree-apps.net/v1.0'
+
+
+class UsGreeClient(GreeClient):
+    @property
+    def APP_ID(self) -> str:
+        raise NotImplementedError("US client not supported")
+
+    @property
+    def APP_SECRET(self) -> str:
+        raise NotImplementedError("US client not supported")
+
+    @property
+    def BASE_URL(self) -> str:
+        return 'https://gl-pkl-us-payment.gree-apps.net/v1.0'
+
+
 import os, re
 from ..constants import CACHE_DIR
 from requests import HTTPError
+from typing import Type
 
-class bsdkclient(sdkclient):
+class sdkclientbase(sdkclient):
+
+    @property
+    def clientType(self) -> Type[GreeClient]: ...
 
     @property
     def cacheFile(self):
@@ -287,11 +324,11 @@ class bsdkclient(sdkclient):
             try:
                 with open(self.cacheFile, 'r') as fp:
                     account = json.load(fp)
-                gclient = GreeClient(base64.b64decode(account['privateKey']), account['uuid'])
+                gclient = self.clientType(base64.b64decode(account['privateKey']), account['uuid'])
                 await gclient.login()
                 break
             except (RuntimeError, FileNotFoundError):
-                gclient = GreeClient()
+                gclient = self.clientType()
                 await gclient.register()
                 await gclient.migrate_from(self._account.username, self._account.password)
                 await gclient.login()
@@ -308,13 +345,26 @@ class bsdkclient(sdkclient):
 
         return gclient.private_key, gclient.uuid
 
+
+
+class bsdkclient(sdkclientbase):
+    
+    @property
+    def clientType(self) -> Type[GreeClient]:
+        return JpGreeClient
+    
     @property
     def apiroot(self):
         return 'https://api.mmme.pokelabo.jp'
 
-
 class qsdkclient(bsdkclient):
-    pass
+    @property
+    def clientType(self) -> Type[GreeClient]:
+        return UsGreeClient
+
+    @property
+    def apiroot(self):
+        return 'https://api-gl.mmme.pokelabo.jp'
         
 class bsdkrsaclient(sdkclient):
 
@@ -325,10 +375,20 @@ class bsdkrsaclient(sdkclient):
     def apiroot(self):
         return 'https://api.mmme.pokelabo.jp'
        
+class qsdkrsaclient(sdkclient):
+
+    async def login(self):
+        return self._account.password, self._account.username
+
+    @property
+    def apiroot(self):
+        return 'https://api-gl.mmme.pokelabo.jp'
+       
 sdkclients = {
     BSDK: bsdkclient,
     QSDK: qsdkclient,
-    BSDKRSA: bsdkrsaclient
+    BSDKRSA: bsdkrsaclient,
+    QSDKRSA: qsdkrsaclient
 }
 
 def create(channel, *args, **kwargs) -> sdkclient:

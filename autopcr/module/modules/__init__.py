@@ -8,6 +8,7 @@ from .common import *
 from .collection import *
 from .tool import *
 from .wash import *
+from .raid import *
 
 @dataclass
 class ModuleList:
@@ -25,6 +26,12 @@ cron_modules = ModuleList(
         cron4,
         cron5,
         cron6,
+        cron1_,
+        cron2_,
+        cron3_,
+        cron4_,
+        cron5_,
+        cron6_,
     ]
 )
 
@@ -35,6 +42,9 @@ daily_modules = ModuleList(
         loginbonus,
         stamina_buy,
         super_sweep,
+        raid_reward,
+        self_raid,
+        support_raid,
         basic,
         event,
         archive,

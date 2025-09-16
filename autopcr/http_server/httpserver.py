@@ -307,7 +307,7 @@ class HttpServer:
         @HttpServer.wrapaccountmgr(readonly=True)
         @HttpServer.wrapaccount()
         async def do_daily(mgr: Account):
-            await mgr.do_daily(mgr._parent.secret.clan)
+            await mgr.do_daily(None, mgr._parent.secret.clan)
             return mgr.generate_result_info(), 200
 
         @self.api.route('/account/<string:acc>/daily_result', methods = ['GET'])

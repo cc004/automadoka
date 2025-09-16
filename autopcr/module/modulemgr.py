@@ -105,7 +105,7 @@ class ModuleManager:
         for cron in self.modules_list.cron_modules:
             if await cron.is_cron_run(hour, minute):
                 await cron.update_client(self.client)
-                return
+                return cron
     
     def get_config(self, name, default):
         return self.config.get(name, default)
@@ -116,8 +116,13 @@ class ModuleManager:
     def generate_tab(self, clan: bool = False, batch: bool = False):
         return self.modules_list.generate_tab(clan, batch)
     
-    async def do_daily(self, isAdminCall: bool = False) -> "TaskResultInfo":
-        resp = await self.do_task(self.config, self.modules_list.daily_modules, isAdminCall)
+    async def do_daily(self, cronModule, isAdminCall: bool = False) -> "TaskResultInfo":
+        from .modules.cron import CronModule
+        resp = await self.do_task(self.config, [
+            module for module in 
+            self.modules_list.daily_modules
+            if cronModule is None or cronModule.judge_module_run(module.__class__)
+        ], isAdminCall)
         status = eResultStatus.SUCCESS
         if any(m.status == eResultStatus.WARNING or m.status == eResultStatus.ABORT for m in resp.result.values()):
             status = eResultStatus.WARNING
