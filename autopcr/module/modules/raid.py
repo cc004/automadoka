@@ -95,6 +95,8 @@ class raid_support(RaidLPModule):
 
 raid_pool: List[Tuple[MultiRaidMultiRaidStageDataRecord, List[int]]] = []
 
+import asyncio
+
 @name('魔女舔盒')
 @default(True)
 @booltype('raid_reward_self_only', '仅收取本人发车的战斗', False)
@@ -108,6 +110,9 @@ class raid_reward(RaidLPModule):
             raid.multiRaidStageDataId: raid
             for raid in self.raid_top.multiRaidStageDataList
         }
+
+        any_reward = False
+
         for raid in self.raid_top.multiRaidRoomDataList:
             stage = stage_map[raid.multiRaidStageDataId]
             if not stage.isClosed:
@@ -120,13 +125,20 @@ class raid_reward(RaidLPModule):
                 questDataId=raid.questDataId
             ))
             self._log(f"已收取团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 奖励")
+            any_reward = True
+        
+        if any_reward:
+            await asyncio.sleep(3) # 等待服务器更新数据
             
+
+import random
 
 @name('魔女召唤')
 @default(False)
 @texttype('start_raid_log', '战斗日志', '')
-@texttype('start_raid_damage', '伤害', '10000')
-@texttype('start_raid_time', '出伤时间(s)', '1')
+@texttype('start_raid_damage_min', '伤害下限', '900000')
+@texttype('start_raid_damage_max', '伤害上限', '1100000')
+#@texttype('start_raid_time', '出伤时间(s)', '1')
 @texttype('start_raid_id', '关卡id', '120')
 @texttype('start_raid_party', '队伍名/id', '30')
 @texttype('start_raid_result', '战斗结果(1:win, 2:lose, 3:timeout)', '3')
@@ -147,8 +159,10 @@ class self_raid(RaidLPModule):
         await super().do_task(client)
 
         raid_id = int(self.get_config('start_raid_id'))
-        raid_damage = int(self.get_config('start_raid_damage'))
-        raid_time = int(self.get_config('start_raid_time'))
+        raid_damage = random.randint(
+            int(self.get_config('start_raid_damage_min')),
+            int(self.get_config('start_raid_damage_max'))
+        )
         log = self.get_config('start_raid_log')
         raid_result = int(self.get_config('start_raid_result'))
         team = self.get_config('start_raid_party')
@@ -207,7 +221,7 @@ class self_raid(RaidLPModule):
             self._log(f"体力不足，无法发车 (当前体力 {now_stamina}，需要 {record.useStaminaForPlay})")
             return
         
-        _, _, resp = await client2.start_clear(raid_id, team, 2, raid_time, raid_damage, log, raid_result)
+        _, _, resp = await client2.start_clear(raid_id, team, 2, 0, raid_damage, log, raid_result)
         
         self._log(f"已发车团战 (关卡 {raid_id}) {raid_damage} 伤害")
         if not resp.multiRaidStageData.isClosed and resp.multiRaidStageData.hp > 0:
@@ -221,9 +235,10 @@ class self_raid(RaidLPModule):
 @name('魔女援助')
 @default(False)
 @texttype('support_raid_log', '战斗日志', '')
-@texttype('support_raid_damage', '伤害', '10000')
-@texttype('support_raid_time', '出伤时间(s)', '1')
-@texttype('support_raid_id', '关卡id', '120')
+@texttype('support_raid_damage_min', '伤害下限', '900000')
+@texttype('support_raid_damage_max', '伤害上限', '1100000')
+#@texttype('support_raid_time', '出伤时间(s)', '1')
+@texttype('support_raid_id', '关卡id（逗号分隔）', '120')
 @texttype('support_raid_party', '队伍名/id', '30')
 @texttype('support_raid_result', '战斗结果(1:win, 2:lose, 3:timeout)', '3')
 @texttype('support_raid_max', '不超过多少人时进入战斗', '2')
@@ -246,9 +261,14 @@ class support_raid(RaidLPModule):
 
         global raid_pool
 
-        raid_id = int(self.get_config('support_raid_id'))
-        raid_damage = int(self.get_config('support_raid_damage'))
-        raid_time = int(self.get_config('support_raid_time'))
+        raid_id = set(
+            int(x) for x in self.get_config('support_raid_id').split(',')
+        )
+        raid_damage = random.randint(
+            int(self.get_config('support_raid_damage_min')),
+            int(self.get_config('support_raid_damage_max'))
+        )
+        # raid_time = int(self.get_config('support_raid_time'))
         log = self.get_config('support_raid_log')
         raid_result = int(self.get_config('support_raid_result'))
         team = self.get_config('support_raid_party')
@@ -265,16 +285,6 @@ class support_raid(RaidLPModule):
         
         if not raid_pool and not self.get_config('support_guild'):
             self._log(f"团战池内没有可支援的团战")
-            return
-        
-        record = next(
-            x for x in 
-            await db.mst(MstApiGetMultiRaidStageMstListRequest())
-            if x.multiRaidStageMstId == raid_id
-        )
-
-        if not record:
-            self._log(f"找不到关卡 {raid_id}")
             return
         
         now_time = datetime.now(user_tz)
@@ -318,14 +328,6 @@ class support_raid(RaidLPModule):
 
         async for raid, user_list, in_pool in distincted_raid():
             
-            if record.useStaminaForRescue > stamina:
-                stamina += await self.stamina_recovery(client, record.useStaminaForRescue - stamina)
-            
-            if record.useStaminaForRescue > stamina:
-                self._log(f"体力不足，无法支援 (当前体力 {stamina}，需要 {record.useStaminaForRescue})")
-                if in_pool: raid_pool_new.append((raid, user_list))
-                continue
-        
             if len(user_list) > max_num or len(user_list) >= client.data.config.multiRaidConfig.maxJoinUserCount:
                 self._log(f"跳过团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 因为已经有 {user_list} 人支援")
                 if in_pool: raid_pool_new.append((raid, user_list))
@@ -336,7 +338,7 @@ class support_raid(RaidLPModule):
                 if in_pool: raid_pool_new.append((raid, user_list))
                 continue
 
-            if raid.multiRaidStageMstId != raid_id:
+            if raid.multiRaidStageMstId not in raid_id:
                 self._log(f"跳过团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 因为关卡ID不符")
                 if in_pool: raid_pool_new.append((raid, user_list))
                 continue
@@ -344,8 +346,27 @@ class support_raid(RaidLPModule):
             if datetime.fromisoformat(raid.createdTime).astimezone(user_tz) < threshold:
                 self._log(f"跳过团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 因为已经超过10分钟")
                 continue
+            
+            record = next(
+                x for x in 
+                await db.mst(MstApiGetMultiRaidStageMstListRequest())
+                if x.multiRaidStageMstId in raid_id
+            )
+
+            if not record:
+                self._log(f"找不到关卡 {raid_id}")
+                continue
+            
+            if record.useStaminaForRescue > stamina:
+                stamina += await self.stamina_recovery(client, record.useStaminaForRescue - stamina)
+            
+            if record.useStaminaForRescue > stamina:
+                self._log(f"体力不足，无法支援 (当前体力 {stamina}，需要 {record.useStaminaForRescue})")
+                if in_pool: raid_pool_new.append((raid, user_list))
+                continue
+        
             try:
-                _, _, resp = await client2.support_clear(raid, team, raid_time, raid_damage, log, raid_result)
+                _, _, resp = await client2.support_clear(raid, team, 0, raid_damage, log, raid_result)
             except ApiException as e:
                 self._log(f"支援团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 失败: {str(e)} (code={e.result_code})")
                 continue

@@ -63,39 +63,47 @@ class AsyncResponse:
 
 
 async def request(method, url, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(await run_sync_func(_global_session.request,
                                              method=method, url=url, **kwargs))
 
 
 async def get(url, params=None, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(
         await run_sync_func(_global_session.get, url=url, params=params, **kwargs))
 
 
 async def options(url, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(
         await run_sync_func(_global_session.options, url=url, **kwargs))
 
 
 async def head(url, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(await run_sync_func(_global_session.head, url=url, **kwargs))
 
 
 async def post(url, data=None, json=None, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(await run_sync_func(_global_session.post, url=url,
                                              data=data, json=json, **kwargs))
 
 
 async def put(url, data=None, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(
         await run_sync_func(_global_session.put, url=url, data=data, **kwargs))
 
 
 async def patch(url, data=None, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(
         await run_sync_func(_global_session.patch, url=url, data=data, **kwargs))
 
 
 async def delete(url, **kwargs) -> AsyncResponse:
+    kwargs['proxies'] = PROXIES
     return AsyncResponse(
         await run_sync_func(_global_session.delete, url=url, **kwargs))

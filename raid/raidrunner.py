@@ -82,7 +82,7 @@ async def once_routine():
                 if stage.hp <= 0:
                     continue
                 raid_time = datetime.fromisoformat(stage.createdTime)
-                threshold = now_time - timedelta(minutes=10)
+                threshold = now_time - timedelta(minutes=150)
                 raid_time_user_tz = raid_time.astimezone(user_tz)
                 if raid_time_user_tz > threshold:
                     log(f"Once routine Skipping raid {stage.multiRaidStageDataId} (Stage {stage.multiRaidStageMstId}) created at {raid_time_user_tz} (less than 10 minutes old)")
@@ -91,6 +91,7 @@ async def once_routine():
                 log(f"Once routine Found raid {stage.multiRaidStageDataId} (Stage {stage.multiRaidStageMstId}) with {stage.hp}? HP")
                 to_rescue.append(rescue(stage, False))
             once_queue = new_queue
+            
             await asyncio.gather(*to_rescue)
         except Exception as ex:
             log(f"Once routine Monitoring failed: {ex}")
