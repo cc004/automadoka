@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from ..config import *
 from ..modulebase import *
 from ...core.pcrclient import pcrclient
@@ -5,6 +6,16 @@ from ...core.apiclient import ApiException
 from ...db.database import db
 from ...model.models import *
 from collections import Counter
+
+user_tz = timezone(timedelta(hours=8))
+def stamina_calc(current: int, update_time: str, config: UserUserConfig) -> int:
+    now = datetime.now(tz=user_tz)
+    update = datetime.fromisoformat(update_time).astimezone(user_tz)
+    delta = now - update
+    if delta.total_seconds() < 0 or current >= config.staminaUpperLimit:
+        return current
+    recover_times = delta.total_seconds() // config.staminaRecoverSec * config.staminaRecoverGemInfoRecoverAmount
+    return min(current + int(recover_times), config.staminaUpperLimit)
 
 @name('快速刷图')
 @default(False)
@@ -47,6 +58,21 @@ class super_sweep(Module):
         }
 
         acquires = {}
+
+        stamina = stamina_calc(
+            client.data.resp.userParamData.stamina,
+            client.data.resp.userParamData.staminaUpdatedTime,
+            client.data.config.userConfig
+        )
+
+        once_cost = next(
+            x for x in await db.mst(MstApiGetQuestStageMstListRequest())
+            if x.questStageMstId == quest_id
+        ).useStamina
+
+        if repeat_times * once_cost > stamina:
+            self._log(f"体力不足，当前体力 {stamina}，单次消耗 {once_cost}，最多可刷 {stamina // once_cost} 次")
+            repeat_times = stamina // once_cost
 
         for _ in range(repeat_times):
             try:

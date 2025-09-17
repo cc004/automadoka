@@ -9,10 +9,21 @@ ONCE_STAMINA_COST = 10
 @description('消耗体力石购买体力')
 @name('购买体力')
 @inttype('stamina_buy_count', '购买次数', 1, [i for i in range(1, 9)])
+@texttype('stamina_retain_count', '保留体力石', '120')
 @default(False)
 class stamina_buy(Module):
     async def do_task(self, client: pcrclient):
 
+        item_cnt = sum(
+            item.num for item in client.data.resp.itemDataList
+            if item.itemMstId == 202001
+        )
+
+        # 1) 检查体力石数量
+        retain_cnt = int(self.get_config('stamina_retain_count'))
+        if item_cnt <= retain_cnt:
+            raise SkipError(f"体力石不足，当前体力石: {item_cnt}，保留体力石: {retain_cnt}")
+        
         # 2) 计算需要购买的体力次数
         buy_count = self.get_config('stamina_buy_count')
         
@@ -32,9 +43,9 @@ class stamina_buy(Module):
 
 @description('根据角色缺口扫荡最高等级素材本，如果材料溢出则扫荡经验本')
 @name('智能体力扫荡')
-@inttype('basic_stamina_5star', "5星角色魔力突破目标", 120, [i for i in range(1, 121)])
-@inttype('basic_stamina_4star', "4星角色魔力突破目标", 110, [i for i in range(1, 121)])
-@inttype('basic_stamina_3star', "3星角色魔力突破目标", 59, [i for i in range(1, 121)])
+@inttype('basic_stamina_5star', "5星角色魔力突破目标", 120, [i for i in range(1, 131)])
+@inttype('basic_stamina_4star', "4星角色魔力突破目标", 110, [i for i in range(1, 131)])
+@inttype('basic_stamina_3star', "3星角色魔力突破目标", 59, [i for i in range(1, 131)])
 @default(True)
 class basic(Module):
     async def do_task(self, client: pcrclient):
