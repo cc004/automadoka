@@ -12,6 +12,7 @@ from ..util.logger import instance as logger
 from .sdkclient import sdkclient
 from . import crypto
 from ..util import type_utils
+from .version import update_version
 
 class ApiException(Exception):
 
@@ -62,7 +63,7 @@ class apiclient(Container["apiclient"]):
         self.lastHomeAccessTime = str(int(time.time()))
     
     @freqlimiter.RunningLimiter(MAX_API_RUNNING)
-    async def _request_internal(self, request: RequestBase[TResponse]) -> TResponse:
+    async def _request_internal(self, request: RequestBase[TResponse], noRetry=False) -> TResponse:
         if not request: return None
         # logger.info(f'{self.user_name} requested {request.__class__.__name__} at /{request.url}')
         request.lastHomeAccessTime = self.lastHomeAccessTime
@@ -83,6 +84,9 @@ class apiclient(Container["apiclient"]):
 
         try:
             resp = await aiorequests.post(urlroot + request.url, data=crypted, headers=self._headers, timeout=10)
+
+            if resp.status_code == 428:
+                await update_version()
 
             if resp.status_code != 200:
                 resp.raise_for_status()

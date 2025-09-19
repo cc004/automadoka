@@ -1,5 +1,5 @@
 from ..core.sdkclient import sdkclient
-from ..constants import BSDK, QSDK, BSDKRSA, APP_SM, APP_VER, QSDKRSA
+from ..constants import BSDK, QSDK, BSDKRSA, QSDKRSA
 import base64
 import hashlib
 import hmac
@@ -9,6 +9,7 @@ import time
 from collections import OrderedDict
 from typing import Optional, Dict, Any
 from urllib.parse import quote
+from ..core.version import version_info
 
 from ..util import aiorequests  # 你给的异步 requests 封装
 from cryptography.hazmat.primitives import hashes, serialization
@@ -107,20 +108,6 @@ class GreeClient:
             key = serialization.load_der_private_key(private_key, password=None)
             self.public_key_pem = export_subject_public_key_info_pem(key)
         
-        self.common_headers = {
-            "X-GREE-GAMELIB": (
-                f"authVersion%3D1.5.28%26billing%3D3%26storeType%3Dgoogle"
-                f"%26appVersion%3D{APP_VER}%26uaType%3Dandroid-app"
-                "%26carrier%3DChina+Mobile+GSM%26compromised%3Dfalse"
-                "%26countryCode%3DCN%26currencyCode%3DCNY"
-                "%26model%3DAndroid-Phone"
-            ),
-            "User-Agent": (
-                "Mozilla/5.0 (Linux; Android 9; ASUS_I003DD Build/PI; wv) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 "
-                "Chrome/68.0.3440.70 Mobile Safari/537.36"
-            )
-        }
 
     async def login(self):
         try:
@@ -141,7 +128,7 @@ class GreeClient:
         self.public_key_pem = export_subject_public_key_info_pem(key)
 
         payload = {
-            "appVersion": APP_VER,
+            "appVersion": version_info.version,
             "urlParam": None,
             "deviceModel": "Asus ASUS_I003DD",
             "osType": 2,
@@ -167,7 +154,7 @@ class GreeClient:
             "supportsVibration": False,
             "uuid": None,
             "xuid": 0,
-            "sm": APP_SM
+            "sm": version_info.sm
         }
         result = await self.post("/auth/initialize", body={
             "device_id": self.device_id,
@@ -230,18 +217,33 @@ class GreeClient:
             f'{k}="{quote(v)}"' for k,v in oauth.items()
         )
 
+        common_headers = {
+            "X-GREE-GAMELIB": (
+                f"authVersion%3D1.5.28%26billing%3D3%26storeType%3Dgoogle"
+                f"%26appVersion%3D{version_info.version}%26uaType%3Dandroid-app"
+                "%26carrier%3DChina+Mobile+GSM%26compromised%3Dfalse"
+                "%26countryCode%3DCN%26currencyCode%3DCNY"
+                "%26model%3DAndroid-Phone"
+            ),
+            "User-Agent": (
+                "Mozilla/5.0 (Linux; Android 9; ASUS_I003DD Build/PI; wv) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 "
+                "Chrome/68.0.3440.70 Mobile Safari/537.36"
+            )
+        }
+
         # 发起请求
         if method == "POST":
             resp = await aiorequests.post(
                 url, data=raw.encode(), headers={
                     "Content-Type":"application/json",
                     "Authorization": auth_header,
-                    **self.common_headers
+                    **common_headers
                 })
         else:
             resp = await aiorequests.get(url, headers={
                 "Authorization": auth_header,
-                **self.common_headers
+                **common_headers
             })
 
         result = await resp.json()
