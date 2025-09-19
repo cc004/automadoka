@@ -154,6 +154,8 @@ class DebugSubscriptionApiIsValidSubscriptionResponse(ResponseBase):
     isValid: bool = None
 class DebugSubscriptionApiDoSubscribeForceResponse(ResponseBase):
     isSuccess: bool = None
+class CameraApiCameraLogResponse(ResponseBase):
+    isSuccess: bool = None
 class AppVersionApiGetReviewVersionDataResponse(ResponseBase):
     isReviewVersion: bool = None
     appealTitleInfo: AppVersionAppealTitleInfo = None
@@ -254,6 +256,7 @@ class StoryEventApiRecoverPlayableCountResponse(ResponseBase):
     storyEventData: StoryEventStoryEventDataRecord = None
 class ShopApiGetShopListResponse(ResponseBase):
     shopCountDataList: List[ShopShopCountDataRecord] = None
+    shopCollectionDataList: List[CollectionCollectionDataRecord] = None
 class ShopApiBuyResponse(ResponseBase):
     viewData: ShopBuyViewData = None
     shopCountData: ShopShopCountDataRecord = None
@@ -265,6 +268,13 @@ class ShopApiGetShopPaymentMstListResponse(ResponseBase):
     shopPaymentBonusRewardMstList: List[ShopShopPaymentBonusRewardMstRecord] = None
     isDisplayWebShopButton: bool = None
     subscriptionDescriptionList: List[ShopSubscriptionDescriptionRecord] = None
+    shopPaymentBannerGroupMstList: List[ShopShopPaymentBannerGroupMstRecord] = None
+    shopTimeSaleCountDataList: List[ShopShopTimeSaleCountDataRecord] = None
+class ShopApiBuyFreeResponse(ResponseBase):
+    shopPaymentMst: ShopShopPaymentMstRecord = None
+    sentObjectDataList: List[ObjectObjectViewData] = None
+class ShopApiIsBuyTimeSaleShopResponse(ResponseBase):
+    result: bool = None
 class SelectionAbilityApiGetSelectionAbilityDataListResponse(ResponseBase):
     selectionAbilityDataList: List[SelectionAbilitySelectionAbilityDataRecord] = None
 class SelectionAbilityApiDeleteSelectionAbilityResponse(ResponseBase):
@@ -460,6 +470,9 @@ class UserApiLoadOptionResponse(ResponseBase):
     sortInfo: List[UserSortInfo] = None
     sortDescInfo: List[UserSortDescInfo] = None
     filterInfo: List[UserFilterInfo] = None
+    dailySkipSpecialAttackDirection: bool = None
+    dailyPlayedSpecialAttackDirectionStyleMstIds: List[int] = None
+    dailyFirstBattleStartTimestamp: int = None
 class UserApiUserSearchResponse(ResponseBase):
     userParamDataList: List[UserUserParamDataRecord] = None
     userProfileDataList: List[UserUserProfileDataRecord] = None
@@ -586,6 +599,14 @@ class ItemApiUseItemResponse(ResponseBase):
 class ItemApiSellItemResponse(ResponseBase):
     itemDataList: List[ItemItemDataRecord] = None
     userParamData: UserUserParamDataRecord = None
+class InvitationApiGetTopResponse(ResponseBase):
+    isNewComer: bool = None
+    inviteeRewardConditionDataList: List[InvitationInviteeRewardConditionDataRecord] = None
+    inviterRewardConditionDataList: List[InvitationInviterRewardConditionDataRecord] = None
+    inviterPlayerId: str = None
+class InvitationApiInviteResponse(ResponseBase):
+    isSuccess: bool = None
+    inviteeRewardConditionDataList: List[InvitationInviteeRewardConditionDataRecord] = None
 class HomeApiGetHomeInfoResponse(ResponseBase):
     viewData: HomeHomeViewData = None
     loginBonusDataList: List[HomeLoginBonusRecord] = None
@@ -610,6 +631,23 @@ class HomeApiGetHomeInfoResponse(ResponseBase):
     isUserExpStoredMessage: bool = None
     userGatheringData: GatheringUserGatheringDataRecord = None
     nextChallengeFieldStageMstId: int = None
+    dollhouseUserData: DollhouseDollhouseUserDataRecord = None
+class HomeApiSetHomeTypeResponse(ResponseBase):
+    isSuccess: bool = None
+class HomeApiSetDollhouse3dModelResponse(ResponseBase):
+    isSuccess: bool = None
+    dollhouseUserData: DollhouseDollhouseUserDataRecord = None
+class HomeApiSetDollhouseLive2dResponse(ResponseBase):
+    isSuccess: bool = None
+    dollhouseUserData: DollhouseDollhouseUserDataRecord = None
+class HomeApiSetDollhouseStyleResponse(ResponseBase):
+    isSuccess: bool = None
+    dollhouseUserData: DollhouseDollhouseUserDataRecord = None
+class HomeApiSetDollhouseCardResponse(ResponseBase):
+    isSuccess: bool = None
+    dollhouseUserData: DollhouseDollhouseUserDataRecord = None
+class HomeApiUpdateDollhouseViewResponse(ResponseBase):
+    collectionDataList: List[CollectionCollectionDataRecord] = None
 class GvgApiGetTopResponse(ResponseBase):
     gvgGuildInfo: GvgGvgGuildInfo = None
     gvgEnemyGuildInfo: GvgGvgEnemyGuildInfo = None
@@ -863,6 +901,7 @@ class GachaApiGachaExecResponse(ResponseBase):
     gachaGainBonusList: List[ObjectObjectViewData] = None
     gachaSeriesGainBonusList: List[ObjectObjectViewData] = None
     gachaPickUpGainBonusList: List[ObjectObjectViewData] = None
+    gachaBonusGaugeGainBonusList: List[ObjectObjectViewData] = None
     objectDataRecord: ObjectObjectDataRecord = None
     gachaRecord: GachaGachaRecord = None
     gachaSeriesRecord: GachaGachaSeriesRecord = None
@@ -874,7 +913,9 @@ class GachaApiGachaExecResponse(ResponseBase):
     bonusGachaSeriesRecord: GachaGachaSeriesRecord = None
     gachaSeriesBonusList: List[GachaGachaSeriesBonusRecord] = None
     gachaPickUpBonusList: List[GachaGachaPickUpBonusRecord] = None
+    gachaBonusGaugeList: List[GachaGachaBonusGaugeRecord] = None
     candidateRarityList: List[int] = None
+    specialDirectionInfo: GachaSpecialDirectionInfo = None
 class GachaApiUpdateAlreadyViewResponse(ResponseBase):
     newBadgeGachaSeriesMstIdList: List[int] = None
 class GachaApiGetGachaGemTextListResponse(ResponseBase):
@@ -925,6 +966,9 @@ class ConfigApiGetConfigResponse(ResponseBase):
     purgeConfig: ConfigPurgeConfig = None
     selectionAbilityConfig: SelectionAbilitySelectionAbilityConfig = None
     multiRaidConfig: MultiRaidMultiRaidConfig = None
+    cameraConfig: CameraCameraConfig = None
+    dollhouseConfig: DollhouseDollhouseConfig = None
+    shopConfig: ShopShopConfig = None
 class CollectionApiGetCollectionDataListResponse(ResponseBase):
     collectionDataList: List[CollectionCollectionDataRecord] = None
     collectionIllustAchieveDataList: List[CollectionCollectionIllustAchieveDataRecord] = None

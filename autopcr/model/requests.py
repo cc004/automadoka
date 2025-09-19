@@ -461,6 +461,10 @@ class MstApiGetStyleVoiceMstListRequest(MstRequestBase[StyleStyleVoiceMstRecord]
     @property
     def url(self) -> str:
         return "/api/mst/get_style_voice_mst_list"
+class MstApiGetStyleOverrideProfileMstListRequest(MstRequestBase[StyleStyleOverrideProfileMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_style_override_profile_mst_list"
 class MstApiGetGvgPointRewardMstListRequest(MstRequestBase[GvgGvgPointRewardMstRecord]):
     @property
     def url(self) -> str:
@@ -681,6 +685,42 @@ class MstApiGetMultiRaidLoseRewardMstListRequest(MstRequestBase[MultiRaidMultiRa
     @property
     def url(self) -> str:
         return "/api/mst/get_multi_raid_lose_reward_mst_list"
+class MstApiGetDollhouse2dBackgroundMstListRequest(MstRequestBase[DollhouseDollhouse2dBackgroundMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_dollhouse2d_background_mst_list"
+class MstApiGetDollhouse3dBackgroundMstListRequest(MstRequestBase[DollhouseDollhouse3dBackgroundMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_dollhouse3d_background_mst_list"
+class MstApiGetStyle3dCharacterMstListRequest(MstRequestBase[DollhouseStyle3dCharacterMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_style3d_character_mst_list"
+class MstApiGetStyle3dCharacterGroupMstListRequest(MstRequestBase[DollhouseStyle3dCharacterGroupMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_style3d_character_group_mst_list"
+class MstApiGetStyleLive2dCostumeMstListRequest(MstRequestBase[DollhouseStyleLive2dCostumeMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_style_live2d_costume_mst_list"
+class MstApiGetStyleLive2dCostumeGroupMstListRequest(MstRequestBase[DollhouseStyleLive2dCostumeGroupMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_style_live2d_costume_group_mst_list"
+class MstApiGetCameraPoseMstListRequest(MstRequestBase[DollhouseCameraPoseMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_camera_pose_mst_list"
+class MstApiGetInvitationCampaignMstListRequest(MstRequestBase[InvitationInvitationCampaignMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_invitation_campaign_mst_list"
+class MstApiGetInvitationCampaignRewardMstListRequest(MstRequestBase[InvitationInvitationCampaignRewardMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_invitation_campaign_reward_mst_list"
 class MapGveApiGetTopInfoRequest(RequestBase[MapGveApiGetTopInfoResponse]):
     @property
     def url(self) -> str:
@@ -791,6 +831,11 @@ class DebugSubscriptionApiDoSubscribeForceRequest(RequestBase[DebugSubscriptionA
     @property
     def url(self) -> str:
         return "/api/debug/debug_subscription/do_subscribe_force"
+class CameraApiCameraLogRequest(RequestBase[CameraApiCameraLogResponse]):
+    cameraLogList: List[CameraCameraLogRecord] = None
+    @property
+    def url(self) -> str:
+        return "/api/camera/camera_log"
 class AppVersionApiGetReviewVersionDataRequest(RequestBase[AppVersionApiGetReviewVersionDataResponse]):
     storeType: int = None
     appVersion: str = None
@@ -918,6 +963,18 @@ class ShopApiGetShopPaymentMstListRequest(RequestBase[ShopApiGetShopPaymentMstLi
     @property
     def url(self) -> str:
         return "/api/shop/get_shop_payment_mst_list"
+class ShopApiBuyFreeRequest(RequestBase[ShopApiBuyFreeResponse]):
+    shopPaymentMstId: int = None
+    num: int = None
+    @property
+    def url(self) -> str:
+        return "/api/shop/buy_free"
+class ShopApiIsBuyTimeSaleShopRequest(RequestBase[ShopApiIsBuyTimeSaleShopResponse]):
+    productId: str = None
+    providerId: str = None
+    @property
+    def url(self) -> str:
+        return "/api/shop/is_buy_time_sale_shop"
 class SelectionAbilityApiGetSelectionAbilityDataListRequest(RequestBase[SelectionAbilityApiGetSelectionAbilityDataListResponse]):
     @property
     def url(self) -> str:
@@ -932,6 +989,7 @@ class SelectionAbilityApiLearnSubSelectionAbilityRequest(RequestBase[SelectionAb
     styleMstId: int = None
     selectionAbilityNum: int = None
     lockIds: List[int] = None
+    permanentLockIds: List[int] = None
     @property
     def url(self) -> str:
         return "/api/selection_ability/learn_sub_selection_ability"
@@ -1156,6 +1214,9 @@ class UserApiSaveOptionRequest(RequestBase[UserApiSaveOptionResponse]):
     sortInfo: List[UserSortInfo] = None
     sortDescInfo: List[UserSortDescInfo] = None
     filterInfo: List[UserFilterInfo] = None
+    dailySkipSpecialAttackDirection: bool = None
+    dailyPlayedSpecialAttackDirectionStyleMstIds: List[int] = None
+    dailyFirstBattleStartTimestamp: int = None
     @property
     def url(self) -> str:
         return "/api/user/save_option"
@@ -1330,11 +1391,59 @@ class ItemApiSellItemRequest(RequestBase[ItemApiSellItemResponse]):
     @property
     def url(self) -> str:
         return "/api/item/sell_item"
+class InvitationApiGetTopRequest(RequestBase[InvitationApiGetTopResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/invitation/get_top"
+class InvitationApiInviteRequest(RequestBase[InvitationApiInviteResponse]):
+    invitationCampaignMstId: int = None
+    inviterPlayerId: str = None
+    @property
+    def url(self) -> str:
+        return "/api/invitation/invite"
 class HomeApiGetHomeInfoRequest(RequestBase[HomeApiGetHomeInfoResponse]):
     skipLoginBonus: bool = None
     @property
     def url(self) -> str:
         return "/api/home/get_home_info"
+class HomeApiSetHomeTypeRequest(RequestBase[HomeApiSetHomeTypeResponse]):
+    homeType: int = None
+    @property
+    def url(self) -> str:
+        return "/api/home/set_home_type"
+class HomeApiSetDollhouse3dModelRequest(RequestBase[HomeApiSetDollhouse3dModelResponse]):
+    model3dMstIdList: List[int] = None
+    model3dBackgroundType: int = None
+    model3dBackgroundMstId: int = None
+    soundMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/home/set_dollhouse3d_model"
+class HomeApiSetDollhouseLive2dRequest(RequestBase[HomeApiSetDollhouseLive2dResponse]):
+    live2dCostumeMstIdList: List[int] = None
+    live2dBackgroundMstId: int = None
+    soundMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/home/set_dollhouse_live2d"
+class HomeApiSetDollhouseStyleRequest(RequestBase[HomeApiSetDollhouseStyleResponse]):
+    styleMstId: int = None
+    soundMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/home/set_dollhouse_style"
+class HomeApiSetDollhouseCardRequest(RequestBase[HomeApiSetDollhouseCardResponse]):
+    cardMstId: int = None
+    soundMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/home/set_dollhouse_card"
+class HomeApiUpdateDollhouseViewRequest(RequestBase[HomeApiUpdateDollhouseViewResponse]):
+    objectType: ObjectObjectType = None
+    objectIds: List[int] = None
+    @property
+    def url(self) -> str:
+        return "/api/home/update_dollhouse_view"
 class GvgApiGetTopRequest(RequestBase[GvgApiGetTopResponse]):
     @property
     def url(self) -> str:

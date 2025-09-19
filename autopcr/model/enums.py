@@ -15,6 +15,10 @@ class ObjectObjectType(IntEnum):
     UserTitle = 12
     Sound = 13
     UserExp = 14
+    Dollhouse3dBackground = 15
+    Dollhouse2dBackground = 16
+    StyleLive2dCostume = 17
+    Style3dCharacter = 18
     KiokuHikari = 999
 
 class QuestBattleResult(IntEnum):
