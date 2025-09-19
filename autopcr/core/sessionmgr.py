@@ -3,10 +3,12 @@ from .apiclient import apiclient, ApiException
 from .sdkclient import sdkclient
 import os
 from ..model.models import *
-from ..constants import CACHE_DIR, APP_VER
+from ..constants import CACHE_DIR
 from ..util.logger import instance as logger
 from ..db.database import db
 import hashlib
+from .version import version_info
+from ..util import freqlimiter
 
 class sessionmgr(Component[apiclient]):
     def __init__(self, sdk: sdkclient):
@@ -25,6 +27,7 @@ class sessionmgr(Component[apiclient]):
         privateKey, uuid = await self.sdk.login()
         self._sdkaccount = privateKey, uuid
 
+    @freqlimiter.FreqLimiter(1, 5)
     async def _ensure_token(self, next: RequestHandler):
         try:
             if self._sdkaccount is None:
@@ -32,7 +35,7 @@ class sessionmgr(Component[apiclient]):
             
             privateKey, uuid = self._sdkaccount
             req = LoginApiLoginRequest(
-                appVersion=APP_VER,
+                appVersion=version_info.version,
                 urlParam=None,
                 deviceModel="Asus ASUS_I003DD",
                 osType=2,

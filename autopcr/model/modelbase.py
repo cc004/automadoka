@@ -3,7 +3,7 @@ from re import T
 from typing import Generic, TypeVar, Optional, List, Any
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
-from ..constants import APP_SM
+from ..core.version import version_info
 
 class ServerError(BaseModel):
     domain: str
@@ -27,7 +27,7 @@ from typing import Any
 
 class RequestBase(Generic[TResponse], BaseModel):
     lastHomeAccessTime: str = ''
-    sm: str = APP_SM
+    sm: str = ''
     @property
     def url(self) -> str:
         raise NotImplementedError()
@@ -48,6 +48,9 @@ class RequestBase(Generic[TResponse], BaseModel):
             ) from e
         object_setattr(__pydantic_self__, '__fields_set__', fields_set)
         __pydantic_self__._init_private_attributes()
+    
+    def prepare(self):
+        self.sm = version_info.sm
 
 TMstType = TypeVar('TMstType', bound=Any, covariant=True)
 

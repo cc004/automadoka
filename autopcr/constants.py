@@ -38,9 +38,6 @@ CLAN_BATTLE_FORBID_PATH = os.path.join(CONFIG_PATH, 'clan_battle_forbidden.txt')
 LOG_PATH = os.path.join(ROOT_DIR, 'log/')
 LOG_LEVEL = logging.INFO
 
-APP_VER = '2.5.0'
-APP_SM = 'df00a131a61c467e2dad974cba6ac699fo1f1E88A0177575728C9A399A9BD1F43A11D4100065n'
-
 # Headers
 DEFAULT_HEADERS = {
   "content-type": "application/x-msgpack",
@@ -48,8 +45,7 @@ DEFAULT_HEADERS = {
   "x-language": "ja-Jpan",
   "x-unity-version": "2022.3.21f1",
   "x-region": "JP",
-  "user-agent": "UnityRequest   (Asus ASUS_I003DD Android OS 9 / API-28 (PI/rel.cjw.20220518.114133))",
-  "x-app-version": APP_VER
+  "user-agent": "UnityRequest   (Asus ASUS_I003DD Android OS 9 / API-28 (PI/rel.cjw.20220518.114133))"
 }
 
 IOS_HEADERS = {
