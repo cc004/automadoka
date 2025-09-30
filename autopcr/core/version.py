@@ -91,7 +91,10 @@ def _update_version_sync():
     save_version_info()
     print(f'Updated to version {version_info.version}, sign {version_info.sign}, libcount {version_info.libcount}')
 
-_update_version_sync()
+import sys
+
+if sys.gettrace() is None:
+    _update_version_sync()
 
 async def update_version():
     version_to_update = version_info.version

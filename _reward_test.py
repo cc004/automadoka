@@ -14,8 +14,6 @@ FIELD_CLEAR = 612001
 
 async def main(client: pcrclient):
 
-    await client.login()
-
     invite_top = await client.request(InvitationApiGetTopRequest())
 
     if not invite_top.inviterPlayerId:
@@ -106,12 +104,86 @@ async def run():
     
     await main(client)
 
-with open('acc.txt', 'r', encoding='utf8') as fp:
-    lines = fp.read().splitlines()
-for line in lines:
-    client = create_client(line, '12345678')
-    print(f'使用账号 {line}')
-    asyncio.run(main(client))
+import urllib.parse
+from quart import Quart, Blueprint, request
+
+quart_ = Quart('server')
+app = Blueprint('app', 'server')
+
+loop = asyncio.get_event_loop()
+
+sema = asyncio.Semaphore(0)
+
+code = None
+
+@app.route('/')
+async def callback():
+    global code
+    code = request.args['code']
+    sema.release()
+    return ''
+
+quart_.register_blueprint(app)
+
+PORT = 38475
+
+query = {
+    'response_type': 'code',
+    'client_id': JpGreeClient.GOOGLE_ID,
+    'redirect_uri' : f'http://127.0.0.1:{PORT}/',
+    'state': f'{PORT}',
+    'scope': 'profile',
+    'service': 'lso',
+    'o2v': '2',
+    'flowName': 'GeneralOAuthFlow'
+}
+
+callback_url = 'https://accounts.google.com/o/oauth2/v2/auth?' + urllib.parse.urlencode(query)
+
+import os
+os.system(f'start "" "{callback_url}"')
+
+async def real_main():
+    try:
+        print('waiting for callback...')
+        await sema.acquire()
+        
+        sub, token = None, None
+        with open('acc.txt', 'r', encoding='utf8') as fp:
+            lines = fp.read().splitlines()
+        for line in lines:
+            client = create_client(line, '12345678')
+            print(f'使用账号 {line}')
+            await client.login()
+            
+            assert isinstance(client.session.sdk, bsdkclient)
+            
+            if sub is None or token is None:
+                sub, token = await client.session.sdk.gclient.getGoogleToken(
+                    code, f'http://127.0.0.1:{PORT}/'
+                )
+            
+            info = await client.session.sdk.gclient.get3rdPartyInfo()
+            
+            if info and int(info[0]['status']):
+                print('已经注册过，解除注册')
+                await client.session.sdk.gclient.unregister3rdparty()
+            
+            await client.session.sdk.gclient.register3rdparty(
+                sub, token
+            )
+            
+            print('请进行网页端操作，结束后按回车键>')
+            input()
+            
+            await client.session.sdk.gclient.unregister3rdparty()
+            await main(client)
+    except:
+        import traceback
+        traceback.print_exc()
+
+loop.create_task(real_main())
+quart_.run(port=PORT, loop=loop)
 
 #for _ in range(10):
 #    asyncio.run(run())

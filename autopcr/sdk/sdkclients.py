@@ -83,8 +83,10 @@ class Util:
 
     
 class GreeClient:
-    GOOGLE_ID = '466108416650-d4805jtr6idhgs25ahbqu9en4ik02b45.apps.googleusercontent.com'
-    GOOGLE_PWD = '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'
+    GOOGLE_ID = base64.b64decode(b'NDY2MTA4NDE2NjUwLWQ0ODA1anRyNmlkaGdzMjVhaGJxdTllbjRpazAyYjQ1LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29t').decode('utf8')
+    GOOGLE_PWD = base64.b64decode(b'R09DU1BYLTJIWEdYYUNlLWEwOHNkbnpERDRjYzJ6V1B0SFk=').decode('utf8')
+    GOOGLE_PLATFORM = 3
+    
     @property
     def APP_ID(self) -> str: ...
 
@@ -120,8 +122,6 @@ class GreeClient:
                 await self.post("/linked/active/update")
                 await self.post("/auth/authorize")
 
-    async def login(self):
-        
     async def register(self):
         key = rsa.generate_private_key(public_exponent=65537, key_size=512)
         priv_bytes = key.private_bytes(
@@ -280,7 +280,10 @@ class GreeClient:
         })
         self.uuid = migrated["src_uuid"]
 
-    async def registerGoogleCode(self, code: str, url: str, platform: int):
+    async def get3rdPartyInfo(self):
+        return [x for x in (await self.get("/migration/3rd/user"))["accounts"] if x['platform'] == str(self.GOOGLE_PLATFORM)]
+    
+    async def getGoogleToken(self, code: str, url: str):
         auth = base64.b64encode(f"{self.GOOGLE_ID}:{self.GOOGLE_PWD}".encode('utf8')).decode('utf8')
         token = await aiorequests.post("https://www.googleapis.com/oauth2/v4/token", data={
             "grant_type": "authorization_code",
@@ -291,29 +294,35 @@ class GreeClient:
             'Authorization': 'Basic ' + auth
         })
         
-        token = (await token.json())['access_token']
+        resp = await token.json()
+        token = resp['access_token']
         
         profile = await aiorequests.get("https://www.googleapis.com/oauth2/v3/userinfo", headers={
             'Authorization': 'Bearer ' + token
         })
         
-        profile = (await profile.json())
+        profile = await profile.json()
         
-        await self.register3rdparty(profile['sub'], token, platform)
+        return profile['sub'], token
+        
+    async def registerGoogleCode(self, code: str, url: str):
+        sub, token = self.getGoogleToken(code, url)
+        await self.register3rdparty(sub, token)
 
-    async def register3rdparty(self, sub: str, token: str, platform: int):
+    async def register3rdparty(self, sub: str, token: str):
         hashed_account_id= hashlib.sha256(sub.encode('utf8')).digest()
         hashed_account_id = base64.b64encode(hashed_account_id).decode('utf8')
         
         await self.post("/migration/3rd/user/register", {
             "access_token": token,
             "hashed_account_id": hashed_account_id,
-            "platform": platform
+            "device_id": self.device_id,
+            "platform": self.GOOGLE_PLATFORM
         })
 
-    async def unregister3rdparty(self, platform: int):
+    async def unregister3rdparty(self):
         await self.post("/migration/3rd/user/unregister", {
-            "platform": platform
+            "platform": self.GOOGLE_PLATFORM
         })
 
 class JpGreeClient(GreeClient):
