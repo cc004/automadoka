@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Tuple, Coroutine, Any, List, Callable
+from typing import Tuple, Coroutine, Any, List, Callable, Optional
 from abc import abstractmethod
 from copy import deepcopy
 from ..constants import DEFAULT_HEADERS, IOS_HEADERS
@@ -21,12 +21,12 @@ class account:
 
 class sdkclient:
 
-    def __init__(self, info: account, captchaVerifier=None, logger=logger):
+    def __init__(self, info: Optional[account] = None, captchaVerifier=None, logger=logger):
         self.captchaVerifier = captchaVerifier
         self.logger = logger
         self._account = info
         self.post_login_evts: List[Callable[[], Coroutine[Any, Any, None]]] = []
-
+    
     def append_post_login(self, evt: Callable[[], Coroutine[Any, Any, None]]):
         self.post_login_evts.append(evt)
 

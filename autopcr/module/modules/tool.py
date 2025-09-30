@@ -68,7 +68,7 @@ class super_sweep(Module):
         once_cost = next(
             x for x in await db.mst(MstApiGetQuestStageMstListRequest())
             if x.questStageMstId == quest_id
-        ).useStamina
+        ).useStamina // 2
 
         if repeat_times * once_cost > stamina:
             self._log(f"体力不足，当前体力 {stamina}，单次消耗 {once_cost}，最多可刷 {stamina // once_cost} 次")

@@ -1,4 +1,4 @@
-from ..core.sdkclient import sdkclient
+from ..core.sdkclient import sdkclient, account, platform
 from ..constants import BSDK, QSDK, BSDKRSA, QSDKRSA
 import base64
 import hashlib
@@ -83,6 +83,8 @@ class Util:
 
     
 class GreeClient:
+    GOOGLE_ID = '466108416650-d4805jtr6idhgs25ahbqu9en4ik02b45.apps.googleusercontent.com'
+    GOOGLE_PWD = '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'
     @property
     def APP_ID(self) -> str: ...
 
@@ -118,6 +120,8 @@ class GreeClient:
                 await self.post("/linked/active/update")
                 await self.post("/auth/authorize")
 
+    async def login(self):
+        
     async def register(self):
         key = rsa.generate_private_key(public_exponent=65537, key_size=512)
         priv_bytes = key.private_bytes(
@@ -276,6 +280,41 @@ class GreeClient:
         })
         self.uuid = migrated["src_uuid"]
 
+    async def registerGoogleCode(self, code: str, url: str, platform: int):
+        auth = base64.b64encode(f"{self.GOOGLE_ID}:{self.GOOGLE_PWD}".encode('utf8')).decode('utf8')
+        token = await aiorequests.post("https://www.googleapis.com/oauth2/v4/token", data={
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": url,
+            "scope": "profile"
+        }, headers={
+            'Authorization': 'Basic ' + auth
+        })
+        
+        token = (await token.json())['access_token']
+        
+        profile = await aiorequests.get("https://www.googleapis.com/oauth2/v3/userinfo", headers={
+            'Authorization': 'Bearer ' + token
+        })
+        
+        profile = (await profile.json())
+        
+        await self.register3rdparty(profile['sub'], token, platform)
+
+    async def register3rdparty(self, sub: str, token: str, platform: int):
+        hashed_account_id= hashlib.sha256(sub.encode('utf8')).digest()
+        hashed_account_id = base64.b64encode(hashed_account_id).decode('utf8')
+        
+        await self.post("/migration/3rd/user/register", {
+            "access_token": token,
+            "hashed_account_id": hashed_account_id,
+            "platform": platform
+        })
+
+    async def unregister3rdparty(self, platform: int):
+        await self.post("/migration/3rd/user/unregister", {
+            "platform": platform
+        })
 
 class JpGreeClient(GreeClient):
     @property
@@ -321,6 +360,29 @@ class sdkclientbase(sdkclient):
             raise RuntimeError('引继码格式不正确')
         return os.path.join(os.path.join(CACHE_DIR, 'token'), self._account.username + '.json')
 
+    async def register(self, password: str):
+        gclient = self.clientType()
+        await gclient.register()
+        await gclient.login()
+
+        code = await gclient.get_migration_code()
+
+        await gclient.register_password(password)
+
+        self._account = account(
+            code,
+            password,
+            platform.Android
+        )
+
+        with open(self.cacheFile, 'w') as fp:
+            json.dump({
+                'privateKey': base64.b64encode(gclient.private_key).decode('utf8'),
+                'uuid': gclient.uuid
+            }, fp)
+        
+        self.gclient = gclient
+
     async def login(self):
         for _ in range(5):
             try:
@@ -345,6 +407,7 @@ class sdkclientbase(sdkclient):
         else:
             raise ConnectionError
 
+        self.gclient = gclient
         return gclient.private_key, gclient.uuid
 
 

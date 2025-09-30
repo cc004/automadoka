@@ -70,6 +70,7 @@ class super_wash(Module):
                 req.styleMstId = style_id
                 req.selectionAbilityNum = selection_index
                 req.lockIds = []
+                req.permanentLockIds = []
 
                 res = await client.request(req)
 
