@@ -15,7 +15,7 @@ from collections import Counter
 @inttype('filter_sub_selection_times', '重复次数', 1, [i for i in range(1, 1000)])
 @texttype('filter_style_mst_id', '目标角色ID', '10010701')
 @texttype('filter_style_selection_index', '目标技能石序列（1代表1号槽）', '1')
-@texttype('filter_permanent_lockid_list', '启用永久锁序列（空代表不启用，1代表1号槽,可多选）', '')
+#@texttype('filter_permanent_lockid_list', '启用永久锁序列（空代表不启用，1代表1号槽,可多选）', '')
 @texttype('filter_sub_selection_key', '目标词条ID列表', '4054,4034')
 @booltype('filter_style_intersection_logic', '是否启用【或/OR】逻辑', False)
 @description('洗洗洗洗洗洗洗洗洗')
@@ -25,7 +25,6 @@ class super_wash(Module):
         selection_index = int(self.get_config('filter_style_selection_index'))
         repeat_times = self.get_config('filter_sub_selection_times')
         field_name = f"subSelectionAbilityMstIds{selection_index}"
-        permanent_lockIds_list = [int(x) for x in self.get_config('filter_permanent_lockid_list').split(',')]
         filter_keys_raw = self.get_config('filter_sub_selection_key')
         is_intersection_logic = self.get_config('filter_style_intersection_logic')
         if isinstance(filter_keys_raw, str):
@@ -65,6 +64,24 @@ class super_wash(Module):
 
         style_name = styleMst.get(style_id, '未知风格')
         acquires = {}
+
+        selection_ability_list = (await client.request(SelectionAbilityApiGetSelectionAbilityDataListRequest())).selectionAbilityDataList
+
+        selection_ability_data = next(
+            (x for x in selection_ability_list if x.styleMstId == style_id), None
+        )
+
+        if not selection_ability_data:
+            raise AbortError(f"没有找到角色 {style_id} 的数据")
+        
+        lock_str = getattr(selection_ability_data, 'subSelectionLocks' + str(selection_index))
+
+        if lock_str:
+            permanent_lockIds_list = lock_str.split(',')
+            self._log(f"应用永久锁定词条: {permanent_lockIds_list}")
+        else:
+            permanent_lockIds_list = []
+
 
         for _ in range(repeat_times):
             try:

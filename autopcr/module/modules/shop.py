@@ -94,7 +94,7 @@ class shop(Module):
                     efficiency = shop.num / shop.price if shop.price > 0 else 0
                     return (-priority, -rarity, -efficiency)
 
-            raise AbortError(f"无法识别商店物品类别，无法排序，商店ID：{shop.shopMstId}，物品类别：{shop.objectReceiveType}，物品ID：{shop.objectId}")
+            raise AbortError(f"商店ID：{shop.shopMstId}，物品类别：{shop.objectReceiveType}，物品ID：{shop.objectId}")
 
         now = datetime.now(timezone.utc).astimezone()
         
@@ -111,7 +111,11 @@ class shop(Module):
                 s.shopMstId: s for s in shop.shopCountDataList if s.shopSeriesMstId == series
             }
 
-            all_items.sort(key=sort_key)
+            try:
+                all_items.sort(key=sort_key)
+            except AbortError as e:
+                self._log(f"跳过商店{mst.title}，无法识别物品类别: {str(e)}")
+                continue
 
             for item in all_items:
                 start = datetime.fromisoformat(item.startTime)

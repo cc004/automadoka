@@ -125,7 +125,7 @@ FIELD_CLEAR = 612001
 @default(False)
 @description('什么时候出蓓蓓呜呜呜我要死了')
 @texttype('inviter_player_id', '邀请者账号', '12345678901J')
-class secret:
+class secret(Module):
     async def do_task(self, client: pcrclient):
         
         invite_top = await client.request(InvitationApiGetTopRequest())
@@ -148,11 +148,11 @@ class secret:
         async def clear_field(field: int):
             mst = field_mst[field]
             if field in cleared_field:
-                print(f"跳过已通关篇章 {field} ({mst.name})")
+                self._log(f"跳过已通关篇章 {field} ({mst.name})")
                 return
             if mst.prevFieldStageMstId != 0:
                 await clear_field(mst.prevFieldStageMstId)
-            print(f"开始清理 {field} ({mst.name})")
+            self._log(f"开始清理 {field} ({mst.name})")
             top = await client.request(ExplorationApiGetTopInfoV4Request(
                 fieldStageMstId=field
             ))
@@ -168,12 +168,12 @@ class secret:
                 points = [x for x in point if x.fieldStratumMstId == s.fieldStratumMstId]
                 for p in points:
                     if p.fieldPointMstId in cleared_points:
-                        print(f"跳过已通关点 {p.fieldPointMstId} ({mst.name}-{p.name})")
+                        self._log(f"跳过已通关点 {p.fieldPointMstId} ({mst.name}-{p.name})")
                         continue
                     reach = await client.request(ExplorationApiReachFieldPointRequest(
                         fieldPointMstId=p.fieldPointMstId
                     ))
-                    print(f"到达点 {p.fieldPointMstId} ({mst.name}-{p.name})")
+                    self._log(f"到达点 {p.fieldPointMstId} ({mst.name}-{p.name})")
 
                     if p.pointType == 1: # dungeon
                         start = await client.request(ExplorationApiDungeonStartRequest(
@@ -184,7 +184,7 @@ class secret:
                             fieldStageMstId=s.fieldStageMstId,
                             dungeonMstId=p.pointValue1
                         ))
-                        print(f"完成副本点 {p.fieldPointMstId} ({mst.name}-{p.name})")
+                        self._log(f"完成副本点 {p.fieldPointMstId} ({mst.name}-{p.name})")
                     elif p.pointType == 2 or p.pointType == 3 or p.pointType == 4: # start
                         quest = await client.request(ExplorationBattleApiInitializeStageV4Request(
                             fieldPointMstId=p.fieldPointMstId,
@@ -201,6 +201,6 @@ class secret:
                             battleLog="",
                             result=1
                         ))
-                        print(f"完成战斗点 {p.fieldPointMstId} ({mst.name}-{p.name})")
+                        self._log(f"完成战斗点 {p.fieldPointMstId} ({mst.name}-{p.name})")
 
         await clear_field(FIELD_CLEAR)
