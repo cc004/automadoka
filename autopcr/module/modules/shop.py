@@ -18,8 +18,9 @@ def it(id):
     return item(5, id, False)
 
 item_category = {
-    '钥匙碎片': it(232030),
     '肖像': lambda shop: shop.objectReceiveType == 4,
+    '钥匙碎片': it(232030),
+    '交换币': it(201017),
     '钻石': item(2, 0, False),
     '记忆切符': it(262001),
     '彩球': it(121003),
