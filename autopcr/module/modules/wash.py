@@ -10,28 +10,67 @@ import random
 import itertools
 from collections import Counter
 
+NONE = '未使用'
+
+sub_selection_list: Dict[str, int] = {}
+style_list: Dict[str, int] = {}
+
+def get_sub_selection_list() -> List[str]:
+    global sub_selection_list
+    if not sub_selection_list and db.selection_ability_list:
+        sub_selection_list = {NONE: 0}
+        for item in db.selection_ability_list:
+            if item.selectionAbilityType == 2:
+                sub_selection_list[f'{item.selectionAbilityMstId}:{item.name}'] = item.selectionAbilityMstId
+    return list(sub_selection_list.keys())
+
+def get_style_list() -> List[str]:
+    global style_list
+    if not style_list and db.style_list and db.character_list and db.figure_list:
+        style_list = {'': 0}
+        char_dict = {x.characterMstId: x.name for x in db.character_list}
+        figure_dict = {
+            x.styleFigureMstId: char_dict.get(x.characterMstId, f'未知角色({x.characterMstId})')
+            for x in db.figure_list
+        }
+        for item in db.style_list:
+            name = figure_dict.get(item.styleFigureMstId, f'未知角色({item.styleFigureMstId})')
+            style_list[f'{item.styleMstId}:[{item.name}]{name}'] = item.styleMstId
+    
+    return list(style_list.keys())
+
 @name('快速洗词条')
 @default(False)
 @inttype('filter_sub_selection_times', '重复次数', 1, [i for i in range(1, 1000)])
-@texttype('filter_style_mst_id', '目标角色ID', '10010701')
+@singlechoice('filter_sub_selection_key_1', '目标词条1',  NONE, get_sub_selection_list)
+@singlechoice('filter_sub_selection_key_2', '目标词条2',  NONE, get_sub_selection_list)
+@singlechoice('filter_sub_selection_key_3', '目标词条3',  NONE, get_sub_selection_list)
+@singlechoice('filter_style', '目标角色', '', get_style_list)
+
 @texttype('filter_style_selection_index', '目标技能石序列（1代表1号槽）', '1')
-@texttype('filter_sub_selection_key', '目标词条ID列表', '4054,4034')
 @booltype('filter_style_intersection_logic', '是否启用【或/OR】逻辑', False)
 @description('洗洗洗洗洗洗洗洗洗')
 class super_wash(Module):
     async def do_task(self, client: pcrclient):
-        style_id = int(self.get_config('filter_style_mst_id'))
+
+        style_name = self.get_config('filter_style')
         selection_index = int(self.get_config('filter_style_selection_index'))
         repeat_times = self.get_config('filter_sub_selection_times')
         field_name = f"subSelectionAbilityMstIds{selection_index}"
-        filter_keys_raw = self.get_config('filter_sub_selection_key')
         is_intersection_logic = self.get_config('filter_style_intersection_logic')
-        if isinstance(filter_keys_raw, str):
-            filter_keys = set(filter_keys_raw.split(','))
-        elif isinstance(filter_keys_raw, list):
-            filter_keys = set(str(i) for i in filter_keys_raw)
-        else:
-            filter_keys = set()
+
+        style_id = style_list[style_name]
+
+        filter_keys = [
+            sub_selection_list[self.get_config(f'filter_sub_selection_key_1')],
+            sub_selection_list[self.get_config(f'filter_sub_selection_key_2')],
+            sub_selection_list[self.get_config(f'filter_sub_selection_key_3')]
+        ]
+
+        if style_id == 0:
+            raise AbortError("请先选择一个角色")
+        
+        filter_keys = set([str(x) for x in filter_keys if x != 0])
 
         try:
             req = SelectionAbilityApiGetSelectionAbilityDataListRequest()
@@ -76,7 +115,7 @@ class super_wash(Module):
         lock_str = getattr(selection_ability_data, 'subSelectionLocks' + str(selection_index))
 
         if lock_str:
-            permanent_lockIds_list = lock_str.split(',')
+            permanent_lockIds_list = [int(x) for x in lock_str.split(',')]
             self._log(f"应用永久锁定词条: {permanent_lockIds_list}")
         else:
             permanent_lockIds_list = []

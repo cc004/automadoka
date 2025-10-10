@@ -15,6 +15,10 @@ class database():
         self._data_cache = {}
         self._current_revision = {}
         self._client: apiclient = None
+        self.style_list: List[models.StyleStyleMstRecord] = []
+        self.selection_ability_list: List[models.SelectionAbilitySelectionAbilityMstRecord] = []
+        self.character_list: List[models.CharacterCharacterMstRecord] = []
+        self.figure_list: List[models.StyleStyleFigureMstRecord] = []
         
     async def update(self, client: RequestHandler):
         data_revision = {
@@ -24,6 +28,11 @@ class database():
         
         self._current_revision = data_revision
         self._client = client
+
+        self.style_list = await db.mst(models.MstApiGetStyleMstListRequest())
+        self.selection_ability_list = await db.mst(models.MstApiGetSelectionAbilityMstListRequest())
+        self.character_list = await db.mst(models.MstApiGetCharacterMstListRequest())
+        self.figure_list = await db.mst(models.MstApiGetStyleFigureMstListRequest())
         
     @staticmethod
     def _get_mst_key(url: str) -> str:
