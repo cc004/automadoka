@@ -18,11 +18,13 @@ def it(id):
     return item(5, id, False)
 
 item_category = {
+    '钥匙碎片': it(232030),
     '肖像': lambda shop: shop.objectReceiveType == 4,
     '钻石': item(2, 0, False),
     '记忆切符': it(262001),
     '彩球': it(121003),
     '开孔材料': it(180001),
+    '永久锁': it(180005),
     '技能书': anyof(
         it(123001), it(123002), it(123003)
     ),
