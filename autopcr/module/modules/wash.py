@@ -15,7 +15,7 @@ from collections import Counter
 @inttype('filter_sub_selection_times', '重复次数', 1, [i for i in range(1, 1000)])
 @texttype('filter_style_mst_id', '目标角色ID', '10010701')
 @texttype('filter_style_selection_index', '目标技能石序列（1代表1号槽）', '1')
-@texttype('filter_permanent_lockid_list', '启用永久锁序列（空代表不启用，1代表1号槽,可多选）', '')
+@texttype('filter_permanent_lockid_list', '启用永久锁序列（0代表不启用，1代表1号槽,可多选）', '0')
 @texttype('filter_sub_selection_key', '目标词条ID列表', '4054,4034')
 @booltype('filter_style_intersection_logic', '是否启用【或/OR】逻辑', False)
 @description('洗洗洗洗洗洗洗洗洗')
@@ -113,3 +113,4 @@ class super_wash(Module):
             for ability, count in ability_counts.items():
                 ability_str = f"{ability} x{count}"
                 self._log(f"  - {ability_str}")
+
