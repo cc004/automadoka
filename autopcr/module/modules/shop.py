@@ -20,7 +20,7 @@ def it(id):
 item_category = {
     '肖像': lambda shop: shop.objectReceiveType == 4,
     '钥匙碎片': it(232030),
-    '交换币': it(201017),
+    '4x交换币': it(201017),
     '钻石': item(2, 0, False),
     '记忆切符': it(262001),
     '彩球': it(121003),
@@ -61,7 +61,7 @@ def shop_priority(cls):
     priority = 100
     for key in item_category:
         cls = inttype(f'shop_priority_{key}', f'{key}优先级，越高越优先，0为不购买', priority, candidate)(cls)
-        priority -= 5
+        priority -= 3
     return cls
 
 @description('按顺序兑换商店物品')
