@@ -20,8 +20,8 @@ class account:
         self.type = type
 
 class region(Enum):
-    Japan = 'JP',
-    Global = 'US',
+    Japan = 0,
+    Global = 1,
 
 class sdkclient:
 

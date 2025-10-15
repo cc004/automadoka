@@ -17,7 +17,7 @@ def log(x: str):
     print(x)
 
 def create_client(obj) -> raidworker:
-    r = region(obj['region'])
+    r = region[obj['region']]
     ret = raidworker(
         obj['code'],
         obj['password'],
@@ -30,7 +30,7 @@ def create_client(obj) -> raidworker:
 for item in cfg['monitor']:
     monitor.append(create_client(item))
 for item in cfg['worker']:
-    r = region(item['region'])
+    r = region[item['region']]
     if r not in worker:
         worker[r] = []
     worker[r].append(create_client(item))
