@@ -83,6 +83,8 @@ class super_sweep(Module):
                 req.backGroundPlay = False
                 req.isArchiveEvent = False
 
+                await asyncio.sleep(2)
+
                 await client.request(req)
 
                 req = QuestBattleApiFinalizeStageForUserRequest()
