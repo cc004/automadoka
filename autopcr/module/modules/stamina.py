@@ -4,7 +4,7 @@ from ...core.pcrclient import pcrclient
 from ...model.models import *
 import math
 
-ONCE_STAMINA_COST = 10
+ONCE_STAMINA_COST = 20
 
 @description('消耗体力石购买体力')
 @name('购买体力')

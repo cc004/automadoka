@@ -6,10 +6,10 @@ from pydantic.generics import GenericModel
 from ..core.version import version_info
 
 class ServerError(BaseModel):
-    domain: str
-    code: int
-    field: str
-    reason: str
+    domain: str = None
+    code: int = None
+    field: str = None
+    reason: str = None
 
 class ResponseBase(BaseModel):
     async def update(self, mgr: "datamgr", request): ...

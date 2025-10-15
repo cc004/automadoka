@@ -1,15 +1,14 @@
 from autopcr.core import pcrclient
-from autopcr.core.sdkclient import account, platform
-from autopcr.sdk.sdkclients import bsdkclient
+from autopcr.core.sdkclient import account, platform, sdkclient
 from autopcr.model.models import *
-from typing import Tuple
+from typing import Tuple, Type
 from .utils import stamina_calc
 import asyncio
 
 class raidworker:
-    def __init__(self, code, password, alias):
+    def __init__(self, code, password, alias, sdkclient: Type[sdkclient]):
         self.client = pcrclient(
-            bsdkclient(account(code, password, platform.Android))
+            sdkclient(account(code, password, platform.Android))
         )
         self.alias = alias
         self.logger = lambda x: print(x)
@@ -17,7 +16,7 @@ class raidworker:
     
     @staticmethod
     def from_client(client: pcrclient, alias: str):
-        worker = raidworker('', '', alias)
+        worker = raidworker('', '', alias, client.session.sdk.__class__)
         worker.client = client
         worker.prepared = True
         return worker

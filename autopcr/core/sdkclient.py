@@ -19,6 +19,10 @@ class account:
         self.password = pwd
         self.type = type
 
+class region(Enum):
+    Japan = 'JP',
+    Global = 'US',
+
 class sdkclient:
 
     def __init__(self, info: Optional[account] = None, captchaVerifier=None, logger=logger):
@@ -53,6 +57,10 @@ class sdkclient:
             raise ValueError(f"Invalid platform {self._account.type}")
         headers['x-game-server-url'] = self.apiroot
         return headers
+
+    @property
+    def region(self) -> region:
+        ...
 
     @property
     def apiroot(self) -> str:

@@ -1,4 +1,4 @@
-from ..core.sdkclient import sdkclient, account, platform
+from ..core.sdkclient import sdkclient, account, platform, region
 from ..constants import BSDK, QSDK, BSDKRSA, QSDKRSA
 import base64
 import hashlib
@@ -342,11 +342,11 @@ class JpGreeClient(GreeClient):
 class UsGreeClient(GreeClient):
     @property
     def APP_ID(self) -> str:
-        raise NotImplementedError("US client not supported")
+        return '934835692267709'
 
     @property
     def APP_SECRET(self) -> str:
-        raise NotImplementedError("US client not supported")
+        return 'c1d8e8d0bfe9a9026cd21c83a9584586'
 
     @property
     def BASE_URL(self) -> str:
@@ -424,6 +424,10 @@ class sdkclientbase(sdkclient):
 class bsdkclient(sdkclientbase):
     
     @property
+    def region(self):
+        return region.Japan
+    
+    @property
     def clientType(self) -> Type[GreeClient]:
         return JpGreeClient
     
@@ -432,6 +436,11 @@ class bsdkclient(sdkclientbase):
         return 'https://api.mmme.pokelabo.jp'
 
 class qsdkclient(bsdkclient):
+
+    @property
+    def region(self):
+        return region.Global
+    
     @property
     def clientType(self) -> Type[GreeClient]:
         return UsGreeClient
@@ -442,6 +451,10 @@ class qsdkclient(bsdkclient):
         
 class bsdkrsaclient(sdkclient):
 
+    @property
+    def region(self):
+        return region.Japan
+    
     async def login(self):
         return self._account.password, self._account.username
 
@@ -451,6 +464,10 @@ class bsdkrsaclient(sdkclient):
        
 class qsdkrsaclient(sdkclient):
 
+    @property
+    def region(self):
+        return region.Global
+    
     async def login(self):
         return self._account.password, self._account.username
 

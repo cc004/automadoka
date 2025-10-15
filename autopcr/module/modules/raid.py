@@ -59,7 +59,8 @@ class raid_support(RaidLPModule):
         client2 = raidworker(
             self.get_config('raid_support_account'),
             self.get_config('raid_support_password'),
-            'Raid Worker'
+            'Raid Worker',
+            client.session.sdk.__class__
         )
 
         await client2.prepare()
@@ -93,7 +94,16 @@ class raid_support(RaidLPModule):
             await client2.add_damage(raid, raid.hp)
             self._log(f"已秒掉团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) {raid.hp} 伤害 by {raid.hostUserName}")
 
-raid_pool: List[Tuple[MultiRaidMultiRaidStageDataRecord, List[int]]] = []
+from autopcr.core.sdkclient import region
+raid_pool: Dict[region, List[Tuple[MultiRaidMultiRaidStageDataRecord, List[int]]]] = {}
+
+def get_raid_pool(region: region) -> List[Tuple[MultiRaidMultiRaidStageDataRecord, List[int]]]:
+    if region not in raid_pool:
+        raid_pool[region] = []
+    return raid_pool[region]
+
+def set_raid_pool(region: region, pool: List[Tuple[MultiRaidMultiRaidStageDataRecord, List[int]]]):
+    raid_pool[region] = pool
 
 import asyncio
 
@@ -226,11 +236,11 @@ class self_raid(RaidLPModule):
         self._log(f"已发车团战 (关卡 {raid_id}) {raid_damage} 伤害")
         if not resp.multiRaidStageData.isClosed and resp.multiRaidStageData.hp > 0:
             if self.get_config('start_raid_pool'):
-                raid_pool.append((resp.multiRaidStageData, [
+                get_raid_pool(client.session.sdk.region).append((resp.multiRaidStageData, [
                     client.data.resp.userParamData.userId
                 ]))
             if self.get_config('start_raid_queue'):
-                queue_raid(resp.multiRaidStageData)
+                queue_raid(resp.multiRaidStageData, client.session.sdk.region)
 
 @name('魔女援助')
 @default(False)
@@ -258,9 +268,6 @@ class support_raid(RaidLPModule):
     
     async def do_task(self, client: pcrclient):
         await super().do_task(client)
-
-        global raid_pool
-
         raid_id = set(
             int(x) for x in self.get_config('support_raid_id').split(',')
         )
@@ -282,6 +289,8 @@ class support_raid(RaidLPModule):
         
         if team is None:
             raise AbortError(f"队伍 '{team}' 未找到，请检查队伍ID或名称。")
+        
+        raid_pool = get_raid_pool(client.session.sdk.region)
         
         if not raid_pool and not self.get_config('support_guild'):
             self._log(f"团战池内没有可支援的团战")
@@ -377,7 +386,7 @@ class support_raid(RaidLPModule):
                 if in_pool: raid_pool_new.append((resp.multiRaidStageData, user_list + [client.data.resp.userParamData.userId]))
 
             if self.get_config('support_queue'):
-                queue_raid(resp.multiRaidStageData)
+                queue_raid(resp.multiRaidStageData, client.session.sdk.region)
             stamina -= record.useStaminaForRescue
         
-        raid_pool = raid_pool_new
+        set_raid_pool(client.session.sdk.region, raid_pool_new)
