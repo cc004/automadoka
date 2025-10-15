@@ -54,7 +54,9 @@ worker_index_dict: Dict[region, int] = {}
 async def rescue(stageData: MultiRaidMultiRaidStageDataRecord, shouldRetry: bool, region: region):
     retry = len(worker[region])
     while retry > 0:
-        cli = worker[region][worker_index_dict.get(region, 0)]
+        if region not in worker_index_dict:
+            worker_index_dict[region] = 0
+        cli = worker[region][worker_index_dict[region]]
         worker_index_dict[region] = (worker_index_dict[region] + 1) % len(worker[region])
         retry -= 1
         async with worker_lock[cli]:
@@ -110,6 +112,8 @@ async def once_routine(region: region):
             await asyncio.gather(*to_rescue)
         except Exception as ex:
             log(f"Once routine Monitoring failed: {ex}")
+            import traceback
+            log(traceback.format_exc())
         await asyncio.sleep(60 * 5)
 
 async def monitor_routine(monitor: raidworker):
@@ -133,6 +137,8 @@ async def monitor_routine(monitor: raidworker):
             await asyncio.gather(*to_rescue)
         except Exception as ex:
             log(f"[{monitor.alias}] Monitoring failed: {ex}")
+            import traceback
+            log(traceback.format_exc())
         await asyncio.sleep(60 * 5)
 
 async def main():

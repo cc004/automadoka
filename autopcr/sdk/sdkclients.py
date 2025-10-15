@@ -482,7 +482,10 @@ sdkclients = {
     QSDKRSA: qsdkrsaclient
 }
 
+from ..util.logger import instance as logger
+
 def create(channel, *args, **kwargs) -> sdkclient:
     if channel not in sdkclients:
-        raise ValueError(f"Invalid channel {channel}")
+        logger.warning(f'未知的 SDK 类型 {channel}，使用默认 BSDK')
+        channel = BSDK
     return sdkclients[channel](*args, **kwargs)
