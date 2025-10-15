@@ -45,6 +45,9 @@ item_category = {
     ),
     '泪滴': it(180003),
     '经验': it(124001),
+    '晶花抽取': anyof(
+        it(181001), it(181002), it(181003)
+    ),
     '小石头': anyof(
         it(121001), it(121004), it(121007), it(121010), it(121013), it(121016), it(121019)
     ),
@@ -106,7 +109,7 @@ class shop(Module):
             end = datetime.fromisoformat(mst.endTime)
             if (start > now or end < now) and end > start:
                 continue
-            if mst.category != 3:
+            if mst.category != 3 and mst.payId != 201029 and mst.payId != 201030:
                 continue
             series = mst.shopSeriesMstId
             all_items = [s for s in shop_mst if s.shopGroupId in (mst.shopGroupId1, mst.shopGroupId2)]
