@@ -291,7 +291,9 @@ class support_raid(RaidLPModule):
                         r.userId for r in self.raid_top.multiRaidRoomDataList
                         if r.multiRaidStageDataId == raid.multiRaidStageDataId
                     ]
-            for _ in range(times):
+            for i in range(times):
+                if i > 0:
+                    await asyncio.sleep(3)
                 raid_search = await client.request(MultiRaidApiGetMultiRaidStageDataListRequest(
                     isRescue=True
                 ))
