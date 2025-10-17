@@ -17,7 +17,7 @@ LP_RECOVER_COUNT = 20
 
 class RaidLPModule(Module):
     async def do_task(self, client: pcrclient):
-        self.raid_top = await client.request(MultiRaidApiGetTopRequest())
+        await self.refresh_top(client)
         try:
             max_recovery = min(
                 client.data.config.multiRaidConfig.staminaMaxCountInDay,
@@ -46,6 +46,31 @@ class RaidLPModule(Module):
         self._log(f"已恢复体力{(target + LP_RECOVER_COUNT - 1) // LP_RECOVER_COUNT * LP_RECOVER_COUNT}，剩余可恢复次数 {self.available_recovery_count - 1}")
         self.available_recovery_count -= 1
         return LP_RECOVER_COUNT
+
+    async def receive_rewards(self, client: pcrclient) -> bool:
+        self._log("开始收取团战奖励")
+        stage_map = {
+            raid.multiRaidStageDataId: raid
+            for raid in self.raid_top.multiRaidStageDataList
+        }
+        for raid in self.raid_top.multiRaidRoomDataList:
+            stage = stage_map[raid.multiRaidStageDataId]
+            if not stage.isClosed:
+                self._log(f"跳过团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 因为未结束")
+                continue
+            await client.request(MultiRaidApiReceiveRewardRequest(
+                questDataId=raid.questDataId
+            ))
+            self._log(f"已收取团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 奖励")
+            any_reward = True
+        
+        if any_reward:
+            await asyncio.sleep(3) # 等待服务器更新数据
+
+        return any_reward
+
+    async def refresh_top(self, client: pcrclient):
+        self.raid_top = await client.request(MultiRaidApiGetTopRequest())
 
 @name('魔女救世')
 @default(False)
@@ -311,6 +336,9 @@ class support_raid(RaidLPModule):
                     seen.add(raid.multiRaidStageDataId)
                     yield raid, user_list
 
+
+        attending = len(self.raid_top.multiRaidRoomDataList)
+
         async for raid, user_list in distincted_raid():
             
             if len(user_list) > max_num or len(user_list) >= client.data.config.multiRaidConfig.maxJoinUserCount:
@@ -339,6 +367,18 @@ class support_raid(RaidLPModule):
                 self._log(f"找不到关卡 {raid_id}")
                 return
             
+            if attending >= client.data.config.multiRaidConfig.maxJoinRoomCount:
+                self._log(f"支援人数已达上限，尝试进行收取 (当前支援数 {attending})")
+                any_reward = await self.receive_rewards(client)
+
+                if any_reward:
+                    await self.refresh_top(client)
+                    attending = len(self.raid_top.multiRaidRoomDataList)
+                    self._log(f"收取完成，当前支援数 {attending}")
+                else:
+                    self._log(f"没有可收取的奖励，停止支援")
+                    return
+
             if record.useStaminaForRescue > stamina:
                 stamina += await self.stamina_recovery(client, record.useStaminaForRescue - stamina)
             
@@ -351,11 +391,14 @@ class support_raid(RaidLPModule):
             except ApiException as e:
                 self._log(f"支援团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 失败: {str(e)} (code={e.result_code})")
                 continue
+
             stamina -= record.useStaminaForRescue
+
             if resp.multiRaidStageData.isClosed or resp.multiRaidStageData.hp <= 0:
                 self._log(f"已支援并结束团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) {raid_damage} 伤害 by {raid.hostUserName} 当前体力 {stamina}")
             else:
                 self._log(f"已支援团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) {raid_damage} 伤害 by {raid.hostUserName} 当前体力 {stamina}")
+                attending += 1
 
             if self.get_config('support_queue'):
                 queue_raid(resp.multiRaidStageData, client.session.sdk.region)
