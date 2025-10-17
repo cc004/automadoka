@@ -281,7 +281,7 @@ class support_raid(RaidLPModule):
         max_num = int(self.get_config('support_raid_max'))
 
         client2 = raidworker.from_client(client, 'Self Raid Worker')
-        stamina = await client2.now_stamina()
+        stamina = client.raid_stamina(self.raid_top.multiRaidUserData)
 
         async def raid_iter():
             if self.get_config('support_guild'):
@@ -332,7 +332,7 @@ class support_raid(RaidLPModule):
             record = next(
                 x for x in 
                 await db.mst(MstApiGetMultiRaidStageMstListRequest())
-                if x.multiRaidStageMstId in raid_id
+                if x.multiRaidStageMstId == raid.multiRaidStageMstId
             )
 
             if not record:
@@ -351,11 +351,11 @@ class support_raid(RaidLPModule):
             except ApiException as e:
                 self._log(f"支援团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 失败: {str(e)} (code={e.result_code})")
                 continue
+            stamina -= record.useStaminaForRescue
             if resp.multiRaidStageData.isClosed or resp.multiRaidStageData.hp <= 0:
-                self._log(f"已支援并结束团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) {raid_damage} 伤害 by {raid.hostUserName}")
+                self._log(f"已支援并结束团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) {raid_damage} 伤害 by {raid.hostUserName} 当前体力 {stamina}")
             else:
-                self._log(f"已支援团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) {raid_damage} 伤害 by {raid.hostUserName}")
-            
+                self._log(f"已支援团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) {raid_damage} 伤害 by {raid.hostUserName} 当前体力 {stamina}")
+
             if self.get_config('support_queue'):
                 queue_raid(resp.multiRaidStageData, client.session.sdk.region)
-            stamina -= record.useStaminaForRescue
