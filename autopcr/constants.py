@@ -50,3 +50,6 @@ DEFAULT_HEADERS = {
 
 IOS_HEADERS = {
 }
+
+from datetime import timezone, timedelta
+USER_TZ = timezone(timedelta(hours=8))

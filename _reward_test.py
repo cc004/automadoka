@@ -1,7 +1,5 @@
 #from autopcr.core.bootstrap import create_client
 
-#client = create_client('KQEQPETWNARVHYA2', '12345678')
-
 from autopcr.core.pcrclient import pcrclient
 from autopcr.core.sdkclient import account, platform
 
@@ -166,7 +164,7 @@ async def real_main():
             info = await client.session.sdk.gclient.get3rdPartyInfo()
             
             if info and int(info[0]['status']):
-                print('已经注册过，解除注册')
+                print('已经过，解除注册')
                 await client.session.sdk.gclient.unregister3rdparty()
             
             await client.session.sdk.gclient.register3rdparty(

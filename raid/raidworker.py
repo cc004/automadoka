@@ -2,7 +2,6 @@ from autopcr.core import pcrclient
 from autopcr.core.sdkclient import account, platform, sdkclient
 from autopcr.model.models import *
 from typing import Tuple, Type
-from .utils import stamina_calc
 import asyncio
 
 class raidworker:
@@ -29,9 +28,9 @@ class raidworker:
         self.logger(f"[{self.alias}] Logged in.")
     
     async def now_stamina(self) -> int:
-        resp = await self.client.request(MultiRaidApiGetTopRequest())
-        return stamina_calc(resp.multiRaidUserData.stamina, resp.multiRaidUserData.staminaUpdatedTime,
-                            self.client.data.config.multiRaidConfig)
+        return self.client.raid_stamina(
+            (await self.client.request(MultiRaidApiGetTopRequest())).multiRaidUserData
+        )
 
     async def do_monitor(self) -> List[MultiRaidMultiRaidStageDataRecord]:
         resp = await self.client.request(MultiRaidApiGetTopRequest())

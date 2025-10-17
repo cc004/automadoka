@@ -19,7 +19,9 @@ def it(id):
 
 item_category = {
     '肖像': lambda shop: shop.objectReceiveType == 4,
-    '钥匙碎片': it(232030),
+    '钥匙（碎片）': anyof(
+        it(232030), it(232001)
+    ),
     '4x交换币': it(201017),
     '钻石': item(2, 0, False),
     '记忆切符': it(262001),

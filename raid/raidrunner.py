@@ -70,8 +70,7 @@ async def rescue(stageData: MultiRaidMultiRaidStageDataRecord, shouldRetry: bool
                     if not shouldRetry: return
 
 from datetime import datetime, timedelta, timezone
-
-user_tz = timezone(timedelta(hours=8))
+from autopcr.constants import USER_TZ as user_tz
 
 once_queue_dict: dict[region, List[MultiRaidMultiRaidStageDataRecord]] = {}
 

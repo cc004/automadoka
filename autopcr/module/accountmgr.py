@@ -105,8 +105,7 @@ class Account(ModuleManager):
             result_list.pop().delete_result()
         return [result] + result_list
 
-    async def save_daily_result(self, result: TaskResult, status: eResultStatus) -> TaskResultInfo:
-        now = datetime.datetime.now()
+    async def save_daily_result(self, result: TaskResult, status: eResultStatus, now: datetime.datetime) -> TaskResultInfo:
         time_safe = db.format_time_safe(now)
         file = os.path.join(RESULT_DIR, f"{self.token}_daily_{time_safe}.json")
 

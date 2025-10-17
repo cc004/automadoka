@@ -24,6 +24,11 @@ CACHE_HTTP_DIR = os.path.join(CACHE_DIR, 'http_server')
 PATH = os.path.dirname(os.path.abspath(__file__))
 static_path = os.path.join(PATH, 'ClientApp')
 
+try:
+    from .whitlelist import checkqq
+except ImportError:
+    async def checkqq(qq: str) -> bool:
+        return True
 
 class HttpServer:
     def __init__(self, host = '0.0.0.0', port = 2, qq_mod = False):
@@ -474,6 +479,8 @@ class HttpServer:
 
             data = await request.get_json()
             qq = data.get('qq', "")
+            if not await checkqq(qq):
+                return "QQ不在群内，无法注册", 400
             password = data.get('password', "")
             if not qq or not password:
                 return "请输入QQ和密码", 400

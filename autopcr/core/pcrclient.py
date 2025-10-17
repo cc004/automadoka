@@ -6,6 +6,8 @@ from .misc import errorhandler, mutexhandler
 from .datamgr import datamgr
 from enum import Enum
 from ..db.database import db
+from datetime import datetime, timedelta, timezone
+from ..constants import USER_TZ as user_tz
 
 class eLoginStatus(Enum):
     NOT_LOGGED = 0
@@ -157,3 +159,27 @@ class pcrclient(apiclient):
         await self.request(TutorialApiUpdateTutorialStepRequest(tutorialStep=2200))
 
         await self.request(HomeApiGetHomeInfoRequest())
+
+    def raid_stamina(self, staminaData: MultiRaidMultiRaidUserDataRecord) -> int:
+        config = self.data.config.multiRaidConfig
+        if staminaData.stamina >= config.maxStamina:
+            return staminaData.stamina
+        now = datetime.now(tz=user_tz)
+        update = datetime.fromisoformat(staminaData.staminaUpdatedTime).astimezone(user_tz)
+        delta = now - update
+        v40 = int(delta.total_seconds()) // config.staminaRecoverSec
+        v42 = (config.maxStamina - staminaData.stamina) // config.staminaRecoverNum
+        if v40 <= v42: v42 = v40
+        return staminaData.stamina + v42 * config.staminaRecoverNum
+
+    def stamina(self, userParamData: Optional[UserUserParamDataRecord] = None) -> int:
+        config = self.data.config.userConfig
+        if userParamData is None:
+            userParamData = self.data.resp.userParamData
+        if userParamData.stamina >= config.staminaUpperLimit:
+            return userParamData.stamina
+        now = datetime.now(tz=user_tz)
+        update = datetime.fromisoformat(userParamData.staminaUpdatedTime).astimezone(user_tz)
+        delta = now - update
+        recover_times = int(delta.total_seconds()) // config.staminaRecoverSec
+        return min(userParamData.stamina + recover_times, config.staminaUpperLimit)

@@ -26,12 +26,6 @@ cron_modules = ModuleList(
         cron4,
         cron5,
         cron6,
-        cron1_,
-        cron2_,
-        cron3_,
-        cron4_,
-        cron5_,
-        cron6_,
     ]
 )
 
@@ -94,7 +88,6 @@ tool_modules = ModuleList(
     'tool',
     [
         super_wash,
-        raid_support,
-        secret
+        raid_support
     ]
 )

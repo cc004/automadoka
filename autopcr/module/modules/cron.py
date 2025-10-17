@@ -95,7 +95,7 @@ class cron5(NormalCronModule):
 class cron6(NormalCronModule):
     def get_cron_time(self) -> str:
         return self.get_config("time_cron6")
-
+'''
 @timetype("time_cron1_", "执行时间", "05:05")
 @description('定时执行')
 @name("定时任务1（仅执行支援）")
@@ -150,3 +150,4 @@ class cron5_(SupportCronModule):
 class cron6_(SupportCronModule):
     def get_cron_time(self) -> str:
         return self.get_config("time_cron6_")
+'''

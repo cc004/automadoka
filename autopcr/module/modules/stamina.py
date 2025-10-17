@@ -4,7 +4,7 @@ from ...core.pcrclient import pcrclient
 from ...model.models import *
 import math
 
-ONCE_STAMINA_COST = 20
+ONCE_STAMINA_COST = 10
 
 @description('消耗体力石购买体力')
 @name('购买体力')
@@ -39,7 +39,7 @@ class stamina_buy(Module):
 
         await client.request(req)
 
-        self._log(f"购买了 {buy_count} 次体力，当前体力: {client.data.resp.userParamData.stamina}")
+        self._log(f"购买了 {buy_count} 次体力，当前体力: {client.stamina()}")
 
 @description('根据角色缺口扫荡最高等级素材本，如果材料溢出则扫荡经验本')
 @name('智能体力扫荡')
@@ -58,7 +58,7 @@ class basic(Module):
             for r in train_quest.userQuestTrainingDataList
         }
 
-        to_repeat = client.data.resp.userParamData.stamina // ONCE_STAMINA_COST
+        to_repeat = client.stamina() // ONCE_STAMINA_COST
 
         if to_repeat <= 0:
             raise SkipError(f"体力不足最低耗体({ONCE_STAMINA_COST})")
@@ -175,6 +175,7 @@ class basic(Module):
         req_skip.questStageMstId = cleared_group[max_group]
         req_skip.isArchiveEvent = False
         req_skip.repeatNum = to_repeat
-        await client.request(req_skip)
+
+        client.data.resp.userParamData.stamina -= to_repeat * ONCE_STAMINA_COST
         
         self._log(f"扫荡了{to_repeat}次最高效率本：{mg.name} - {max_rate: .0%}")

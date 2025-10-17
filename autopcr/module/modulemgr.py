@@ -11,6 +11,7 @@ from ..core.pcrclient import pcrclient
 from .modulebase import Module, ModuleResult, eResultStatus
 import traceback
 import os
+import datetime
 
 @dataclass_json
 @dataclass
@@ -73,7 +74,7 @@ class ModuleManager:
     async def get_client() -> pcrclient: ...
 
     @abstractmethod
-    async def save_daily_result(self, resp: TaskResult, status: eResultStatus) -> TaskResultInfo: ...
+    async def save_daily_result(self, result: TaskResult, status: eResultStatus, now: datetime.datetime) -> TaskResultInfo: ...
 
     @abstractmethod
     async def save_single_result(self, key: str, resp: ModuleResult) -> ModuleResultInfo: ...
@@ -118,6 +119,7 @@ class ModuleManager:
     
     async def do_daily(self, cronModule, isAdminCall: bool = False) -> "TaskResultInfo":
         from .modules.cron import CronModule
+        now = datetime.datetime.now()
         resp = await self.do_task(self.config, [
             module for module in 
             self.modules_list.daily_modules
@@ -128,7 +130,7 @@ class ModuleManager:
             status = eResultStatus.WARNING
         if any(m.status == eResultStatus.PANIC or m.status == eResultStatus.ERROR for m in resp.result.values()):
             status = eResultStatus.ERROR
-        res = await self.save_daily_result(resp, status)
+        res = await self.save_daily_result(resp, status, now)
         return res
 
     async def do_from_key(self, config: dict, key: str, isAdminCall: bool = False) -> "ModuleResultInfo":
