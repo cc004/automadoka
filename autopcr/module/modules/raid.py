@@ -53,6 +53,7 @@ class RaidLPModule(Module):
             raid.multiRaidStageDataId: raid
             for raid in self.raid_top.multiRaidStageDataList
         }
+        any_reward = False
         for raid in self.raid_top.multiRaidRoomDataList:
             stage = stage_map[raid.multiRaidStageDataId]
             if not stage.isClosed:
@@ -369,6 +370,10 @@ class support_raid(RaidLPModule):
             
             if attending >= client.data.config.multiRaidConfig.maxJoinRoomCount:
                 self._log(f"支援人数已达上限，尝试进行收取 (当前支援数 {attending})")
+
+                await asyncio.sleep(3)
+                await self.refresh_top(client)
+                
                 any_reward = await self.receive_rewards(client)
 
                 if any_reward:

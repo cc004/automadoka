@@ -68,6 +68,7 @@ class apiclient(Container["apiclient"]):
         if not request: return None
         # logger.info(f'{self.user_name} requested {request.__class__.__name__} at /{request.url}')
         request.lastHomeAccessTime = self.lastHomeAccessTime
+        request.prepare()
         req = Request(
             payload=request,
             actionTime=self.actionTime(),

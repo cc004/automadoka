@@ -1,5 +1,11 @@
 import asyncio
-from autopcr.core.bootstrap import create_new
+from autopcr.core.bootstrap import create_client
 from autopcr.sdk.sdkclients import qsdkclient
 
-asyncio.run(create_new('12345678', qsdkclient))
+client = create_client('MW8T67FVCQWMKL5D', '187385qq', qsdkclient)
+
+async def main():
+    await client.login()
+    print(client.data.resp.userParamData.userId)
+
+asyncio.run(main())

@@ -24,6 +24,7 @@ item_category = {
     ),
     '4x交换币': it(201017),
     '钻石': item(2, 0, False),
+    '玩偶屋': lambda shop: shop.objectReceiveType == 20,
     '记忆切符': it(262001),
     '彩球': it(121003),
     '开孔材料': it(180001),

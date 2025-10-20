@@ -88,6 +88,7 @@ tool_modules = ModuleList(
     'tool',
     [
         super_wash,
-        raid_support
+        raid_support,
+        secret
     ]
 )
