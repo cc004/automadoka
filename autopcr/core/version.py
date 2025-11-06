@@ -1,6 +1,6 @@
 import asyncio, hashlib, zipfile, os, json, requests, io
 from ..constants import CACHE_DIR
-from ..util.streamzip import StreamZip
+from ..util import streamzip
 
 class AppInfo:
     def __init__(self):
@@ -61,7 +61,7 @@ def _update_version_sync():
     url = 'https://d.apkpure.net/b/XAPK/com.aniplex.magia.exedra.jp?version=latest'
     print(f'Downloading latest version from {url} ...')
 
-    file = StreamZip(url)
+    file = streamzip.StreamZip(url)
 
     with file.open('manifest.json') as fp:
         manifest = json.load(fp)

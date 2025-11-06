@@ -28,7 +28,8 @@ class UserException(Exception):
 class PermissionLimitedException(Forbidden):
     pass
 class UserDisabledException(Forbidden):
-    pass
+    def __init__(self, reason: str = "用户被禁用，请联系管理员"):
+        self.reason = reason
 
 @dataclass_json
 @dataclass

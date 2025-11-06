@@ -24,7 +24,10 @@ item_category = {
     ),
     '4x交换币': it(201017),
     '钻石': item(2, 0, False),
-    '玩偶屋': lambda shop: shop.objectReceiveType == 20,
+    '玩家经验': lambda shop: shop.objectReceiveType == 18,
+    '称号': lambda shop: shop.objectReceiveType == 15,
+    '玩偶屋': lambda shop: shop.objectReceiveType == 19 or shop.objectReceiveType == 20 or shop.objectReceiveType == 21 or shop.objectReceiveType == 22,
+    '光之间内容': lambda shop: shop.objectReceiveType == 14 or shop.objectReceiveType == 16 or shop.objectReceiveType == 17,
     '记忆切符': it(262001),
     '彩球': it(121003),
     '开孔材料': it(180001),
@@ -71,6 +74,8 @@ def shop_priority(cls):
         priority -= 3
     return cls
 
+NULL_TIME = datetime.fromisoformat('1970-01-01T09:00:00+09:00')
+    
 @description('按顺序兑换商店物品')
 @shop_priority
 @name('清空兑换币')
@@ -111,7 +116,7 @@ class shop(Module):
         for mst in shop_series_mst:
             start = datetime.fromisoformat(mst.startTime)
             end = datetime.fromisoformat(mst.endTime)
-            if (start > now or end < now) and end > start:
+            if start != NULL_TIME and start > now or end != NULL_TIME and end < now:
                 continue
             if mst.category != 3 and mst.payId != 201029 and mst.payId != 201030:
                 continue
@@ -130,9 +135,7 @@ class shop(Module):
             for item in all_items:
                 start = datetime.fromisoformat(item.startTime)
                 end = datetime.fromisoformat(item.endTime)
-                if item.resetType == 1 and (
-                     start > now or end < now
-                ) and end > start:
+                if start != NULL_TIME and start > now or end != NULL_TIME and end < now:
                     continue
                 category = category_of(item)
                 if self.get_config(f'shop_priority_{category}') == 0:

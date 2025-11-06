@@ -2,8 +2,7 @@ import asyncio
 from functools import partial
 from typing import Optional, Any
 
-import requests
-from requests import *
+from requests import Session, Response
 from ..constants import PROXIES
 
 async def run_sync_func(func, *args, **kwargs) -> Any:
@@ -14,7 +13,7 @@ _global_session = Session()
 _global_session.proxies = PROXIES
 
 class AsyncResponse:
-    def __init__(self, response: requests.Response):
+    def __init__(self, response: Response):
         self.raw_response = response
 
     @property

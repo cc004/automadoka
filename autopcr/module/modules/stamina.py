@@ -176,6 +176,8 @@ class basic(Module):
         req_skip.isArchiveEvent = False
         req_skip.repeatNum = to_repeat
 
+        await client.request(req_skip)
+
         client.data.resp.userParamData.stamina -= to_repeat * ONCE_STAMINA_COST
         
         self._log(f"扫荡了{to_repeat}次最高效率本：{mg.name} - {max_rate: .0%}")

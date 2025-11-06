@@ -1,5 +1,9 @@
 import zipfile, requests
 import io
+from ..constants import PROXIES
+
+_global_session = requests.Session()
+_global_session.proxies = PROXIES
 
 class RangeReader:
     def total_size(self):
@@ -12,7 +16,7 @@ class RangeReader:
 
 class UrlRangeReader(RangeReader):
     def __init__(self, url):
-        self.session = requests.Session()
+        self.session = _global_session
         self.url = url
         while True:
             response = self.session.head(self.url, allow_redirects=False)

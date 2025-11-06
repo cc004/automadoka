@@ -25,10 +25,12 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 static_path = os.path.join(PATH, 'ClientApp')
 
 try:
-    from .whitlelist import checkqq
+    from .whitlelist import checkqq, BAN_LOGIN_TEXT, BAN_REGISTER_TEXT
 except ImportError:
     async def checkqq(qq: str) -> bool:
         return True
+    BAN_LOGIN_TEXT = ''
+    BAN_REGISTER_TEXT = ''
 
 class HttpServer:
     def __init__(self, host = '0.0.0.0', port = 2, qq_mod = False):
@@ -146,8 +148,8 @@ class HttpServer:
             return "无权使用此接口", 403
 
         @self.api.errorhandler(UserDisabledException)
-        async def disabled(*_: Exception):
-            return "用户被禁用，请联系管理员", 403
+        async def disabled(e: UserDisabledException):
+            return e.reason, 403
 
         @self.api.errorhandler(UserException)
         async def handle_user_exception(e):
@@ -468,6 +470,8 @@ class HttpServer:
                 return "无效的QQ或密码", 400
             if not usermgr.check_enabled(str(qq)):
                 return "用户被禁用，请联系管理员", 403
+            if not await checkqq(str(qq)):
+                return BAN_LOGIN_TEXT, 403
             login_user(AuthUser(qq))
             return "欢迎回来，" + qq, 200
 
@@ -480,7 +484,7 @@ class HttpServer:
             data = await request.get_json()
             qq = data.get('qq', "")
             if not await checkqq(qq):
-                return "QQ不在群内，无法注册", 400
+                return BAN_REGISTER_TEXT, 400
             password = data.get('password', "")
             if not qq or not password:
                 return "请输入QQ和密码", 400

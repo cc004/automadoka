@@ -243,7 +243,7 @@ class self_raid(RaidLPModule):
             self._log(f"体力不足，无法发车 (当前体力 {now_stamina}，需要 {record.useStaminaForPlay})")
             return
         
-        _, _, resp = await client2.start_clear(raid_id, team, 2, 0, raid_damage, log, raid_result)
+        _, _, resp = await client2.start_clear(raid_id, team, 1, 0, raid_damage, log, raid_result)
         
         self._log(f"已发车团战 (关卡 {raid_id}) {raid_damage} 伤害")
         if not resp.multiRaidStageData.isClosed and resp.multiRaidStageData.hp > 0:
