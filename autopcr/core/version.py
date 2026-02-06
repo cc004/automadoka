@@ -93,8 +93,8 @@ def _update_version_sync():
 
 import sys
 
-if sys.gettrace() is None:
-    _update_version_sync()
+#if sys.gettrace() is None:
+#    _update_version_sync()
 
 async def update_version():
     version_to_update = version_info.version
@@ -103,6 +103,6 @@ async def update_version():
             print(f'Another coroutine updated version to {version_info.version}, skip updating {version_to_update}')
             return
         
-        asyncio.get_event_loop().run_in_executor(None, _update_version_sync)
+        await asyncio.get_event_loop().run_in_executor(None, _update_version_sync)
         
 

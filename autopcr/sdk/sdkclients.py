@@ -309,6 +309,17 @@ class GreeClient:
         sub, token = self.getGoogleToken(code, url)
         await self.register3rdparty(sub, token)
 
+    async def clear3rdparty(self, sub: str, token: str):
+        hashed_account_id= hashlib.sha256(sub.encode('utf8')).digest()
+        hashed_account_id = base64.b64encode(hashed_account_id).decode('utf8')
+        
+        await self.post("/migration/3rd/user/clear", {
+            "access_token": token,
+            "hashed_account_id": hashed_account_id,
+            "device_id": self.device_id,
+            "platform": self.GOOGLE_PLATFORM
+        })
+
     async def register3rdparty(self, sub: str, token: str):
         hashed_account_id= hashlib.sha256(sub.encode('utf8')).digest()
         hashed_account_id = base64.b64encode(hashed_account_id).decode('utf8')
