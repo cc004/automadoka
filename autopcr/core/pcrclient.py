@@ -26,6 +26,15 @@ class pcrclient(apiclient):
         self.register(self.session)
         self.register(mutexhandler())
 
+    def get_crypto_key(self) -> str:
+        return self.session.sdk.get_crypto_key()
+    
+    async def post_sign(self, data: bytes) -> str:
+        return await self.session.sdk.post_sign(data)
+    
+    async def modify_request(self, request: RequestBase):
+        await self.session.sdk.modify_request(request)
+
     def set_config(self, config: dict):
         self._base_keys = config
         self._keys = {}

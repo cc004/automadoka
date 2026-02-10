@@ -19,6 +19,7 @@ BSDK = '日服'
 QSDK = '国际服'
 BSDKRSA = '日服（RSA登录）'
 QSDKRSA = '国际服（RSA登录）'
+SONET = '台服'
 
 CHANNEL_OPTION = [BSDK, QSDK, BSDKRSA, QSDKRSA]
 

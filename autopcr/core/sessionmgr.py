@@ -17,23 +17,23 @@ class sessionmgr(Component[apiclient]):
         self.sdk = sdk
         self._logged = False
         self.auto_relogin = True
-        self._sdkaccount = None
+        self.uuid = None
         self.session_expire_time = 0
         self.id = hashlib.md5( self.sdk.account.encode('utf-8')).hexdigest()
         if not os.path.exists(self.cacheDir):
             os.makedirs(self.cacheDir)
 
     async def _bililogin(self):
-        privateKey, uuid = await self.sdk.login()
-        self._sdkaccount = privateKey, uuid
+        uuid = await self.sdk.login()
+        self.uuid = uuid
 
     @freqlimiter.FreqLimiter(5, 20)
     async def _ensure_token(self, next: RequestHandler):
         try:
-            if self._sdkaccount is None:
+            if self.uuid is None:
                 await self._bililogin()
+            assert self.uuid is not None
             
-            privateKey, uuid = self._sdkaccount
             req = LoginApiLoginRequest(
                 appVersion=version_info.version,
                 urlParam=None,
@@ -62,8 +62,7 @@ class sessionmgr(Component[apiclient]):
                 uuid=None,
                 xuid=0
             )
-            self._container.privateKey = privateKey
-            self._container.uuid = uuid
+            self._container.uuid = self.uuid
             resp = await next.request(req)
             self._container.sessionId = resp.sessionId
             self._container.userId = resp.userId

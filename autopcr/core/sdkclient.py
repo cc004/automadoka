@@ -4,6 +4,7 @@ from abc import abstractmethod
 from copy import deepcopy
 from ..constants import DEFAULT_HEADERS, IOS_HEADERS
 from ..util.logger import instance as logger
+from ..model.modelbase import RequestBase
 
 class platform(Enum):
     Android = 0,
@@ -22,6 +23,7 @@ class account:
 class region(Enum):
     Japan = 0,
     Global = 1,
+    Sonet = 2
 
 class sdkclient:
 
@@ -34,21 +36,31 @@ class sdkclient:
     def append_post_login(self, evt: Callable[[], Coroutine[Any, Any, None]]):
         self.post_login_evts.append(evt)
 
+    @abstractmethod
+    async def register(self, password: str) -> str: ...
+
     '''
-    returns: privateKey, uuid
+    returns: uuid
     '''
     @abstractmethod
-    async def login(self) -> Tuple[bytes, str]: ...
+    async def login(self) ->str: ...
+
+    @abstractmethod
+    def get_crypto_key(self) -> str: ...
+
+    @abstractmethod
+    async def post_sign(self, data: bytes) -> str: ...
+
+    async def modify_request(self, request: RequestBase):
+        pass
 
     async def invoke_post_login(self):
         for evt in self.post_login_evts:
             await evt()
         self.post_login_evts.clear()
 
-    async def do_captcha(self):                                
-        return await self.captchaVerifier(self)
-
     def header(self):
+        assert self._account is not None
         if self._account.type == platform.Android:
             headers = deepcopy(DEFAULT_HEADERS)
         elif self._account.type == platform.IOS:
@@ -72,4 +84,5 @@ class sdkclient:
 
     @property
     def account(self):
+        assert self._account is not None
         return self._account.username

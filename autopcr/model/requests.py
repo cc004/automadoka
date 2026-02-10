@@ -757,6 +757,7 @@ class LoginApiLoginRequest(RequestBase[LoginApiLoginResponse]):
     supportsVibration: bool = None
     uuid: str = None
     xuid: int = None
+    jwttoken: str = None
     @property
     def url(self) -> str:
         return "/api/login"

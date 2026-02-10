@@ -14,6 +14,7 @@ from .sdkclient import sdkclient
 from . import crypto
 from ..util import type_utils
 from .version import update_version
+from abc import abstractmethod
 
 class ApiException(Exception):
 
@@ -41,8 +42,7 @@ class apiclient(Container["apiclient"]):
     userId: int = 0
     sessionId: str = None
     lastHomeAccessTime: str = '0'
-    uuid: str = '' 
-    privateKey: bytes = b''
+    uuid: str = ''
 
     def __init__(self, sdk: sdkclient):
         super().__init__()
@@ -63,12 +63,23 @@ class apiclient(Container["apiclient"]):
     def access_home(self):
         self.lastHomeAccessTime = str(int(time.time()))
     
+    @abstractmethod
+    def get_crypto_key(self) -> str: ...
+
+    @abstractmethod
+    async def post_sign(self, data: bytes) -> str: ...
+
+    async def modify_request(self, request: RequestBase[TResponse]) -> None:
+        pass
+
     @freqlimiter.RunningLimiter(MAX_API_RUNNING)
     async def _request_internal(self, request: RequestBase[TResponse], noRetry=False) -> TResponse:
         if not request: return None
         # logger.info(f'{self.user_name} requested {request.__class__.__name__} at /{request.url}')
         request.lastHomeAccessTime = self.lastHomeAccessTime
         request.prepare()
+        await self.modify_request(request)
+
         req = Request(
             payload=request,
             actionTime=self.actionTime(),
@@ -80,9 +91,10 @@ class apiclient(Container["apiclient"]):
         )
 
         urlroot = self.servers[self.active_server]
-        crypted = crypto.PackHelper.pack(req.dict(by_alias=True), crypto.PackHelper.get_iv())
+        crypted = crypto.PackHelper.pack(
+            req.dict(by_alias=True), crypto.PackHelper.get_iv(), self.get_crypto_key())
 
-        self._headers['x-post-signature'] = crypto.ApiCrypto.sign(crypted, private_key_bytes=self.privateKey)
+        self._headers['x-post-signature'] = await self.post_sign(crypted)
 
         try:
             resp = await aiorequests.post(urlroot + request.url, data=crypted, headers=self._headers, timeout=10)
@@ -95,7 +107,7 @@ class apiclient(Container["apiclient"]):
 
             response = await resp.content
 
-            response = crypto.PackHelper.unpack(response)
+            response = crypto.PackHelper.unpack(response, self.get_crypto_key())
         except:
             import traceback
             traceback.print_exc()

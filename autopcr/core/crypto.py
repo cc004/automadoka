@@ -2,7 +2,7 @@ import base64
 import hashlib
 import hmac
 from datetime import datetime, timezone
-from typing import Optional, Union, Any
+from typing import Optional, Union, Any, Tuple
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa, utils
@@ -43,7 +43,7 @@ class AppCryptoConfig:
     @staticmethod
     def crypto_key() -> str:
         key = Builtin.get_key(2)
-        return Hash.hash_string(key, 16)
+        return Hash.hash_string(key, 16, (AppCryptoConfig.hash_salt(), AppCryptoConfig.hash_key().encode('utf-8')))
 
     @staticmethod
     def get_hash_algorithm(secret_key: bytes):
@@ -53,20 +53,10 @@ class AppCryptoConfig:
 
 class Hash:
     @staticmethod
-    def get_salt() -> str:
-        salt = AppCryptoConfig.hash_salt()
-        # 原 C# 逻辑实际上是返回整个字符串，这里保持一致
-        return salt
-
-    @staticmethod
-    def get_hash_key() -> bytes:
-        key = AppCryptoConfig.hash_key()
-        return key.encode('utf-8')
-
-    @staticmethod
-    def hash_bytes(text: str, max_length: int) -> bytes:
-        v8 = Hash.get_salt() + text
-        hmac_obj = AppCryptoConfig.get_hash_algorithm(Hash.get_hash_key())
+    def hash_bytes(text: str, max_length: int, hashSalt: Tuple[str, bytes]) -> bytes:
+        salt, key = hashSalt
+        v8 = salt + text
+        hmac_obj = AppCryptoConfig.get_hash_algorithm(key)
         h = hmac_obj.copy()
         h.update(v8.encode('utf-8'))
         v15 = h.digest()
@@ -77,8 +67,8 @@ class Hash:
         return v15[offset: offset + max_length]
 
     @staticmethod
-    def hash_string(text: str, max_length: int) -> str:
-        hb = Hash.hash_bytes(text, max_length)
+    def hash_string(text: str, max_length: int, hashSalt: Tuple[str, bytes]) -> str:
+        hb = Hash.hash_bytes(text, max_length, hashSalt)
         b64 = base64.b64encode(hb).decode('utf-8')
         if len(b64) > max_length:
             start = (len(b64) - max_length) // 2
@@ -117,12 +107,12 @@ class BasicCrypto:
 
 class PackHelper:
     @staticmethod
-    def unpack(crypted: bytes) -> Any:
+    def unpack(crypted: bytes, cryptKey: str) -> Any:
         """
         解包：先调用 ApiCrypto.decrypt，得到 msgpack 二进制，
         再转换成 Python 原生结构（list/dict/基本类型）。
         """
-        decrypted = ApiCrypto.decrypt(crypted)
+        decrypted = ApiCrypto.decrypt(crypted, cryptKey)
         return msgpack.unpackb(decrypted, raw=False)
 
     @staticmethod
@@ -135,26 +125,26 @@ class PackHelper:
         return bytes(int(x, 16) for x in parts)
 
     @staticmethod
-    def pack(token: Any, iv: bytes) -> bytes:
+    def pack(token: Any, iv: bytes, cryptKey: str) -> bytes:
         """
         打包：将 Python 结构转换成 msgpack 二进制，
         再调用 ApiCrypto.encrypt，返回加密后的字节串。
         """
         packed: bytes = msgpack.packb(token)
-        return ApiCrypto.encrypt(packed, iv)
+        return ApiCrypto.encrypt(packed, iv, cryptKey)
 
+PKLB_HASH_KEY = Hash.hash_string("UVFBdDtWKhpESJj3", 16, 
+                                 (AppCryptoConfig.hash_salt(), AppCryptoConfig.hash_key().encode('utf-8')))
+SONET_HASH_KEY = Hash.hash_string("ABCDEFGHIJKLMNOP", 16, 
+                                 ('System.Char[]', b'System.Char[]'))
 
 class ApiCrypto:
-    _MSG_PACK_KEY = "UVFBdDtWKhpESJj3"
-
     @staticmethod
-    def decrypt(encrypted: bytes) -> bytes:
-        hk = Hash.hash_string(ApiCrypto._MSG_PACK_KEY, 16)
+    def decrypt(encrypted: bytes, hk: str) -> bytes:
         return BasicCrypto.decrypt(hk, encrypted)
 
     @staticmethod
-    def encrypt(raw: bytes, iv: bytes) -> bytes:
-        hk = Hash.hash_string(ApiCrypto._MSG_PACK_KEY, 16)
+    def encrypt(raw: bytes, iv: bytes, hk: str) -> bytes:
         return BasicCrypto.encrypt(hk, raw, iv)
 
     @staticmethod
