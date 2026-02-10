@@ -63,8 +63,6 @@ async def main():
             info = [client.session.sdk._account.username + ',', f'{cnt},'] + info
             logger.write(''.join(info) + '\n')
             logger.flush()
-        else:
-            print('Badluck', cnt)
     
     async def worker():
         while True:

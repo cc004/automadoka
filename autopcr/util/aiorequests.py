@@ -9,8 +9,19 @@ async def run_sync_func(func, *args, **kwargs) -> Any:
     return await asyncio.get_event_loop().run_in_executor(
         None, partial(func, *args, **kwargs))
 
+from requests.adapters import HTTPAdapter
+
+adapter = HTTPAdapter(
+    pool_connections=1000,
+    pool_maxsize=1000,
+    max_retries=0
+)
+
 _global_session = Session()
 _global_session.proxies = PROXIES
+
+_global_session.mount("http://", adapter)
+_global_session.mount("https://", adapter)
 
 class AsyncResponse:
     def __init__(self, response: Response):
