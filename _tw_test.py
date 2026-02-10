@@ -15,7 +15,7 @@ async def create_new() -> pcrclient:
 
     return client
 
-def pretty_print(data: ObjectStyleGainViewData) -> tuple[str, int]:
+def pretty_print(data: ObjectStyleGainViewData) -> Tuple[str, int]:
     style = style_dict[data.styleMstId]
     character = char_dict[data.styleMstId // 10000]
     rarity = int(style.rarity)

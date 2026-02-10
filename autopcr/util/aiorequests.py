@@ -5,9 +5,12 @@ from typing import Optional, Any
 from requests import Session, Response
 from ..constants import PROXIES
 
+from concurrent.futures import ThreadPoolExecutor
+_executor = ThreadPoolExecutor(max_workers=1000)  # 视情况调，比如 100~500
+
 async def run_sync_func(func, *args, **kwargs) -> Any:
     return await asyncio.get_event_loop().run_in_executor(
-        None, partial(func, *args, **kwargs))
+        _executor, partial(func, *args, **kwargs))
 
 from requests.adapters import HTTPAdapter
 
