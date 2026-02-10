@@ -72,7 +72,6 @@ class apiclient(Container["apiclient"]):
     async def modify_request(self, request: RequestBase[TResponse]) -> None:
         pass
 
-    @freqlimiter.RunningLimiter(MAX_API_RUNNING)
     async def _request_internal(self, request: RequestBase[TResponse], noRetry=False) -> TResponse:
         if not request: return None
         # logger.info(f'{self.user_name} requested {request.__class__.__name__} at /{request.url}')

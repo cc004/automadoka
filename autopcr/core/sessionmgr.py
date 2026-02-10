@@ -27,7 +27,6 @@ class sessionmgr(Component[apiclient]):
         uuid = await self.sdk.login()
         self.uuid = uuid
 
-    @freqlimiter.FreqLimiter(5, 20)
     async def _ensure_token(self, next: RequestHandler):
         try:
             if self.uuid is None:

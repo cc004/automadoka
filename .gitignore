@@ -20,3 +20,4 @@ raid_config.json
 .vs/
 acc.txt
 autopcr/http_server/whitlelist.py
+tw_users.txt
