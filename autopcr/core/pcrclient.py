@@ -279,7 +279,7 @@ class pcrclient(apiclient):
                 presentDataIds=present_ids
             ))
 
-        for gachaId in [250327041, 250327022, 250327051]:
+        for gachaId in [250327041, 250330012, 250327051]:
             gacha_result = await self.request(GachaApiGachaExecRequest(
                 gachaMstId=gachaId
             ))

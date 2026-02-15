@@ -52,7 +52,7 @@ class SonetClient:
         headers.update(SonetClient.HEADERS)
 
         resp = await post('https://mme-sdk.so-net.tw' + url, json=data
-                          ,headers=headers, timeout=15)
+                          ,headers=headers, timeout=30)
 
         obj = await resp.json()
         assert obj['status'] == 0, str(obj)

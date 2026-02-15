@@ -4,6 +4,8 @@ from typing import Type
 from autopcr.core.sdkclient import account, platform, sdkclient
 from autopcr.sdk.sdkclients import sonetsdkclient
 from autopcr.model.models import *
+from typing import Tuple
+import requests
 
 async def create_new() -> pcrclient:
     sdk = sonetsdkclient()
@@ -47,6 +49,7 @@ async def main():
 
     async def work_once():
         client = await create_new()
+        resp = await client.request(UserApiGetUserDataRequest())
         info = []
         cnt = 0
         gacha_result = await client.clear_tutorial_gacha()
@@ -59,10 +62,10 @@ async def main():
                 cnt += 1
         
         if cnt > 2:
-            print('got 5 starts: ', cnt)
-            info = [client.session.sdk._account.username + ',', f'{cnt},'] + info
+            info = [client.session.sdk._account.username + ',', f'{cnt},', f'{resp.userData.userId},', f'{resp.userData.playerId},'] + info
             logger.write(''.join(info) + '\n')
             logger.flush()
+            print('Found:', cnt)
     
     async def worker():
         while True:
@@ -70,8 +73,9 @@ async def main():
                 await work_once()
             except Exception as e:
                 print('Error occurred:', e)
+                await asyncio.sleep(60)
     
-    workers = [asyncio.create_task(worker()) for _ in range(64)]
+    workers = [asyncio.create_task(worker()) for _ in range(32)]
 
     await asyncio.gather(*workers)
 

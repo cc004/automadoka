@@ -79,19 +79,19 @@ class sessionmgr(Component[apiclient]):
                 
                 await self._ensure_token(next)
                 
-                await db.update(next)
+                #await db.update(next)
                 
-                await next.request(UserApiGetInitDataListRequest())
-                await next.request(PartyApiGetCharacterBuildDataListRequest())
-                await next.request(CharacterApiGetCharacterListRequest())
-                await next.request(CollectionApiGetCollectionParamUpAchieveDataListRequest())
-                await next.request(CollectionApiGetCollectionDataListRequest())
-                await next.request(StyleApiGetStyleDataListRequest())
-                await next.request(UserApiGetUserParamDataRequest())
-                await next.request(ConfigApiGetConfigRequest())
-                await next.request(UserApiLoadOptionRequest())
-                await next.request(WebPayApiCancelLatestRequest())
-                await next.request(TermsApiGetUpdatedTermsRequest(storeType=2))
+                #await next.request(UserApiGetInitDataListRequest())
+                #await next.request(PartyApiGetCharacterBuildDataListRequest())
+                #await next.request(CharacterApiGetCharacterListRequest())
+                #await next.request(CollectionApiGetCollectionParamUpAchieveDataListRequest())
+                #await next.request(CollectionApiGetCollectionDataListRequest())
+                #await next.request(StyleApiGetStyleDataListRequest())
+                #await next.request(UserApiGetUserParamDataRequest())
+                #await next.request(ConfigApiGetConfigRequest())
+                #await next.request(UserApiLoadOptionRequest())
+                #await next.request(WebPayApiCancelLatestRequest())
+                #await next.request(TermsApiGetUpdatedTermsRequest(storeType=2))
                 self._logged = True
                 
                 break
