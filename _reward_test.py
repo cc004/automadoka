@@ -16,10 +16,10 @@ async def main(client: pcrclient):
 
     if not invite_top.inviterPlayerId:
         await client.request(InvitationApiInviteRequest(
-            invitationCampaignMstId=1,
+            invitationCampaignMstId=2,
             inviterPlayerId='77464662337J'
         ))
-
+    
     stratum = (await client.request(MstApiGetFieldStratumMstListRequest())).mstList
     point = (await client.request(MstApiGetFieldPointMstListRequest())).mstList
     field_mst = {
@@ -153,6 +153,8 @@ async def real_main():
             client = create_client(line, '12345678')
             print(f'使用账号 {line}')
             await client.login()
+            #await main(client)
+            #continue
             
             assert isinstance(client.session.sdk, bsdkclient)
             
@@ -163,14 +165,23 @@ async def real_main():
             
             info = await client.session.sdk.gclient.get3rdPartyInfo()
             
+            print(info)
+
             if info and int(info[0]['status']):
                 print('已经过，解除注册')
                 await client.session.sdk.gclient.unregister3rdparty()
             
-            await client.session.sdk.gclient.register3rdparty(
-                sub, token
-            )
-            
+            try:
+                await client.session.sdk.gclient.register3rdparty(
+                    sub, token
+                )
+            except Exception as e:
+                await client.session.sdk.gclient.clear3rdparty(
+                    sub, token
+                )
+                await client.session.sdk.gclient.register3rdparty(
+                    sub, token
+                )
             print('请进行网页端操作，结束后按回车键>')
             input()
             

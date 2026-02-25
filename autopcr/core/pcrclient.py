@@ -26,6 +26,15 @@ class pcrclient(apiclient):
         self.register(self.session)
         self.register(mutexhandler())
 
+    def get_crypto_key(self) -> str:
+        return self.session.sdk.get_crypto_key()
+    
+    async def post_sign(self, data: bytes) -> str:
+        return await self.session.sdk.post_sign(data)
+    
+    async def modify_request(self, request: RequestBase):
+        await self.session.sdk.modify_request(request)
+
     def set_config(self, config: dict):
         self._base_keys = config
         self._keys = {}
@@ -183,3 +192,98 @@ class pcrclient(apiclient):
         delta = now - update
         recover_times = int(delta.total_seconds()) // config.staminaRecoverSec
         return min(userParamData.stamina + recover_times, config.staminaUpperLimit)
+
+    async def clear_tutorial_gacha(self):
+        await self.login()
+        # 注意：原 C# 中 client.AccessHome() 是同步方法，这里保留同名调用
+        self.access_home()
+
+        await self.request(TutorialApiSkipTutorialToGachaRequest())
+
+        results = []
+
+        gacha_result = await self.request(GachaApiGachaExecRequest(
+            gachaMstId=240925001
+        ))
+
+        results.extend(gacha_result.objectDataRecord.gainViewData.styleGainViewDataList)
+
+        await self.request(TutorialApiUpdateTutorialStepRequest(tutorialStep=1900))
+
+        present = await self.request(PresentApiGetPresentDataListRequest(
+            expireTimeType=0,
+            isOrderNewest=False
+        ))
+
+        # 收礼物 id 列表并接收
+        present_ids = [d.presentDataId for d in present.presentDataList]
+        if present_ids:
+            await self.request(PresentApiReceiveRequest(
+                presentDataIds=present_ids
+            ))
+
+        await self.request(TutorialApiUpdateTutorialStepRequest(tutorialStep=1950))
+
+        recommend = await self.request(PartyApiGetRecommendPartyDataRequest(
+            selectedStyleElement=0,
+            selectedParameter=0,
+            isSettingCard=True,
+            isSettingSubStyle=True,
+            sameCharacterInParty=True
+        ))
+
+        # 保存推荐队伍（把 recommend.recommendPartyData 的字段映射过去）
+        rp = recommend.recommendPartyData
+        await self.request(PartyApiSavePartyForRecommendRequest(
+            partyType=1,
+            partyDataId=0,
+            partyIndex=0,
+            styleMstId1=rp.member1,
+            styleMstId2=rp.member2,
+            styleMstId3=rp.member3,
+            styleMstId4=rp.member4,
+            styleMstId5=rp.member5,
+            cardMstId1=rp.cardMstId1,
+            cardMstId2=rp.cardMstId2,
+            cardMstId3=rp.cardMstId3,
+            cardMstId4=rp.cardMstId4,
+            cardMstId5=rp.cardMstId5,
+            subStyleMstIds1=[0],
+            subStyleMstIds2=[0],
+            subStyleMstIds3=[0],
+            subStyleMstIds4=[0],
+            subStyleMstIds5=[0],
+        ))
+
+        # 一系列教程进度更新
+        await self.request(TutorialApiUpdateTutorialStepRequest(tutorialStep=2000))
+        await self.request(TutorialApiUpdateTutorialStepRequest(tutorialStep=2030))
+        await self.request(TutorialApiUpdateTutorialStepRequest(tutorialStep=2060))
+
+        await self.request(UserApiSetNameRequest(name='木谷高明'))
+
+        await self.request(TutorialApiUpdateTutorialStepRequest(tutorialStep=2100))
+        await self.request(TutorialApiUpdateTutorialStepRequest(tutorialStep=2200))
+
+        await self.request(HomeApiGetHomeInfoRequest())
+
+        present = await self.request(PresentApiGetPresentDataListRequest(
+            expireTimeType=0,
+            isOrderNewest=False
+        ))
+
+        # 收礼物 id 列表并接收
+        present_ids = [d.presentDataId for d in present.presentDataList]
+        if present_ids:
+            await self.request(PresentApiReceiveRequest(
+                presentDataIds=present_ids
+            ))
+
+        for gachaId in [250327041, 250330012, 250327051]:
+            gacha_result = await self.request(GachaApiGachaExecRequest(
+                gachaMstId=gachaId
+            ))
+            results.extend(gacha_result.objectDataRecord.gainViewData.styleGainViewDataList)
+        
+
+        return results

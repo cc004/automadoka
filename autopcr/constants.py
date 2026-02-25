@@ -5,20 +5,21 @@ import logging
 SERVER_PORT = int(os.getenv("AUTOPCR_SERVER_PORT", "13200"))
 
 PROXIES = {
-    'http': 'http://localhost:8888',
-    'https': 'http://localhost:8888'
+  'http': 'http://localhost:1080',
+  'https': 'http://localhost:1080'
 }
 
 CLIENT_POOL_SIZE_MAX = 100
 CLIENT_POOL_MAX_AGE = 3600 * 24
 CLIENT_POOL_MAX_CLIENT_ALIVE = 10
 SESSION_ERROR_MAX_RETRY = 2
-MAX_API_RUNNING = 6
+MAX_API_RUNNING = 9999
 
 BSDK = '日服'
 QSDK = '国际服'
 BSDKRSA = '日服（RSA登录）'
 QSDKRSA = '国际服（RSA登录）'
+SONET = '台服'
 
 CHANNEL_OPTION = [BSDK, QSDK, BSDKRSA, QSDKRSA]
 
