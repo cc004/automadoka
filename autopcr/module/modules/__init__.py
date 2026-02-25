@@ -89,6 +89,7 @@ tool_modules = ModuleList(
     [
         super_wash,
         raid_support,
-        secret
+        secret,
+        auto_register
     ]
 )

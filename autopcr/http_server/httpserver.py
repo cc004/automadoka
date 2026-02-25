@@ -32,6 +32,14 @@ except ImportError:
     BAN_LOGIN_TEXT = ''
     BAN_REGISTER_TEXT = ''
 
+def validate_password(password: str) -> bool:
+    if len(password) < 8:
+        return False
+    has_letter = any(c.isalpha() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    has_special = any(not c.isalnum() for c in password)
+    return has_letter and has_digit and has_special
+
 class HttpServer:
     def __init__(self, host = '0.0.0.0', port = 2, qq_mod = False):
 
@@ -432,6 +440,8 @@ class HttpServer:
                         return "无法禁用自己", 403
                     mgr.secret.disabled = data['disabled']
                 if 'password' in data:
+                    if not validate_password(data['password']):
+                        return "弱密码，必须包含字母数字和特殊字符且长度不少于8位", 400
                     mgr.secret.password = data['password']
                 if 'clan' in data:
                     mgr.secret.clan = data['clan']
@@ -483,9 +493,11 @@ class HttpServer:
 
             data = await request.get_json()
             qq = data.get('qq', "")
+            password = data.get('password', "")
+            if not validate_password(password):
+                return "弱密码，必须包含字母数字和特殊字符且长度不少于8位", 400
             if not await checkqq(qq):
                 return BAN_REGISTER_TEXT, 400
-            password = data.get('password', "")
             if not qq or not password:
                 return "请输入QQ和密码", 400
             if self.qq_mod:

@@ -6,6 +6,7 @@ from autopcr.model.models import *
 import asyncio
 from autopcr.core.sdkclient import region
 from autopcr.sdk.sdkclients import bsdkclient, qsdkclient
+from autopcr.core import pcrclient
 
 with open('raid_config.json', 'r', encoding='utf-8') as fp:
     cfg = json.load(fp)
@@ -37,9 +38,143 @@ for item in cfg['worker']:
 
 stamina_cost = {}
 
+backup_id = 0
+
+async def backupLoaderJp() -> raidworker:
+    global backup_id
+    with open('backup_accounts.json', 'r', encoding='utf-8') as fp:
+        backup_cfg: List[str] = json.load(fp)
+    next_backup = backup_cfg[backup_id]
+    backup_id = (backup_id + 1) % len(backup_cfg)
+    
+    code, password = next_backup.split(',')
+    backup_worker = raidworker(
+        code,
+        password,
+        'Backup JP Loader',
+        bsdkclient
+    )
+
+    try:
+        await backup_worker.prepare()
+        lvl = backup_worker.client.data.resp.userParamData.level
+        log(f"[Backup JP Loader] Logged in successfully. user level = {lvl}")
+        if lvl > 50:
+            log("[Backup JP Loader] User level too high, trying next backup account...")
+            raise Exception("User level too high")
+        return backup_worker
+    except Exception as ex:
+        log(f"[Backup JP Loader] Failed to log in: {ex}")
+        with open('backup_accounts.json', 'w', encoding='utf-8') as fp:
+            json.dump(
+                backup_cfg[:backup_id] + backup_cfg[backup_id + 1 :] + [next_backup]
+                ,fp, indent=4, ensure_ascii=False
+            )
+        
+        return await backupLoaderJp()
+
+backup_loader = {
+    region.Japan: backupLoaderJp
+}
+
+async def prepare_progress(worker: raidworker):
+    client = worker.client
+
+    stratum = (await client.request(MstApiGetFieldStratumMstListRequest())).mstList
+    point = (await client.request(MstApiGetFieldPointMstListRequest())).mstList
+    field_mst = {
+        x.fieldStageMstId: x for x in (await client.request(MstApiGetFieldStageMstListRequest())).mstList
+    }
+
+    top = await client.request(ExplorationApiGetFieldStageCollectionInfoListRequest())
+    cleared_field = set(x.fieldStageMstId for x in top.fieldStageCollectionInfoList if x.isClear)
+
+    def log(x: str):
+        print(f"[{worker.alias}] {x}")
+
+    async def clear_field(field: int):
+        mst = field_mst[field]
+        if field in cleared_field:
+            log(f"跳过已通关篇章 {field} ({mst.name})")
+            return
+        if mst.prevFieldStageMstId != 0:
+            await clear_field(mst.prevFieldStageMstId)
+        log(f"开始清理 {field} ({mst.name})")
+        top = await client.request(ExplorationApiGetTopInfoV4Request(
+            fieldStageMstId=field
+        ))
+    
+        if top.fieldStageUserData.clearFieldPointMstIdCsv:
+            cleared_points = set(int(x) for x in top.fieldStageUserData.clearFieldPointMstIdCsv.split(','))
+        else:
+            cleared_points = set()
+        
+        stratums = [x for x in stratum if x.fieldStageMstId == field]
+
+        for s in stratums:
+            points = [x for x in point if x.fieldStratumMstId == s.fieldStratumMstId]
+            for p in points:
+                if p.fieldPointMstId in cleared_points:
+                    log(f"跳过已通关点 {p.fieldPointMstId} ({mst.name}-{p.name})")
+                    continue
+                reach = await client.request(ExplorationApiReachFieldPointRequest(
+                    fieldPointMstId=p.fieldPointMstId
+                ))
+                log(f"到达点 {p.fieldPointMstId} ({mst.name}-{p.name})")
+
+                if p.pointType == 1: # dungeon
+                    start = await client.request(ExplorationApiDungeonStartRequest(
+                        fieldStageMstId=s.fieldStageMstId,
+                        dungeonMstId=p.pointValue1
+                    ))
+                    finish = await client.request(ExplorationApiDungeonGoalRequest(
+                        fieldStageMstId=s.fieldStageMstId,
+                        dungeonMstId=p.pointValue1
+                    ))
+                    log(f"完成副本点 {p.fieldPointMstId} ({mst.name}-{p.name})")
+                elif p.pointType == 2 or p.pointType == 3 or p.pointType == 4: # start
+                    quest = await client.request(ExplorationBattleApiInitializeStageV4Request(
+                        fieldPointMstId=p.fieldPointMstId,
+                        fieldStageMstId=s.fieldStageMstId,
+                        dungeonEventMstId=0,
+                        dungeonRoomMstId=0,
+                        bossDirectionMstId=0,
+                        presetEventIndex=0,
+                        partyDataId=1
+                    ))
+                    await asyncio.sleep(2)
+                    finish = await client.request(ExplorationBattleApiFinalizeStageForUserV4Request(
+                        autoMode=1,
+                        battleLog="",
+                        result=1
+                    ))
+                    log(f"完成战斗点 {p.fieldPointMstId} ({mst.name}-{p.name})")
+
+    await clear_field(605001)
+
+async def prepare_or_backup(worker: raidworker):
+    try:
+        await worker.prepare()
+    except Exception as ex:
+        log(f"[{worker.alias}] Preparation failed: {ex}. Attempting to use backup loader...")
+        if worker.client.session.sdk.region in backup_loader:
+            backup_func = backup_loader[worker.client.session.sdk.region]
+            backup_worker = await backup_func()
+            worker.client = backup_worker.client
+            worker.prepared = True
+            log(f"[{worker.alias}] Backup loader assigned.")
+        else:
+            log(f"[{worker.alias}] No backup loader available for region {worker.client.session.sdk.region}.")
+            raise ex
+    finally:
+        await prepare_progress(worker)
+
 async def prepare_all():
     global stamina_cost
-    await asyncio.gather(*[m.prepare() for m in monitor + sum(worker.values(), [])])
+    await asyncio.gather(*(
+        [m.prepare() for m in monitor] + 
+        [prepare_or_backup(w) for w in sum(worker.values(), [])]
+    ))
     stamina_cost = {
         stage.multiRaidStageMstId: stage.useStaminaForRescue
         for stage in await db.mst(MstApiGetMultiRaidStageMstListRequest())
@@ -60,6 +195,7 @@ async def rescue(stageData: MultiRaidMultiRaidStageDataRecord, shouldRetry: bool
         worker_index_dict[region] = (worker_index_dict[region] + 1) % len(worker[region])
         retry -= 1
         async with worker_lock[cli]:
+            log(f"[{cli.alias}] Attempting to rescue raid {stageData.multiRaidStageDataId} (Stage {stageData.multiRaidStageMstId}) with {stageData.hp} HP")
             if await cli.now_stamina() >= stamina_cost[stageData.multiRaidStageMstId]:
                 try:
                     await cli.add_damage(stageData, stageData.hp)

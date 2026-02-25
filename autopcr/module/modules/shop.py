@@ -27,7 +27,10 @@ item_category = {
     '玩家经验': lambda shop: shop.objectReceiveType == 18,
     '称号': lambda shop: shop.objectReceiveType == 15,
     '玩偶屋': lambda shop: shop.objectReceiveType == 19 or shop.objectReceiveType == 20 or shop.objectReceiveType == 21 or shop.objectReceiveType == 22,
-    '光之间内容': lambda shop: shop.objectReceiveType == 14 or shop.objectReceiveType == 16 or shop.objectReceiveType == 17,
+    '光之间内容': anyof(
+        lambda shop: shop.objectReceiveType == 14 or shop.objectReceiveType == 16 or shop.objectReceiveType == 17,
+        it(201046)
+    ),
     '记忆切符': it(262001),
     '彩球': it(121003),
     '开孔材料': it(180001),
@@ -52,7 +55,7 @@ item_category = {
     '泪滴': it(180003),
     '经验': it(124001),
     '晶花抽取': anyof(
-        it(181001), it(181002), it(181003)
+        it(181001), it(181002), it(181003), it(282001)
     ),
     '临时锁': it(180004),
     '小石头': anyof(

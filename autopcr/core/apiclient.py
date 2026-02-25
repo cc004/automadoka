@@ -90,6 +90,8 @@ class apiclient(Container["apiclient"]):
             if resp.status_code == 428:
                 await update_version()
 
+            if resp.status_code == 401:
+                raise ApiException("Unauthorized: Session may have expired.", status="Unauthorized", result_code=401)
             if resp.status_code != 200:
                 resp.raise_for_status()
 
@@ -103,7 +105,7 @@ class apiclient(Container["apiclient"]):
 
         cls = type_utils.find_type_base(request.__class__, RequestBase)
 
-        if DEBUG_LOG and 'multi_raid' in request.url:
+        if DEBUG_LOG:
             with open('req.log', 'a', encoding='utf8') as fp:
                 # fp.write(f'{self.user_name} requested {request.__class__.__name__} at /{request.url}\n')
                 fp.write(json.dumps(self._headers, indent=4, ensure_ascii=False) + '\n')

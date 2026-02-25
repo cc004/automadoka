@@ -202,6 +202,19 @@ class self_raid(RaidLPModule):
         if team is None:
             raise AbortError(f"队伍 '{team}' 未找到，请检查队伍ID或名称。")
         
+        opening_raid = next(
+            x for x in
+            await db.mst(MstApiGetMultiRaidMstListRequest())
+            if datetime.fromisoformat(x.startTime).astimezone(user_tz) <= datetime.now(timezone.utc).astimezone(user_tz) <= datetime.fromisoformat(x.endTime).astimezone(user_tz)
+        )
+
+        if not opening_raid:
+            self._log(f"当前没有开放的团战")
+            return
+        
+        raid_id = raid_id % 100
+        raid_id += opening_raid.seasonId * 100
+        
         record = next(
             x for x in 
             await db.mst(MstApiGetMultiRaidStageMstListRequest())
@@ -276,7 +289,7 @@ class support_raid(RaidLPModule):
     async def do_task(self, client: pcrclient):
         await super().do_task(client)
         raid_id = set(
-            int(x) for x in self.get_config('support_raid_id').split(',')
+            int(x) % 100 for x in self.get_config('support_raid_id').split(',')
         )
         raid_damage = random.randint(
             int(self.get_config('support_raid_damage_min')),
@@ -350,7 +363,7 @@ class support_raid(RaidLPModule):
                 self._log(f"跳过团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 因为已经支援过了")
                 continue
 
-            if raid.multiRaidStageMstId not in raid_id:
+            if raid.multiRaidStageMstId % 100 not in raid_id:
                 self._log(f"跳过团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 因为关卡ID不符")
                 continue
         

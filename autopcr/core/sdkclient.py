@@ -34,6 +34,8 @@ class sdkclient:
     def append_post_login(self, evt: Callable[[], Coroutine[Any, Any, None]]):
         self.post_login_evts.append(evt)
 
+    @abstractmethod
+    async def register(self, password: str): ...
     '''
     returns: privateKey, uuid
     '''

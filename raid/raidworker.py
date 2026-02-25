@@ -23,9 +23,15 @@ class raidworker:
     async def prepare(self):
         if self.prepared:
             return
-        self.logger(f"[{self.alias}] Logging in...")
-        await self.client.login()
-        self.logger(f"[{self.alias}] Logged in.")
+        try:
+            self.logger(f"[{self.alias}] Logging in...")
+            await self.client.login()
+            self.logger(f"[{self.alias}] Logged in.")
+        except Exception as e:
+            self.logger(f"[{self.alias}] Login failed.")
+            import traceback
+            traceback.print_exc()
+            raise
     
     async def now_stamina(self) -> int:
         return self.client.raid_stamina(
@@ -64,10 +70,14 @@ class raidworker:
             multiRaidStageMstId=multiRaidStageDataRecord.multiRaidStageMstId,
             multiRaidStageDataId=multiRaidStageDataRecord.multiRaidStageDataId
         ))
-        resp2 = await self.client.request(MultiRaidApiAddDamageRequest(
-            questDataId=resp.multiRaidRoomData.questDataId,
-            damage=damage
-        ))
+        DAMAGE_ONCE = 1000_0000
+        while damage > 0:
+            dmg = min(damage, DAMAGE_ONCE)
+            damage -= dmg
+            resp2 = await self.client.request(MultiRaidApiAddDamageRequest(
+                questDataId=resp.multiRaidRoomData.questDataId,
+                damage=dmg
+            ))
         resp3 = await self.client.request(MultiRaidApiRetireRequest(
             questDataId=resp.multiRaidRoomData.questDataId,
             battleLog=''

@@ -1,9 +1,9 @@
-from ..sdk.sdkclients import bsdkclient, sdkclientbase
+from ..sdk.sdkclients import bsdkclient, qsdkclient, sdkclient
 from .pcrclient import pcrclient
 from typing import Type
 from .sdkclient import account, platform
 
-def create_client(usr: str, pwd: str, client_type: Type[sdkclientbase]=bsdkclient) -> pcrclient:
+def create_client(usr: str, pwd: str, client_type: Type[sdkclient]=bsdkclient) -> pcrclient:
     sdk = client_type(account(
         usr=usr,
         pwd=pwd,
@@ -12,7 +12,7 @@ def create_client(usr: str, pwd: str, client_type: Type[sdkclientbase]=bsdkclien
 
     return pcrclient(sdk)
 
-async def create_new(pwd: str, client_type: Type[sdkclientbase]=bsdkclient) -> pcrclient:
+async def create_new(pwd: str, client_type: Type[sdkclient]=bsdkclient) -> pcrclient:
     sdk = client_type(None)
     await sdk.register('12345678')
     

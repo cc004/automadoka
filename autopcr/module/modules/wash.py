@@ -12,31 +12,33 @@ from collections import Counter
 
 NONE = '未使用'
 
-sub_selection_list: Dict[str, int] = {}
-style_list: Dict[str, int] = {}
+sub_selection_list = {}
+style_list = {}
 
 def get_sub_selection_list() -> List[str]:
+    if not db.selection_ability_list: return []
+    
     global sub_selection_list
-    if not sub_selection_list and db.selection_ability_list:
-        sub_selection_list = {NONE: 0}
-        for item in db.selection_ability_list:
-            if item.selectionAbilityType == 2:
-                sub_selection_list[f'{item.selectionAbilityMstId}:{item.name}'] = item.selectionAbilityMstId
+    sub_selection_list = {NONE: 0}
+    for item in db.selection_ability_list:
+        if item.selectionAbilityType == 2:
+            sub_selection_list[f'{item.selectionAbilityMstId}:{item.name}'] = item.selectionAbilityMstId
     return list(sub_selection_list.keys())
 
 def get_style_list() -> List[str]:
-    global style_list
-    if not style_list and db.style_list and db.character_list and db.figure_list:
-        style_list = {'': 0}
-        char_dict = {x.characterMstId: x.name for x in db.character_list}
-        figure_dict = {
-            x.styleFigureMstId: char_dict.get(x.characterMstId, f'未知角色({x.characterMstId})')
-            for x in db.figure_list
-        }
-        for item in db.style_list:
-            name = figure_dict.get(item.styleFigureMstId, f'未知角色({item.styleFigureMstId})')
-            style_list[f'{item.styleMstId}:[{item.name}]{name}'] = item.styleMstId
+    if not db.character_list or not db.figure_list: return []
     
+    global style_list
+    style_list = {'': 0}
+    char_dict = {x.characterMstId: x.name for x in db.character_list}
+    figure_dict = {
+        x.styleFigureMstId: char_dict.get(x.characterMstId, f'未知角色({x.characterMstId})')
+        for x in db.figure_list
+    }
+    for item in db.style_list:
+        name = figure_dict.get(item.styleFigureMstId, f'未知角色({item.styleFigureMstId})')
+        style_list[f'{item.styleMstId}:[{item.name}]{name}'] = item.styleMstId
+
     return list(style_list.keys())
 
 @name('快速洗词条')
@@ -77,7 +79,7 @@ class super_wash(Module):
             
             res = await client.request(req)
                             
-        except:
+        except ApiException as e:
             self._log(f"对象初始化失败: {str(e)} (code={e.result_code})")
             return
 
@@ -134,10 +136,6 @@ class super_wash(Module):
             except ApiException as e:
                 self._log(f"洗词条失败: {str(e)} (code={e.result_code})")
                 break
-
-            with open('sub_selection_temp.log', 'a') as fp:
-                fp.write(res.json())
-                fp.write('\n')
 
             selection_ability_data = res.selectionAbilityData
             sub_ids_str = getattr(selection_ability_data, field_name)

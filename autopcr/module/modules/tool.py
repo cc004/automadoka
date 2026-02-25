@@ -55,7 +55,7 @@ class super_sweep(Module):
         once_cost = next(
             x for x in await db.mst(MstApiGetQuestStageMstListRequest())
             if x.questStageMstId == quest_id
-        ).useStamina
+        ).useStamina // 2
 
         if repeat_times * once_cost > stamina:
             self._log(f"体力不足，当前体力 {stamina}，单次消耗 {once_cost}，最多可刷 {stamina // once_cost} 次")
@@ -86,10 +86,6 @@ class super_sweep(Module):
                 self._log(f"战斗失败: {str(e)} (code={e.result_code})")
                 break
             
-            with open('temp.log', 'a') as fp:
-                fp.write(res.json())
-                fp.write('\n')
-
             for sa in res.acquiredSelectionAbilityInfoList + res.selectionAbilityConversionItemDataList:
                 sname = styleMst.get(sa.styleMstId, '未知风格')
                 if sname not in acquires:
@@ -112,6 +108,17 @@ import asyncio
 
 FIELD_CLEAR = 612001
 
+from ...core.bootstrap import create_new
+@name('注册十个号给我！')
+@default(False)
+@description('自动注册初始号')
+class auto_register(Module):
+    PASSWORD = '12345678'
+    async def do_task(self, client: pcrclient):
+        for _ in range(10):
+            new_client = await create_new(auto_register.PASSWORD, client.session.sdk.__class__)
+            self._log(f"注册完成新账号，ID: {new_client.session.sdk.account}, 密码: {auto_register.PASSWORD}")
+
 @name('神秘新功能')
 @default(False)
 @description('什么时候出蓓蓓呜呜呜我要死了')
@@ -123,7 +130,7 @@ class secret(Module):
 
         if not invite_top.inviterPlayerId:
             await client.request(InvitationApiInviteRequest(
-                invitationCampaignMstId=1,
+                invitationCampaignMstId=2,
                 inviterPlayerId=self.get_config('inviter_player_id')
             ))
 
