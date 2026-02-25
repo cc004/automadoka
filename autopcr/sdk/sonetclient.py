@@ -83,7 +83,7 @@ class SonetClient:
         })
 
     async def migrate_from(self, username: str, password: str):
-        pass
+        raise NotImplementedError("未实现的功能")
 
     async def get_jwt_token(self) -> str:
         now = int(time.time())

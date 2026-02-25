@@ -3,7 +3,7 @@ from .apiclient import apiclient, ApiException
 from .sdkclient import sdkclient
 import os
 from ..model.models import *
-from ..constants import CACHE_DIR
+from ..constants import CACHE_DIR, LOGIN_LIMIT_TIMES, LOGIN_LIMIT_INTERVAL
 from ..util.logger import instance as logger
 from ..db.database import db
 import hashlib
@@ -80,19 +80,19 @@ class sessionmgr(Component[apiclient]):
                 
                 await self._ensure_token(next)
                 
-                #await db.update(next)
+                await db.update(next)
                 
-                #await next.request(UserApiGetInitDataListRequest())
-                #await next.request(PartyApiGetCharacterBuildDataListRequest())
-                #await next.request(CharacterApiGetCharacterListRequest())
-                #await next.request(CollectionApiGetCollectionParamUpAchieveDataListRequest())
-                #await next.request(CollectionApiGetCollectionDataListRequest())
-                #await next.request(StyleApiGetStyleDataListRequest())
-                #await next.request(UserApiGetUserParamDataRequest())
-                #await next.request(ConfigApiGetConfigRequest())
-                #await next.request(UserApiLoadOptionRequest())
-                #await next.request(WebPayApiCancelLatestRequest())
-                #await next.request(TermsApiGetUpdatedTermsRequest(storeType=2))
+                await next.request(UserApiGetInitDataListRequest())
+                await next.request(PartyApiGetCharacterBuildDataListRequest())
+                await next.request(CharacterApiGetCharacterListRequest())
+                await next.request(CollectionApiGetCollectionParamUpAchieveDataListRequest())
+                await next.request(CollectionApiGetCollectionDataListRequest())
+                await next.request(StyleApiGetStyleDataListRequest())
+                await next.request(UserApiGetUserParamDataRequest())
+                await next.request(ConfigApiGetConfigRequest())
+                await next.request(UserApiLoadOptionRequest())
+                await next.request(WebPayApiCancelLatestRequest())
+                await next.request(TermsApiGetUpdatedTermsRequest(storeType=2))
                 self._logged = True
                 
                 break
