@@ -36,8 +36,6 @@ for item in cfg['worker']:
         worker[r] = []
     worker[r].append(create_client(item))
 
-stamina_cost = {}
-
 backup_id = 0
 
 async def backupLoaderJp() -> raidworker:
@@ -170,15 +168,10 @@ async def prepare_or_backup(worker: raidworker):
         await prepare_progress(worker)
 
 async def prepare_all():
-    global stamina_cost
     await asyncio.gather(*(
         [m.prepare() for m in monitor] + 
         [prepare_or_backup(w) for w in sum(worker.values(), [])]
     ))
-    stamina_cost = {
-        stage.multiRaidStageMstId: stage.useStaminaForRescue
-        for stage in await db.mst(MstApiGetMultiRaidStageMstListRequest())
-    }
 
 worker_lock = {
     c: asyncio.Lock() for c in sum(worker.values(), [])
@@ -187,6 +180,10 @@ worker_lock = {
 worker_index_dict: Dict[region, int] = {}
 
 async def rescue(stageData: MultiRaidMultiRaidStageDataRecord, shouldRetry: bool, region: region):
+    stamina_cost = {
+        stage.multiRaidStageMstId: stage.useStaminaForRescue
+        for stage in await db.mst(MstApiGetMultiRaidStageMstListRequest())
+    }
     retry = len(worker[region])
     while retry > 0:
         if region not in worker_index_dict:
