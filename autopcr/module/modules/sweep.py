@@ -51,7 +51,8 @@ class event(Module):
                 continue
             
             party_data_id = party_data.partyDataId
-            now_available = story_quest[to_sweep[0].questStageMstId]
+            now_available_quest_id = to_sweep[0].questStageMstId
+            now_available = story_quest[now_available_quest_id]
             if now_available != max_available:
                 self._log(f"活动 {mst.name} 未完全通关,开始自动通关.")
 
@@ -68,20 +69,20 @@ class event(Module):
                 req_next_quest_finalize.result = 1
                 
                 auto_quest_count = 0
-                for next_quest_stage_mstid in range(now_available+1 , max_available+1)[:todayPlayableCount]:
+                for next_quest_stage_mstid in range(now_available_quest_id+1 , max_available+1)[:todayPlayableCount]:
                     req_next_quest_initialize.questStageMstId = next_quest_stage_mstid
                     await client.request(req_next_quest_initialize)
                     await client.request(req_next_quest_finalize)
                     auto_quest_count += 1
                 else:
                     todayPlayableCount = todayPlayableCount - auto_quest_count
-                    now_available = next_quest_stage_mstid
+                    now_available_quest_id = next_quest_stage_mstid
                     self._log(f"活动 {mst.name}已自动通过{auto_quest_count}关至{mst.name}({next_quest_stage_mstid}),剩余{todayPlayableCount}次以执行扫荡任务.")
 
             req_skip_new = QuestBattleApiSkipQuestBattleRequest()
             req_skip_new.isArchiveEvent = False
             req_skip_new.partyDataId = party_data_id
-            req_skip_new.questStageMstId = now_available
+            req_skip_new.questStageMstId = now_available_quest_id
             req_skip_new.repeatNum = todayPlayableCount
             await client.request(req_skip_new)
             
