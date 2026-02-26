@@ -2060,6 +2060,7 @@ class QuestBattleApiInitializeStageRequest(RequestBase[QuestBattleApiInitializeS
     repeatNum: int = None
     backGroundPlay: bool = None
     isArchiveEvent: bool = None
+    selectionAbilityMultiLotteryItemNum: int = None
     @property
     def url(self) -> str:
         return "/api/quest_battle/initialize_stage"
