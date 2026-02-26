@@ -62,7 +62,7 @@ class event(Module):
                 req_next_quest_initialize.isArchiveEvent = False
                 req_next_quest_initialize.selectionAbilityMultiLotteryItemNum = 0
 
-                req_next_quest_finalize = QuestBattleApiInitializeStageRequest()
+                req_next_quest_finalize = QuestBattleApiFinalizeStageForUserRequest()
                 req_next_quest_finalize.battleLog = str({"Commands": [], "ResultBattleUnits": [], "ResultRound": 1})
                 req_next_quest_finalize.autoMode = 0
                 req_next_quest_finalize.result = 1
@@ -347,4 +347,5 @@ class present(Module):
         await client.request(req_receive)
         self._log(f"收集了{cnt}个礼物")
         
+
 
