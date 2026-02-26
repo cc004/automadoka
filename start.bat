@@ -1,1 +1,2 @@
-py -3.8 _httpserver_test.py
+py -3.9 _start_both.py
+start.bat

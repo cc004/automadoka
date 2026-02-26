@@ -4,7 +4,7 @@ from .httpserver import HttpServer
 from ..constants import SERVER_PORT
 from ..module.crons import queue_crons
 
-server = HttpServer(port=SERVER_PORT, host='127.0.0.1')
+server = HttpServer(port=SERVER_PORT, host='0.0.0.0')
 
 queue_crons()
 
