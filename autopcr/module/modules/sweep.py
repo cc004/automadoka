@@ -44,10 +44,14 @@ class event(Module):
                 key=lambda x: story_quest[x.questStageMstId],
                 reverse=True
             )
+                        
+            todayPlayableCount = info.todayPlayableCount
+            if todayPlayableCount == 0 or not to_sweep:
+                self._log(f"活动{mst.name}没有剩余扫荡次数或其他问题.")
+                continue
             
             party_data_id = party_data.partyDataId
-            todayPlayableCount = info.todayPlayableCount
-            now_available = story_quest[to_sweep[0].questStageMstId] if to_sweep else -1
+            now_available = story_quest[to_sweep[0].questStageMstId]
             if now_available != max_available:
                 self._log(f"活动 {mst.name} 未完全通关,开始自动通关.")
 
@@ -62,20 +66,19 @@ class event(Module):
                 req_next_quest_finalize.battleLog = str({"Commands": [], "ResultBattleUnits": [], "ResultRound": 1})
                 req_next_quest_finalize.autoMode = 0
                 req_next_quest_finalize.result = 1
-
+                
+                auto_quest_count = 0
                 for next_questStageMstId in range(now_available+1 , max_available+1)[:todayPlayableCount]:
                     req_next_quest_initialize.questStageMstId = next_quest_stage_mstid
                     await client.request(req_next_quest_initialize)
                     await client.request(req_next_quest_finalize)
-                    
-                continue
+                    auto_quest_count += 1
+                else:
+                    todayPlayableCount = todayPlayableCount - auto_quest_count
+                    now_available = next_quest_stage_mstid
+                    self._log(f"活动 {mst.name}已自动通过{auto_quest_count}关至{mst.name}({next_quest_stage_mstid}),剩余{todayPlayableCount}次以执行扫荡任务.")
 
-            if todayPlayableCount == 0:
-                self._log(f"活动{mst.name}没有剩余扫荡次数.")
-                continue
-
-            quest_id = to_sweep[0].questStageMstId
-
+            quest_id = now_available
             req_skip_new = QuestBattleApiSkipQuestBattleRequest()
             req_skip_new.isArchiveEvent = False
             req_skip_new.partyDataId = party_data_id
@@ -83,7 +86,7 @@ class event(Module):
             req_skip_new.repeatNum = todayPlayableCount
             await client.request(req_skip_new)
             
-            self._log(f"扫荡了活动 {mst.name} ({quest_id}){info.todayPlayableCount}次")
+            self._log(f"扫荡了活动 {mst.name} ({quest_id}){todayPlayableCount}次")
 
 
 @description('自动使用扫荡最高加成档案活动')
