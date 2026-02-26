@@ -68,7 +68,7 @@ class event(Module):
                 req_next_quest_finalize.result = 1
                 
                 auto_quest_count = 0
-                for next_questStageMstId in range(now_available+1 , max_available+1)[:todayPlayableCount]:
+                for next_quest_stage_mstid in range(now_available+1 , max_available+1)[:todayPlayableCount]:
                     req_next_quest_initialize.questStageMstId = next_quest_stage_mstid
                     await client.request(req_next_quest_initialize)
                     await client.request(req_next_quest_finalize)
@@ -78,15 +78,14 @@ class event(Module):
                     now_available = next_quest_stage_mstid
                     self._log(f"活动 {mst.name}已自动通过{auto_quest_count}关至{mst.name}({next_quest_stage_mstid}),剩余{todayPlayableCount}次以执行扫荡任务.")
 
-            quest_id = now_available
             req_skip_new = QuestBattleApiSkipQuestBattleRequest()
             req_skip_new.isArchiveEvent = False
             req_skip_new.partyDataId = party_data_id
-            req_skip_new.questStageMstId = quest_id
+            req_skip_new.questStageMstId = now_available
             req_skip_new.repeatNum = todayPlayableCount
             await client.request(req_skip_new)
             
-            self._log(f"扫荡了活动 {mst.name} ({quest_id}){todayPlayableCount}次")
+            self._log(f"扫荡了活动 {mst.name} ({now_available}){todayPlayableCount}次")
 
 
 @description('自动使用扫荡最高加成档案活动')
@@ -347,5 +346,6 @@ class present(Module):
         await client.request(req_receive)
         self._log(f"收集了{cnt}个礼物")
         
+
 
 
