@@ -63,7 +63,7 @@ class event(Module):
                 req_next_quest_finalize.autoMode = 0
                 req_next_quest_finalize.result = 1
 
-                for next_questStageMstId in (now_available+1 , max_available+1):
+                for next_questStageMstId in range(now_available+1 , max_available+1)[:todayPlayableCount]:
                     req_next_quest_initialize.questStageMstId = next_quest_stage_mstid
                     await client.request(req_next_quest_initialize)
                     await client.request(req_next_quest_finalize)
@@ -344,3 +344,4 @@ class present(Module):
         await client.request(req_receive)
         self._log(f"收集了{cnt}个礼物")
         
+
