@@ -4,6 +4,7 @@ from ...core.pcrclient import pcrclient
 from ...model.models import *
 from datetime import datetime, timedelta, timezone
 
+
 @description('自动扫荡当前已通关活动')
 @name('扫荡活动')
 @default(True)
@@ -43,12 +44,33 @@ class event(Module):
                 key=lambda x: story_quest[x.questStageMstId],
                 reverse=True
             )
+            
+            party_data_id = party_data.partyDataId
+            todayPlayableCount = info.todayPlayableCount
+            now_available = story_quest[to_sweep[0].questStageMstId] if to_sweep else -1
+            if now_available != max_available:
+                self._log(f"活动 {mst.name} 未完全通关,开始自动通关.")
 
-            if not to_sweep or story_quest[to_sweep[0].questStageMstId] != max_available:
-                self._log(f"活动 {mst.name} 未完全通关.")
+                req_next_quest_initialize = QuestBattleApiInitializeStageRequest()
+                req_next_quest_initialize.partyDataId = party_data_id
+                req_next_quest_initialize.repeatNum = 0
+                req_next_quest_initialize.backGroundPlay = False
+                req_next_quest_initialize.isArchiveEvent = False
+                req_next_quest_initialize.selectionAbilityMultiLotteryItemNum = 0
+
+                req_next_quest_finalize = QuestBattleApiInitializeStageRequest()
+                req_next_quest_finalize.battleLog = str({"Commands": [], "ResultBattleUnits": [], "ResultRound": 1})
+                req_next_quest_finalize.autoMode = 0
+                req_next_quest_finalize.result = 1
+
+                for next_questStageMstId in range(now_available+1 , max_available+1)[:todayPlayableCount]:
+                    req_next_quest_initialize.questStageMstId = next_quest_stage_mstid
+                    await client.request(req_next_quest_initialize)
+                    await client.request(req_next_quest_finalize)
+                    
                 continue
 
-            if info.todayPlayableCount == 0:
+            if todayPlayableCount == 0:
                 self._log(f"活动{mst.name}没有剩余扫荡次数.")
                 continue
 
@@ -56,9 +78,9 @@ class event(Module):
 
             req_skip_new = QuestBattleApiSkipQuestBattleRequest()
             req_skip_new.isArchiveEvent = False
-            req_skip_new.partyDataId = party_data.partyDataId
+            req_skip_new.partyDataId = party_data_id
             req_skip_new.questStageMstId = quest_id
-            req_skip_new.repeatNum = info.todayPlayableCount
+            req_skip_new.repeatNum = todayPlayableCount
             await client.request(req_skip_new)
             
             self._log(f"扫荡了活动 {mst.name} ({quest_id}){info.todayPlayableCount}次")
@@ -322,3 +344,4 @@ class present(Module):
         await client.request(req_receive)
         self._log(f"收集了{cnt}个礼物")
         
+
