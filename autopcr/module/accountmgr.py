@@ -317,9 +317,6 @@ class AccountManager:
         self.secret.password = password
 
     def validate_password(self, password: str) -> bool:
-        print(self.secret.password.encode('utf-8'))
-        print(hashlib.md5(self.secret.password.encode('utf-8')).hexdigest())
-        print(password)
         return hashlib.md5(self.secret.password.encode('utf-8')).hexdigest() == password
 
     def load(self, account: str = "", readonly = False) -> Account:

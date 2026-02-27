@@ -61,6 +61,8 @@ class event(Module):
                 
                 await client.request(req_next_quest_finalize)
 
+                todayPlayableCount -= 1
+                
                 self._log(f"活动 {mst.name}已自动通过{quest_id}关,剩余{todayPlayableCount}次以执行扫荡任务.")
                 
             if todayPlayableCount == 0:
