@@ -6,7 +6,7 @@ from ..model.modelbase import *
 from asyncio import Lock
 from typing import TypeVar, Any
 from ..util import aiorequests, freqlimiter
-from ..constants import DEBUG_LOG, MAX_API_RUNNING
+from ..constants import DEBUG_LOG, API_LIMIT_TIMES, API_LIMIT_INTERVAL
 import time, datetime
 import json
 from ..util.logger import instance as logger
@@ -72,7 +72,7 @@ class apiclient(Container["apiclient"]):
     async def modify_request(self, request: RequestBase[TResponse]) -> None:
         pass
 
-    @freqlimiter.RunningLimiter(MAX_API_RUNNING)
+    @freqlimiter.FreqLimiter(API_LIMIT_TIMES, API_LIMIT_INTERVAL)
     async def _request_internal(self, request: RequestBase[TResponse], noRetry=False) -> TResponse:
         if not request: return None
         # logger.info(f'{self.user_name} requested {request.__class__.__name__} at /{request.url}')
@@ -110,6 +110,8 @@ class apiclient(Container["apiclient"]):
             response = await resp.content
 
             response = crypto.PackHelper.unpack(response, self.get_crypto_key())
+        except ApiException:
+            raise
         except:
             import traceback
             traceback.print_exc()
