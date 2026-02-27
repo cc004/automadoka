@@ -110,6 +110,8 @@ class apiclient(Container["apiclient"]):
             response = await resp.content
 
             response = crypto.PackHelper.unpack(response, self.get_crypto_key())
+        except ApiException:
+            raise
         except:
             import traceback
             traceback.print_exc()
