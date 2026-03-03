@@ -352,7 +352,7 @@ class arena(Module):
         
         req_pvp_top = PvpApiGetPvpTopRequest()
         res_pvp_top = await client.request(req_pvp_top)
-        pvp_free_playable_count = res_pvp_top.pvpTopInfo['remainTodayFreePlayCount']
+        pvp_free_playable_count = res_pvp_top.pvpTopInfo.remainTodayFreePlayCount
         
         self._log(f"检测到你还有{pvp_free_playable_count}次PVP机会，将使用队伍 {party_data.name}全部同意")
             
@@ -383,3 +383,4 @@ class arena(Module):
             self._log(f"本次投降给了{candidate_user_id}")#感觉可以不要
         else:
             self._log(f"真是一场酣畅淋漓的战斗啊")
+
