@@ -338,5 +338,48 @@ class present(Module):
         self._log(f"收集了{cnt}个礼物")
         
 
+@description('PVP自动全输掉')
+@name('自动PVP投降')
+@default(False)
+class arena(Module):
+    async def do_task(self, client: pcrclient):
+        
+        party_data = next(
+            p for p in client.data.resp.partyDataList
+            if p.isPvp == True and p.member1 + p.member2 + p.member3 + p.member4 + p.member5 > 0
+        )
+        party_data_id = party_data.partyDataId
+        
+        req_pvp_top = PvpApiGetPvpTopRequest()
+        res_pvp_top = await client.request(req_pvp_top)
+        pvp_free_playable_count = res_pvp_top.pvpTopInfo['remainTodayFreePlayCount']
+        
+        self._log(f"检测到你还有{pvp_free_playable_count}次PVP机会，将使用队伍 {party_data.name}全部同意")
+            
+        for _ in range(pvp_free_playable_count):
+            #找路人
+            req_candidate_list = PvpApiGetCandidateEnemyUserListRequest()
+            
+            res_candidate_list = await client.request(req_candidate_list)
+            candidate_list = res_candidate_list.candidateEnemyUserInfoList
+            candidate_user_id = candidate_list[0]['userId']
 
-
+            #开房
+            req_pvp_initialize = PvpApiInitializeStageRequest()
+            req_pvp_initialize.chooseEnemyUserId = candidate_user_id
+            req_pvp_initialize.partyDataId = party_data_id
+            req_pvp_initialize.isConsumeGem = False
+            
+            res_pvp_initialize = await client.request(req_pvp_initialize)
+            pvp_room_id = res_pvp_initialize.roomId
+            
+            #结算
+            req_pvp_finalize = PvpApiFinalizeStageForUserRequest()
+            req_pvp_finalize.roomId = pvp_room_id
+            req_pvp_finalize.result = 2
+            req_pvp_finalize.battleLog = '{"Commands":[],"ResultBattleUnits":[],"ResultRound":1}'
+            req_pvp_finalize.autoMode = 2
+            
+            self._log(f"本次投降给了{candidate_user_id}")#感觉可以不要
+        else:
+            self._log(f"真是一场酣畅淋漓的战斗啊")
