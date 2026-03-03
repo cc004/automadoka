@@ -39,6 +39,7 @@ daily_modules = ModuleList(
         raid_reward,
         self_raid,
         support_raid,
+        arena,
         basic,
         event,
         archive,
