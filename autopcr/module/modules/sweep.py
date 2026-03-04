@@ -362,7 +362,7 @@ class arena(Module):
             
             res_candidate_list = await client.request(req_candidate_list)
             candidate_list = res_candidate_list.candidateEnemyUserInfoList
-            candidate_user_id = candidate_list[0]['userId']
+            candidate_user_id = candidate_list[0].userId
 
             #开房
             req_pvp_initialize = PvpApiInitializeStageRequest()
