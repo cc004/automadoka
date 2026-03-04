@@ -3,7 +3,7 @@ from ..config import *
 from ...core.pcrclient import pcrclient
 from ...model.models import *
 from datetime import datetime, timedelta, timezone
-
+import asyncio
 
 @description('自动扫荡当前已通关活动')
 @name('扫荡活动')
@@ -381,6 +381,8 @@ class arena(Module):
             req_pvp_finalize.autoMode = 2
             
             self._log(f"本次投降给了{candidate_user_id}")#感觉可以不要
+
+            await asyncio.sleep(10)
         else:
             self._log(f"真是一场酣畅淋漓的战斗啊")
 
