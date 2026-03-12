@@ -17,7 +17,8 @@ def anyof(*conds):
 def it(id):
     return item(5, id, False)
 
-item_category = {
+item_category: Dict[str, Callable[[ShopShopMstRecord], bool]] = {
+    '白送的东西': lambda shop: shop.price <= 0,
     '肖像': lambda shop: shop.objectReceiveType == 4,
     '钥匙（碎片）': anyof(
         it(232030), it(232001)
@@ -85,7 +86,7 @@ NULL_TIME = datetime.fromisoformat('1970-01-01T09:00:00+09:00')
 
 class shop_base(Module):
     prefix: str = 'base'
-    
+
     def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool: ...
 
     async def do_task(self, client: pcrclient):
