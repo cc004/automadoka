@@ -70,17 +70,22 @@ item_category = {
     '金币（无限池）': item(11, 0, True)
 }
 
-def shop_priority(cls):
-    candidate = [i for i in range(0, 101)]
-    priority = 100
-    for key in item_category:
-        cls = inttype(f'shop_priority_{key}', f'{key}优先级，越高越优先，0为不购买', priority, candidate)(cls)
-        priority -= 3
-    return cls
+def shop_priority(prefix: str):
+    def wrapper(cls):
+        setattr(cls, 'prefix', prefix)
+        candidate = [i for i in range(0, 101)]
+        priority = 100
+        for key in item_category:
+            cls = inttype(f'{prefix}_shop_priority_{key}', f'{key}优先级，越高越优先，0为不购买', priority, candidate)(cls)
+            priority -= 3
+        return cls
+    return wrapper
 
 NULL_TIME = datetime.fromisoformat('1970-01-01T09:00:00+09:00')
 
 class shop_base(Module):
+    prefix: str = 'base'
+    
     def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool: ...
 
     async def do_task(self, client: pcrclient):
@@ -106,7 +111,7 @@ class shop_base(Module):
         def sort_key(shop: ShopShopMstRecord):
             for key, cond in item_category.items():
                 if cond(shop):
-                    priority = self.get_config(f'shop_priority_{key}')
+                    priority = self.get_config(f'{self.__class__.prefix}_shop_priority_{key}')
                     rarity = item_dict[shop.objectId].rarity if shop.objectReceiveType == 5 and shop.objectId in item_dict else 0
                     efficiency = shop.num / shop.price if shop.price > 0 else 0
                     return (-priority, -rarity, -efficiency)
@@ -167,7 +172,7 @@ class shop_base(Module):
                 user_items[mst.payId] = user_items.get(mst.payId, 0) - item.price * buy_num
 
 @description('按顺序兑换活动商店物品')
-@shop_priority
+@shop_priority('event')
 @name('清空兑换币')
 @default(True)
 class event_shop(shop_base):
@@ -175,7 +180,7 @@ class event_shop(shop_base):
         return mst.category == 3
 
 @description('按顺序兑换raid商店物品')
-@shop_priority
+@shop_priority('raid')
 @name('清空兑换币')
 @default(True)
 class raid_shop(shop_base):
@@ -184,7 +189,7 @@ class raid_shop(shop_base):
 
 
 @description('按顺序兑换jjc商店物品')
-@shop_priority
+@shop_priority('arena')
 @name('清空兑换币')
 @default(True)
 class arena_shop(shop_base):
