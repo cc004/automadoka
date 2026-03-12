@@ -379,19 +379,20 @@ class arena(Module):
             req_pvp_finalize.result = 2
             req_pvp_finalize.battleLog = '{"Commands":[],"ResultBattleUnits":[],"ResultRound":1}'
             req_pvp_finalize.autoMode = 2
-            
-            try:
-                res_pvp_finalize = await client.request(req_pvp_finalize)
-            except:
-                req_pvp_retire = PvpApiRetireRequest()
-                req_pvp_retire.battleLog = ""
-                req_pvp_retire.isSystemRetire = True
-                req_pvp_retire.isUpdateRetire = False
-                res_pvp_retire = await client.request(req_pvp_retire)
-                
-            self._log(f"本次投降给了{candidate_user_id}")#感觉可以不要
+    
+            res_pvp_finalize = await client.request(req_pvp_finalize)
 
-            await asyncio.sleep(5)
+            req_pvp_retire = PvpApiRetireRequest()
+            req_pvp_retire.battleLog = ""
+            req_pvp_retire.isSystemRetire = True
+            req_pvp_retire.isUpdateRetire = False
+            
+            res_pvp_retire = await client.request(req_pvp_retire)
+                
+            self._log(f"本次投降给了{candidate_user_id}")
+
+            await asyncio.sleep(2)
         else:
             self._log(f"真是一场酣畅淋漓的战斗啊")
+
 
