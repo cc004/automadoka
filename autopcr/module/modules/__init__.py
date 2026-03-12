@@ -9,6 +9,7 @@ from .collection import eventscenario, collection
 from .tool import secret, auto_register, super_sweep
 from .wash import super_wash
 from .raid import raid_reward, self_raid, support_raid, raid_support
+from .gacha import freegacha
 from typing import List
 from dataclasses import dataclass
 
@@ -51,6 +52,7 @@ daily_modules = ModuleList(
         tower,
         heart,
         gather,
+        freegacha,
         eventscenario,
         collection,
         mission,

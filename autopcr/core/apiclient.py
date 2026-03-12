@@ -101,6 +101,7 @@ class apiclient(Container["apiclient"]):
 
             if resp.status_code == 428:
                 await update_version()
+                request.prepare()
 
             if resp.status_code == 401:
                 raise ApiException("Unauthorized: Session may have expired.", status="Unauthorized", result_code=401)
