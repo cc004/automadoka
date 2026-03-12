@@ -1,14 +1,16 @@
 from dataclasses import field
 from typing import Any
-from .cron import *
-from .sweep import *
-from .stamina import *
-from .shop import *
-from .common import *
-from .collection import *
-from .tool import *
-from .wash import *
-from .raid import *
+from .cron import cron1, cron2, cron3, cron4, cron5, cron6
+from .sweep import arena, event, archive, tower, heart, gather, mission, present
+from .stamina import stamina_buy, basic 
+from .shop import event_shop, raid_shop, arena_shop
+from .common import loginbonus, info
+from .collection import eventscenario, collection
+from .tool import secret, auto_register, super_sweep
+from .wash import super_wash
+from .raid import raid_reward, self_raid, support_raid, raid_support
+from typing import List
+from dataclasses import dataclass
 
 @dataclass
 class ModuleList:
@@ -43,7 +45,9 @@ daily_modules = ModuleList(
         basic,
         event,
         archive,
-        shop,
+        event_shop,
+        raid_shop,
+        arena_shop,
         tower,
         heart,
         gather,

@@ -65,6 +65,7 @@ item_category = {
         it(121002), it(121005), it(121008), it(121011), it(121014), it(121017), it(121020)
     ),
     '金币': item(11, 0, False),
+    '泪滴（无限池）': item(5, 180003, True),
     '经验（无限池）': item(5, 124001, True),
     '金币（无限池）': item(11, 0, True)
 }
@@ -78,12 +79,10 @@ def shop_priority(cls):
     return cls
 
 NULL_TIME = datetime.fromisoformat('1970-01-01T09:00:00+09:00')
-    
-@description('按顺序兑换商店物品')
-@shop_priority
-@name('清空兑换币')
-@default(True)
-class shop(Module):
+
+class shop_base(Module):
+    def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool: ...
+
     async def do_task(self, client: pcrclient):
         user_items = (await client.request(ItemApiGetItemDataListRequest())).itemDataList
         item_keys = {item.itemMstId for item in user_items}
@@ -121,7 +120,7 @@ class shop(Module):
             end = datetime.fromisoformat(mst.endTime)
             if start != NULL_TIME and start > now or end != NULL_TIME and end < now:
                 continue
-            if mst.category != 3 and mst.payId != 201029 and mst.payId != 201030:
+            if not self.shop_filter(mst):
                 continue
             series = mst.shopSeriesMstId
             all_items = [s for s in shop_mst if s.shopGroupId in (mst.shopGroupId1, mst.shopGroupId2)]
@@ -166,3 +165,29 @@ class shop(Module):
                 await client.request(req_buy)
                 self._log(f"购买商店{mst.title}的{item_name}[{item.price}]，数量：{buy_num}")
                 user_items[mst.payId] = user_items.get(mst.payId, 0) - item.price * buy_num
+
+@description('按顺序兑换活动商店物品')
+@shop_priority
+@name('清空兑换币')
+@default(True)
+class event_shop(shop_base):
+    def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
+        return mst.category == 3
+
+@description('按顺序兑换raid商店物品')
+@shop_priority
+@name('清空兑换币')
+@default(True)
+class raid_shop(shop_base):
+    def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
+        return mst.payId == 201029 or mst.payId == 201030
+
+
+@description('按顺序兑换jjc商店物品')
+@shop_priority
+@name('清空兑换币')
+@default(True)
+class arena_shop(shop_base):
+    def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
+        return mst.payId == 201009
+
