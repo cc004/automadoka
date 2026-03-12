@@ -45,8 +45,10 @@ class freegacha(Module):
             dailyCount, totalCount = gacha_count.get(gacha.gachaMstId, (0, 0))
             if gacha.countLimit != 0 and gacha.countLimit <= totalCount:
                 self._log(f'{gacha.gachaName} 已经抽取过了，跳过')
+                continue
             if gacha.dailyCountLimit != 0 and gacha.dailyCountLimit <= dailyCount:
                 self._log(f'{gacha.gachaName} 今日抽取次数已满，跳过')
+                continue
 
             request = GachaApiGachaExecRequest()
             request.gachaMstId = gacha.gachaMstId
