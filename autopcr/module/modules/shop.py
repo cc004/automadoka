@@ -146,7 +146,7 @@ class shop_base(Module):
                 if start != NULL_TIME and start > now or end != NULL_TIME and end < now:
                     continue
                 category = category_of(item)
-                if self.get_config(f'shop_priority_{category}') == 0:
+                if self.get_config(f'{self.__class__.prefix}_shop_priority_{category}') == 0:
                     self._log(f"商店{mst.title}的{item_name}类别{category}优先级为0，跳过")
                     continue
                 bought = purchased[item.shopMstId].purchaseCount if item.shopMstId in purchased else 0
