@@ -180,7 +180,7 @@ class shop_base(Module):
 
 @description('按顺序兑换活动商店物品')
 @shop_priority('event')
-@name('清空兑换币')
+@name('清空活动兑换币')
 @default(True)
 class event_shop(shop_base):
     def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
@@ -191,7 +191,7 @@ class event_shop(shop_base):
 
 @description('按顺序兑换raid商店物品')
 @shop_priority('raid')
-@name('清空兑换币')
+@name('清空raid兑换币')
 @default(True)
 class raid_shop(shop_base):
     def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
@@ -204,7 +204,7 @@ class raid_shop(shop_base):
 
 @description('按顺序兑换jjc商店物品')
 @shop_priority('arena')
-@name('清空兑换币')
+@name('清空jjc兑换币')
 @default(True)
 class arena_shop(shop_base):
     def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
