@@ -57,6 +57,9 @@ item_category: Dict[str, Callable[[ShopShopMstRecord], bool]] = {
     ),
     '泪滴': it(180003),
     '经验': it(124001),
+    '晶花抽取EX': anyof(
+        it(181004),
+    ),
     '晶花抽取': anyof(
         it(181001), it(181002), it(181003), it(282001)
     ),
