@@ -233,6 +233,10 @@ class MstApiGetQuestConditionMstListRequest(MstRequestBase[QuestOutGameQuestCond
     @property
     def url(self) -> str:
         return "/api/mst/get_quest_condition_mst_list"
+class MstApiGetQuestGuestMemberMstListRequest(MstRequestBase[QuestOutGameQuestGuestMemberMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_quest_guest_member_mst_list"
 class MstApiGetMissionTitleMstListRequest(MstRequestBase[MissionMissionTitleMstRecord]):
     @property
     def url(self) -> str:
@@ -329,6 +333,10 @@ class MstApiGetPassiveSkillDetailMstListRequest(MstRequestBase[SkillPassiveSkill
     @property
     def url(self) -> str:
         return "/api/mst/get_passive_skill_detail_mst_list"
+class MstApiGetUniqueStatePatternMstListRequest(MstRequestBase[SkillUniqueStatePatternMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_unique_state_pattern_mst_list"
 class MstApiGetLeaderSkillMstListRequest(MstRequestBase[SkillLeaderSkillMstRecord]):
     @property
     def url(self) -> str:
@@ -721,6 +729,102 @@ class MstApiGetInvitationCampaignRewardMstListRequest(MstRequestBase[InvitationI
     @property
     def url(self) -> str:
         return "/api/mst/get_invitation_campaign_reward_mst_list"
+class MstApiGetSoloRaidMstListRequest(MstRequestBase[SoloRaidSoloRaidMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_solo_raid_mst_list"
+class MstApiGetSoloRaidPartyBuffMstListRequest(MstRequestBase[SoloRaidSoloRaidPartyBuffMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_solo_raid_party_buff_mst_list"
+class MstApiGetSoloRaidRankingRewardMstListRequest(MstRequestBase[SoloRaidSoloRaidRankingRewardMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_solo_raid_ranking_reward_mst_list"
+class MstApiGetSoloRaidSeasonBuffMstListRequest(MstRequestBase[SoloRaidSoloRaidSeasonBuffMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_solo_raid_season_buff_mst_list"
+class MstApiGetSoloRaidStageMstListRequest(MstRequestBase[SoloRaidSoloRaidStageMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_solo_raid_stage_mst_list"
+class MstApiGetSoloRaidTotalScoreRewardMstListRequest(MstRequestBase[SoloRaidSoloRaidTotalScoreRewardMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_solo_raid_total_score_reward_mst_list"
+class MstApiGetQuestEnemyWaveMstListRequest(MstRequestBase[QuestOutGameQuestEnemyWaveMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_quest_enemy_wave_mst_list"
+class MstApiGetToolTipsMstListRequest(MstRequestBase[TipsToolTipsMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_tool_tips_mst_list"
+class MstApiGetPassiveSkillSortMstListRequest(MstRequestBase[SkillPassiveSkillSortMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_passive_skill_sort_mst_list"
+class MstApiGetLotteryMstListRequest(MstRequestBase[LotteryLotteryMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_lottery_mst_list"
+class MstApiGetLotteryRewardMstListRequest(MstRequestBase[LotteryLotteryRewardMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_lottery_reward_mst_list"
+class MstApiGetLotteryWinningMstListRequest(MstRequestBase[LotteryLotteryWinningMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_lottery_winning_mst_list"
+class MstApiGetQuestEnemyModeChangeMstListRequest(MstRequestBase[QuestOutGameQuestEnemyModeChangeMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_quest_enemy_mode_change_mst_list"
+class MstApiGetQuestBuffMstListRequest(MstRequestBase[QuestOutGameQuestBuffMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_quest_buff_mst_list"
+class MstApiGetNamaeScenarioArchiveMstListRequest(MstRequestBase[CollectionNamaeScenarioArchiveMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_namae_scenario_archive_mst_list"
+class MstApiGetNamaeScenarioArchiveCategoryMstListRequest(MstRequestBase[CollectionNamaeScenarioArchiveCategoryMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_namae_scenario_archive_category_mst_list"
+class MstApiGetAlternativeStoryMstListRequest(MstRequestBase[AlternativeStoryAlternativeStoryMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_alternative_story_mst_list"
+class MstApiGetAlternativeStoryPointMstListRequest(MstRequestBase[AlternativeStoryAlternativeStoryPointMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_alternative_story_point_mst_list"
+class MstApiGetAlternativeStoryPointSequenceMstListRequest(MstRequestBase[AlternativeStoryAlternativeStoryPointSequenceMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_alternative_story_point_sequence_mst_list"
+class MstApiGetCharacterStoryAlertViewMstListRequest(MstRequestBase[CharacterCharacterStoryAlertViewMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_character_story_alert_view_mst_list"
+class MstApiGetCollaborationMstListRequest(MstRequestBase[CollaborationCollaborationMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_collaboration_mst_list"
+class MstApiGetCollaborationCopyrightMstListRequest(MstRequestBase[CollaborationCollaborationCopyrightMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_collaboration_copyright_mst_list"
+class MstApiGetCollaborationMusicMstListRequest(MstRequestBase[CollaborationCollaborationMusicMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_collaboration_music_mst_list"
+class MstApiGetMissionCampaignGroupMstListRequest(MstRequestBase[MissionMissionCampaignGroupMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_mission_campaign_group_mst_list"
 class MapGveApiGetTopInfoRequest(RequestBase[MapGveApiGetTopInfoResponse]):
     @property
     def url(self) -> str:
@@ -757,7 +861,6 @@ class LoginApiLoginRequest(RequestBase[LoginApiLoginResponse]):
     supportsVibration: bool = None
     uuid: str = None
     xuid: int = None
-    jwttoken: str = None
     @property
     def url(self) -> str:
         return "/api/login"
@@ -798,6 +901,7 @@ class ExplorationBattleApiInitializeStageV4Request(RequestBase[ExplorationBattle
     bossDirectionMstId: int = None
     presetEventIndex: int = None
     partyDataId: int = None
+    styleRentalUsingStatus: StyleRentalUsingStatus = None
     @property
     def url(self) -> str:
         return "/api/exploration_battle/initialize_stage_v4"
@@ -949,6 +1053,60 @@ class StoryEventApiRecoverPlayableCountRequest(RequestBase[StoryEventApiRecoverP
     @property
     def url(self) -> str:
         return "/api/story_event/recover_playable_count"
+class SoloRaidApiFinalizeStageForUserRequest(RequestBase[SoloRaidApiFinalizeStageForUserResponse]):
+    questDataId: int = None
+    result: int = None
+    battleInfo: SoloRaidBattleInfo = None
+    battleLog: str = None
+    autoMode: int = None
+    @property
+    def url(self) -> str:
+        return "/api/solo_raid/finalize_stage_for_user"
+class SoloRaidApiGetPlayingCharacterBuildDetailRequest(RequestBase[SoloRaidApiGetPlayingCharacterBuildDetailResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/solo_raid/get_playing_character_build_detail"
+class SoloRaidApiGetRankingInfoRequest(RequestBase[SoloRaidApiGetRankingInfoResponse]):
+    mode: int = None
+    soloRaidMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/solo_raid/get_ranking_info"
+class SoloRaidApiGetRankingUserCharacterBuildDetailRequest(RequestBase[SoloRaidApiGetRankingUserCharacterBuildDetailResponse]):
+    targetUserId: int = None
+    soloRaidMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/solo_raid/get_ranking_user_character_build_detail"
+class SoloRaidApiGetSoloRaidInfoRequest(RequestBase[SoloRaidApiGetSoloRaidInfoResponse]):
+    questDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/solo_raid/get_solo_raid_info"
+class SoloRaidApiGetTopRequest(RequestBase[SoloRaidApiGetTopResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/solo_raid/get_top"
+class SoloRaidApiInitializeStageRequest(RequestBase[SoloRaidApiInitializeStageResponse]):
+    soloRaidStageMstId: int = None
+    partyDataId: int = None
+    challengeType: SoloRaidChallengeType = None
+    soloRaidStageDataId: int = None
+    styleRentalUsingStatus: StyleRentalUsingStatus = None
+    @property
+    def url(self) -> str:
+        return "/api/solo_raid/initialize_stage"
+class SoloRaidApiRetireRequest(RequestBase[SoloRaidApiRetireResponse]):
+    soloRaidStageDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/solo_raid/retire"
+class SoloRaidApiSkipQuestBattleRequest(RequestBase[SoloRaidApiSkipQuestBattleResponse]):
+    soloRaidStageMstId: int = None
+    repeatNum: int = None
+    @property
+    def url(self) -> str:
+        return "/api/solo_raid/skip_quest_battle"
 class ShopApiGetShopListRequest(RequestBase[ShopApiGetShopListResponse]):
     @property
     def url(self) -> str:
@@ -1056,6 +1214,12 @@ class ScoreAttackApiGetRankingUserCharacterBuildDetailRequest(RequestBase[ScoreA
     @property
     def url(self) -> str:
         return "/api/score_attack/get_ranking_user_character_build_detail"
+class ScoreAttackApiSkipQuestBattleRequest(RequestBase[ScoreAttackApiSkipQuestBattleResponse]):
+    scoreAttackMstId: int = None
+    repeatNum: int = None
+    @property
+    def url(self) -> str:
+        return "/api/score_attack/skip_quest_battle"
 class PvpApiGetPvpTopRequest(RequestBase[PvpApiGetPvpTopResponse]):
     @property
     def url(self) -> str:
@@ -1218,6 +1382,10 @@ class UserApiSaveOptionRequest(RequestBase[UserApiSaveOptionResponse]):
     dailySkipSpecialAttackDirection: bool = None
     dailyPlayedSpecialAttackDirectionStyleMstIds: List[int] = None
     dailyFirstBattleStartTimestamp: int = None
+    itemExpiryNotification: bool = None
+    showNotifyExpiryItemPopupTimestamp: int = None
+    styleRentalAutoSelectInfo: UserStyleRentalAutoSelectInfo = None
+    isUseGuestStyle: bool = None
     @property
     def url(self) -> str:
         return "/api/user/save_option"
@@ -1259,6 +1427,7 @@ class UserApiGetPlayerIdRequest(RequestBase[UserApiGetPlayerIdResponse]):
 class PresentApiGetPresentDataListRequest(RequestBase[PresentApiGetPresentDataListResponse]):
     isOrderNewest: bool = None
     expireTimeType: int = None
+    isExtendedList: bool = None
     @property
     def url(self) -> str:
         return "/api/present/get_present_data_list"
@@ -1275,12 +1444,54 @@ class PresentApiReceiveRequest(RequestBase[PresentApiReceiveResponse]):
     @property
     def url(self) -> str:
         return "/api/present/receive"
+class StyleRentalApiGetBorrowingCandidateListRequest(RequestBase[StyleRentalApiGetBorrowingCandidateListResponse]):
+    role: StyleRentalRole = None
+    contentId: StyleRentalContentId = None
+    @property
+    def url(self) -> str:
+        return "/api/style_rental/get_borrowing_candidate_list"
+class StyleRentalApiGetMyListRequest(RequestBase[StyleRentalApiGetMyListResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/style_rental/get_my_list"
+class StyleRentalApiSaveBorrowingStyleRequest(RequestBase[StyleRentalApiSaveBorrowingStyleResponse]):
+    contentId: StyleRentalContentId = None
+    partyDataId: int = None
+    borrowedUserId: int = None
+    role: StyleRentalRole = None
+    isActive: bool = None
+    styleMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/style_rental/save_borrowing_style"
+class StyleRentalApiSaveMyCardRequest(RequestBase[StyleRentalApiSaveMyCardResponse]):
+    contentId: StyleRentalContentId = None
+    cardMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/style_rental/save_my_card"
+class StyleRentalApiSaveMySubStyleRequest(RequestBase[StyleRentalApiSaveMySubStyleResponse]):
+    contentId: StyleRentalContentId = None
+    styleMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/style_rental/save_my_sub_style"
+class StyleRentalApiSetMyStyleRequest(RequestBase[StyleRentalApiSetMyStyleResponse]):
+    styleRentalForSetInfoList: List[StyleRentalStyleRentalForSetInfo] = None
+    @property
+    def url(self) -> str:
+        return "/api/style_rental/set_my_style"
 class MultiRaidApiGetTopRequest(RequestBase[MultiRaidApiGetTopResponse]):
     @property
     def url(self) -> str:
         return "/api/multi_raid/get_top"
 class MultiRaidApiGetMultiRaidStageDataListRequest(RequestBase[MultiRaidApiGetMultiRaidStageDataListResponse]):
     isRescue: bool = None
+    difficultyList: List[int] = None
+    prioritizeGuild: bool = None
+    prioritizeFriend: bool = None
+    prioritizeFollow: bool = None
+    prioritizeFollower: bool = None
     @property
     def url(self) -> str:
         return "/api/multi_raid/get_multi_raid_stage_data_list"
@@ -1339,6 +1550,11 @@ class MultiRaidApiReceiveRewardRequest(RequestBase[MultiRaidApiReceiveRewardResp
     @property
     def url(self) -> str:
         return "/api/multi_raid/receive_reward"
+class MultiRaidApiIdSearchRequest(RequestBase[MultiRaidApiIdSearchResponse]):
+    searchId: str = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/id_search"
 class MissionApiGetMissionDataListRequest(RequestBase[MissionApiGetMissionDataListResponse]):
     missionType: int = None
     @property
@@ -1371,6 +1587,10 @@ class TutorialApiSkipTutorialToGachaRequest(RequestBase[TutorialApiSkipTutorialT
     @property
     def url(self) -> str:
         return "/api/tutorial/skip_tutorial_to_gacha"
+class LotteryApiGetTopRequest(RequestBase[LotteryApiGetTopResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/lottery/get_top"
 class ItemApiGetItemDataListRequest(RequestBase[ItemApiGetItemDataListResponse]):
     @property
     def url(self) -> str:
@@ -1760,6 +1980,71 @@ class GachaApiGetGachaGemTextListRequest(RequestBase[GachaApiGetGachaGemTextList
     @property
     def url(self) -> str:
         return "/api/gacha/get_gacha_gem_text_list"
+class FriendApiGetTopRequest(RequestBase[FriendApiGetTopResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/friend/get_top"
+class FriendApiGetFollowListRequest(RequestBase[FriendApiGetFollowListResponse]):
+    sortCondition: FriendSortCondition = None
+    sortOrder: FriendSortOrder = None
+    pageNum: int = None
+    @property
+    def url(self) -> str:
+        return "/api/friend/get_follow_list"
+class FriendApiGetFollowerListRequest(RequestBase[FriendApiGetFollowerListResponse]):
+    sortCondition: FriendSortCondition = None
+    sortOrder: FriendSortOrder = None
+    pageNum: int = None
+    @property
+    def url(self) -> str:
+        return "/api/friend/get_follower_list"
+class FriendApiGetBlockListRequest(RequestBase[FriendApiGetBlockListResponse]):
+    sortCondition: FriendSortCondition = None
+    sortOrder: FriendSortOrder = None
+    pageNum: int = None
+    @property
+    def url(self) -> str:
+        return "/api/friend/get_block_list"
+class FriendApiGetRecommendUserListRequest(RequestBase[FriendApiGetRecommendUserListResponse]):
+    sortCondition: FriendSortCondition = None
+    sortOrder: FriendSortOrder = None
+    pageNum: int = None
+    @property
+    def url(self) -> str:
+        return "/api/friend/get_recommend_user_list"
+class FriendApiSetFollowRequest(RequestBase[FriendApiSetFollowResponse]):
+    userId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/friend/set_follow"
+class FriendApiRemoveFollowRequest(RequestBase[FriendApiRemoveFollowResponse]):
+    userId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/friend/remove_follow"
+class FriendApiRemoveFollowerRequest(RequestBase[FriendApiRemoveFollowerResponse]):
+    userId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/friend/remove_follower"
+class FriendApiSetBlockRequest(RequestBase[FriendApiSetBlockResponse]):
+    userId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/friend/set_block"
+class FriendApiRemoveBlockRequest(RequestBase[FriendApiRemoveBlockResponse]):
+    userId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/friend/remove_block"
+class FriendApiFriendSearchRequest(RequestBase[FriendApiFriendSearchResponse]):
+    searchString: str = None
+    sortCondition: FriendSortCondition = None
+    sortOrder: FriendSortOrder = None
+    pageNum: int = None
+    @property
+    def url(self) -> str:
+        return "/api/friend/friend_search"
 class QuestOutGameApiGetUserQuestStageListRequest(RequestBase[QuestOutGameApiGetUserQuestStageListResponse]):
     questCategoryMstId: int = None
     @property
@@ -1961,6 +2246,7 @@ class PartyApiGetRecommendPartyDataRequest(RequestBase[PartyApiGetRecommendParty
     isSettingCard: bool = None
     isSettingSubStyle: bool = None
     sameCharacterInParty: bool = None
+    isEnableStyleForSoloRaid: bool = None
     @property
     def url(self) -> str:
         return "/api/party/get_recommend_party_data"
@@ -1976,6 +2262,7 @@ class PartyApiGetRecommendCardRequest(RequestBase[PartyApiGetRecommendCardRespon
         return "/api/party/get_recommend_card"
 class PartyApiRemovePartyRequest(RequestBase[PartyApiRemovePartyResponse]):
     partyDataId: int = None
+    styleRentalDefineContentId: StyleRentalContentId = None
     @property
     def url(self) -> str:
         return "/api/party/remove_party"
@@ -1996,6 +2283,11 @@ class PartyApiSavePartySubStyleRequest(RequestBase[PartyApiSavePartySubStyleResp
     @property
     def url(self) -> str:
         return "/api/party/save_party_sub_style"
+class PartyApiSaveSoloRaidPartyBuffRequest(RequestBase[PartyApiSaveSoloRaidPartyBuffResponse]):
+    saveSoloRaidPartyBuffList: List[PartySavePartyBuffReqParam] = None
+    @property
+    def url(self) -> str:
+        return "/api/party/save_solo_raid_party_buff"
 class CharacterApiGetCharacterListRequest(RequestBase[CharacterApiGetCharacterListResponse]):
     @property
     def url(self) -> str:
@@ -2095,11 +2387,49 @@ class QuestBattleApiGetBackGroundInfoRequest(RequestBase[QuestBattleApiGetBackGr
     @property
     def url(self) -> str:
         return "/api/quest_battle/get_back_ground_info"
+class AlternativeStoryApiGetTopRequest(RequestBase[AlternativeStoryApiGetTopResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/alternative_story/get_top"
+class AlternativeStoryApiInitializeStageRequest(RequestBase[AlternativeStoryApiInitializeStageResponse]):
+    questStageMstId: int = None
+    partyDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/alternative_story/initialize_stage"
+class AlternativeStoryApiFinalizeStageForUserRequest(RequestBase[AlternativeStoryApiFinalizeStageForUserResponse]):
+    result: int = None
+    battleLog: str = None
+    autoMode: int = None
+    @property
+    def url(self) -> str:
+        return "/api/alternative_story/finalize_stage_for_user"
+class AlternativeStoryApiGetQuestInfoRequest(RequestBase[AlternativeStoryApiGetQuestInfoResponse]):
+    questDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/alternative_story/get_quest_info"
+class AlternativeStoryApiRetireRequest(RequestBase[AlternativeStoryApiRetireResponse]):
+    questDataId: int = None
+    battleLog: str = None
+    @property
+    def url(self) -> str:
+        return "/api/alternative_story/retire"
+class AlternativeStoryApiReadAdvRequest(RequestBase[AlternativeStoryApiReadAdvResponse]):
+    advMstId: int = None
+    skipType: CollectionAdvSkipType = None
+    @property
+    def url(self) -> str:
+        return "/api/alternative_story/read_adv"
 class ExplorationApiGetTopInfoV4Request(RequestBase[ExplorationApiGetTopInfoV4Response]):
     fieldStageMstId: int = None
     @property
     def url(self) -> str:
         return "/api/exploration/get_top_info_v4"
+class ExplorationApiGetFieldStageUserDataListRequest(RequestBase[ExplorationApiGetFieldStageUserDataListResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/exploration/get_field_stage_user_data_list"
 class ExplorationApiReachFieldPointRequest(RequestBase[ExplorationApiReachFieldPointResponse]):
     fieldPointMstId: int = None
     @property
