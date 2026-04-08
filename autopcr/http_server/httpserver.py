@@ -17,7 +17,8 @@ from ..module.accountmgr import Account, AccountManager, instance as usermgr, Ac
 from ..util.draw import instance as drawer
 from ..util.logger import instance as logger
 
-APP_VERSION = "1.3.0"
+APP_VERSION_MAJOR = 1
+APP_VERSION_MINOR = 7
 
 CACHE_HTTP_DIR = os.path.join(CACHE_DIR, 'http_server')
 
@@ -137,11 +138,15 @@ class HttpServer:
 
         @self.api_limit.before_request
         async def check_app_version():
-            version = request.headers.get('X-App-Version', None)
-            if version != APP_VERSION:
-                return f"后端期望前端版本为{APP_VERSION}，请更新", 400
-            else:
-                return None
+            version = request.headers.get('X-App-Version', "0.0.0")
+            try:
+                major, minor, patch = map(int, version.split("."))
+                if major != APP_VERSION_MAJOR or minor != APP_VERSION_MINOR:
+                    return f"后端期望前端版本为{APP_VERSION_MAJOR}.{APP_VERSION_MINOR}，请更新", 400
+                else:
+                    return None
+            except Exception:
+                return "无法解析前端版本号，请更新", 400
 
         @self.api_limit.errorhandler(RateLimitExceeded)
         async def handle_rate_limit_exceeded_error(error):
@@ -199,6 +204,18 @@ class HttpServer:
         @HttpServer.wrapaccountmgr(readonly = True)
         async def get_role(accountmgr: AccountManager):
             return await accountmgr.generate_role(), 200
+
+        @self.api.route('/running_status', methods = ["GET"])
+        @HttpServer.login_required()
+        async def get_running_status():
+            return {'statuses': [
+                {
+                    'name': "功能不支持",
+                    'running': 0,
+                    'waiting': 0,
+                    'max_running': 0,
+                }
+            ]}, 200
 
         @self.api.route('/account', methods = ['GET'])
         @HttpServer.login_required()
