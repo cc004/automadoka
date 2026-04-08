@@ -23,6 +23,8 @@ item_category: Dict[str, Callable[[ShopShopMstRecord], bool]] = {
     '钥匙（碎片）': anyof(
         it(232030), it(232001)
     ),
+    '10抽钥匙': it(232054),
+    '5x交换币': it(201075),
     '4x交换币': it(201017),
     '钻石': item(2, 0, False),
     '玩家经验': lambda shop: shop.objectReceiveType == 18,
@@ -67,6 +69,7 @@ item_category: Dict[str, Callable[[ShopShopMstRecord], bool]] = {
     ),
     '金币': item(11, 0, False),
     '泪滴（无限池）': item(5, 180003, True),
+    '小石头（无限池）': item(5, 121001, True),
     '经验（无限池）': item(5, 124001, True),
     '金币（无限池）': item(11, 0, True)
 }
@@ -178,7 +181,10 @@ class shop_base(Module):
 @default(True)
 class event_shop(shop_base):
     def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
-        return mst.category == 3
+        return mst.category == 3 and not (
+            'ゴールドクライシスメダル' in mst.title or # fuck you pklb
+            'シルバークライシスメダル' in mst.title
+        )
 
 @description('按顺序兑换raid商店物品')
 @shop_priority('raid')
@@ -186,7 +192,11 @@ class event_shop(shop_base):
 @default(True)
 class raid_shop(shop_base):
     def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
-        return mst.payId == 201029 or mst.payId == 201030
+        return (
+            mst.payId == 201029 or mst.payId == 201030 or
+            'ゴールドクライシスメダル' in mst.title or # fuck you pklb
+            'シルバークライシスメダル' in mst.title 
+        )
 
 
 @description('按顺序兑换jjc商店物品')
