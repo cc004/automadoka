@@ -18,29 +18,34 @@ class eventscenario(Module):
             await db.mst(MstApiGetStoryEventScenarioMstListRequest())
         }
 
-        story_top = await client.request(StoryEventApiGetTopRequest())
+        updated = True
 
-        cleared_stage = set(
-            x.questStageMstId for x in story_top.userQuestStageDataList
-        )
+        while updated:
+            updated = False
+            story_top = await client.request(StoryEventApiGetTopRequest())
 
-        for scenario_id in story_top.storyEventScenarioMstIdList:
-            if scenario_id in story_top.clearStoryEventScenarioMstIdList:
-                continue
-            record = scenario_list[scenario_id]
-            if not record.conditionQuestStageMstId in cleared_stage:
-                continue
+            cleared_stage = set(
+                x.questStageMstId for x in story_top.userQuestStageDataList
+            )
 
-            request = CollectionApiUpdateAlreadyViewRequest()
-            request.objectType = ObjectObjectType.Adv
-            request.objectIds = [record.advMstId]
-            await client.request(request)
+            for scenario_id in story_top.storyEventScenarioMstIdList:
+                if scenario_id in story_top.clearStoryEventScenarioMstIdList:
+                    continue
+                record = scenario_list[scenario_id]
+                if record.conditionQuestStageMstId and not record.conditionQuestStageMstId in cleared_stage:
+                    continue
 
-            request = StoryEventApiScenarioReadRequest()
-            request.storyEventScenarioMstId = record.storyEventScenarioMstId
-            await client.request(request)
+                request = CollectionApiUpdateAlreadyViewRequest()
+                request.objectType = ObjectObjectType.Adv
+                request.objectIds = [record.advMstId]
+                await client.request(request)
 
-            self._log(f'已阅读活动剧情: {story_event[record.storyEventMstId].name} ({record.storyEventScenarioMstId})')
+                request = StoryEventApiScenarioReadRequest()
+                request.storyEventScenarioMstId = record.storyEventScenarioMstId
+                await client.request(request)
+
+                self._log(f'已阅读活动剧情: {story_event[record.storyEventMstId].name} ({record.storyEventScenarioMstId})')
+                updated = True
 
 @description('去除所有光之间红点')
 @name('阅读光之间内容')

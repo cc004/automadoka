@@ -141,9 +141,13 @@ class archive(Module):
         for info in archive_top.storyEventInfoList:
             mst = story_event[info.storyEventMstId]
             
-            max_available = max(
-                story_quest[x.questStageMstId] for x in quest_mst if x.questGroupMstId == mst.storyQuestGroupId
-            )
+            available = [story_quest[x.questStageMstId] for x in quest_mst if x.questGroupMstId == mst.storyQuestGroupId]
+
+            if not available:
+                self._log(f"档案活动 {mst.name} 没有可供扫荡代币的关卡.")
+                continue
+
+            max_available = max(available)
 
             to_sweep = sorted(
                 [x for x in archive_top.userQuestStageDataList
