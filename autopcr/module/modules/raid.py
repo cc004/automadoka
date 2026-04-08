@@ -162,7 +162,6 @@ import random
 
 @name('魔女召唤')
 @default(False)
-@texttype('start_raid_log', '战斗日志', '')
 @texttype('start_raid_damage_min', '伤害下限', '900000')
 @texttype('start_raid_damage_max', '伤害上限', '1100000')
 @texttype('start_raid_id', '关卡id', '120')
@@ -174,12 +173,6 @@ import random
 @description('使用给定伤害记录发车')
 class self_raid(RaidLPModule):
 
-    def config_string(self) -> str:
-        return '\n'.join([
-            f"{self.config[key].desc}: {self.get_config_str(key)}" for key in self.config
-            if key != 'start_raid_log'
-            ])
-    
     async def do_task(self, client: pcrclient):
         await super().do_task(client)
 
@@ -188,7 +181,6 @@ class self_raid(RaidLPModule):
             int(self.get_config('start_raid_damage_min')),
             int(self.get_config('start_raid_damage_max'))
         )
-        log = self.get_config('start_raid_log')
         raid_result = int(self.get_config('start_raid_result'))
         team = self.get_config('start_raid_party')
         receive = self.get_config('start_raid_receive')
@@ -256,7 +248,7 @@ class self_raid(RaidLPModule):
             self._log(f"体力不足，无法发车 (当前体力 {now_stamina}，需要 {record.useStaminaForPlay})")
             return
         
-        _, _, resp = await client2.start_clear(raid_id, team, 1, 0, raid_damage, log, raid_result)
+        _, _, resp = await client2.start_clear(raid_id, team, 1, 0, raid_damage, raid_result)
         
         self._log(f"已发车团战 (关卡 {raid_id}) {raid_damage} 伤害")
         if not resp.multiRaidStageData.isClosed and resp.multiRaidStageData.hp > 0:
@@ -265,7 +257,6 @@ class self_raid(RaidLPModule):
 
 @name('魔女援助')
 @default(False)
-@texttype('support_raid_log', '战斗日志', '')
 @texttype('support_raid_damage_min', '伤害下限', '900000')
 @texttype('support_raid_damage_max', '伤害上限', '1100000')
 @texttype('support_raid_id', '关卡id（逗号分隔）', '120')
@@ -280,12 +271,6 @@ class self_raid(RaidLPModule):
 @description('查询团战池内的团战并进行支援（十分钟内的）')
 class support_raid(RaidLPModule):
 
-    def config_string(self) -> str:
-        return '\n'.join([
-            f"{self.config[key].desc}: {self.get_config_str(key)}" for key in self.config
-            if key != 'support_raid_log'
-            ])
-    
     async def do_task(self, client: pcrclient):
         await super().do_task(client)
         raid_id = set(
@@ -295,7 +280,6 @@ class support_raid(RaidLPModule):
             int(self.get_config('support_raid_damage_min')),
             int(self.get_config('support_raid_damage_max'))
         )
-        log = self.get_config('support_raid_log')
         raid_result = int(self.get_config('support_raid_result'))
         team = self.get_config('support_raid_party')
         time_max = int(self.get_config('support_raid_time_max'))
@@ -405,7 +389,7 @@ class support_raid(RaidLPModule):
                 return
         
             try:
-                _, _, resp = await client2.support_clear(raid, team, 0, raid_damage, log, raid_result)
+                _, _, resp = await client2.support_clear(raid, team, 0, raid_damage, raid_result)
             except ApiException as e:
                 self._log(f"支援团战 {raid.multiRaidStageDataId} (关卡 {raid.multiRaidStageMstId}) 失败: {str(e)} (code={e.result_code})")
                 continue

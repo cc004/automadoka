@@ -3,6 +3,7 @@ from autopcr.core.sdkclient import account, platform, sdkclient
 from autopcr.model.models import *
 from typing import Tuple, Type
 import asyncio
+from autopcr.util.utils import generate_battle_log
 
 class raidworker:
     def __init__(self, code, password, alias, sdkclient: Type[sdkclient]):
@@ -13,6 +14,26 @@ class raidworker:
         self.logger = lambda x: print(x)
         self.prepared = False
     
+    async def get_battle_log(self, partyDataId: int) -> str:
+        
+        teamRecord = next(x for x in self.client.data.resp.partyDataList if x.partyDataId == partyDataId)
+
+        styleDict = {
+            x.styleMstId: x for x in self.client.data.resp.styleDataList
+        }
+
+        return generate_battle_log(
+            [
+                styleDict[x] for x in [
+                    teamRecord.member1,
+                    teamRecord.member2,
+                    teamRecord.member3,
+                    teamRecord.member4,
+                    teamRecord.member5
+                ] if x != 0
+            ]
+        )
+
     @staticmethod
     def from_client(client: pcrclient, alias: str):
         worker = raidworker('', '', alias, client.session.sdk.__class__)
@@ -83,7 +104,7 @@ class raidworker:
             battleLog=''
         ))
         return (resp, resp2, resp3)
-    async def start_clear(self, multiRaidStageMstId: int, partyDataId: int, rescueType: int, waitTime: int, damage: int, battleLog: str,
+    async def start_clear(self, multiRaidStageMstId: int, partyDataId: int, rescueType: int, waitTime: int, damage: int,
                           result: int) -> Tuple[
         MultiRaidApiInitializeStageResponse,
         MultiRaidApiAddDamageResponse,
@@ -102,13 +123,13 @@ class raidworker:
         ))
         resp3 = await self.client.request(MultiRaidApiFinalizeStageForUserRequest(
             questDataId=resp.multiRaidRoomData.questDataId,
-            battleLog=battleLog,
+            battleLog=await self.get_battle_log(partyDataId),
             autoMode=0,
             result=result
         ))
         return (resp, resp2, resp3)
     async def support_clear(self, multiRaidStageDataRecord: MultiRaidMultiRaidStageDataRecord, partyDataId: int,
-                          waitTime: int, damage: int, battleLog: str, result: int) -> Tuple[
+                          waitTime: int, damage: int, result: int) -> Tuple[
         MultiRaidApiInitializeStageResponse,
         MultiRaidApiAddDamageResponse,
         MultiRaidApiFinalizeStageForUserResponse
@@ -128,7 +149,7 @@ class raidworker:
             result = 1 # force to win if overkill
         resp3 = await self.client.request(MultiRaidApiFinalizeStageForUserRequest(
             questDataId=resp.multiRaidRoomData.questDataId,
-            battleLog=battleLog,
+            battleLog=await self.get_battle_log(partyDataId),
             autoMode=0,
             result=result
         ))

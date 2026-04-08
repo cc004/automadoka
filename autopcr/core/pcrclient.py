@@ -8,6 +8,7 @@ from enum import Enum
 from ..db.database import db
 from datetime import datetime, timedelta, timezone
 from ..constants import USER_TZ as user_tz
+import math
 
 class eLoginStatus(Enum):
     NOT_LOGGED = 0
@@ -177,7 +178,7 @@ class pcrclient(apiclient):
         update = datetime.fromisoformat(staminaData.staminaUpdatedTime).astimezone(user_tz)
         delta = now - update
         v40 = int(delta.total_seconds()) // config.staminaRecoverSec
-        v42 = (config.maxStamina - staminaData.stamina) // config.staminaRecoverNum
+        v42 = math.ceil((config.maxStamina - staminaData.stamina) / config.staminaRecoverNum)
         if v40 <= v42: v42 = v40
         return staminaData.stamina + v42 * config.staminaRecoverNum
 

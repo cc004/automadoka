@@ -7,22 +7,16 @@ from ...db.database import db
 from ...model.models import *
 from collections import Counter
 from ...constants import USER_TZ as user_tz
+from ...util.utils import generate_battle_log
 
 @name('快速刷图')
 @default(False)
 @inttype('force_battle_repeat_times', '重复次数', 1, [i for i in range(1, 100)])
 @texttype('force_battle_quest_id', '关卡ID', '411105')
 @texttype('force_battle_team', '队伍ID/名称', '20')
-@texttype('force_battle_log', '战斗日志', '')
 @inttype('force_battle_auto_mode', '自动模式', 0, [0, 1, 2])
 @description('开了就是开了？')
 class super_sweep(Module):
-    
-    def config_string(self) -> str:
-        return '\n'.join([
-            f"{self.config[key].desc}: {self.get_config_str(key)}" for key in self.config
-            if key != 'force_battle_log'
-            ])
     
     async def do_task(self, client: pcrclient):
         quest_id = int(self.get_config('force_battle_quest_id'))
@@ -61,6 +55,12 @@ class super_sweep(Module):
             self._log(f"体力不足，当前体力 {stamina}，单次消耗 {once_cost}，最多可刷 {stamina // once_cost} 次")
             repeat_times = stamina // once_cost
 
+        teamRecord = next(x for x in client.data.resp.partyDataList if x.partyDataId == team)
+
+        styleDict = {
+            x.styleMstId: x for x in client.data.resp.styleDataList
+        }
+
         for _ in range(repeat_times):
             try:
                 req = QuestBattleApiInitializeStageRequest()
@@ -78,7 +78,17 @@ class super_sweep(Module):
 
                 req = QuestBattleApiFinalizeStageForUserRequest()
                 req.autoMode = self.get_config('force_battle_auto_mode')
-                req.battleLog = self.get_config('force_battle_log')
+                req.battleLog = generate_battle_log(
+                    [
+                        styleDict[x] for x in [
+                            teamRecord.member1,
+                            teamRecord.member2,
+                            teamRecord.member3,
+                            teamRecord.member4,
+                            teamRecord.member5
+                        ] if x != 0
+                    ]
+                )
                 req.result = 1
 
                 res = await client.request(req)
