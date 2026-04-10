@@ -4,6 +4,7 @@ from ...core.pcrclient import pcrclient
 from ...model.models import *
 from datetime import datetime, timedelta, timezone
 import asyncio
+from ...util.utils import generate_battle_log
 
 @description('自动扫荡当前已通关活动')
 @name('扫荡活动')
@@ -399,3 +400,90 @@ class arena(Module):
         else:
             self._log(f"真是一场酣畅淋漓的战斗啊")
 
+
+@description('自动完成已通关的主线打一遍任务（暂不支持有要求的关卡）')
+@name('完成战斗任务')
+@default(True)
+class battle_mission(Module):
+    async def do_task(self, client: pcrclient):
+        mission_mst = {m.missionMstId: m for m in (await db.mst(MstApiGetMissionMstListRequest()))}
+
+        stratum = (await client.request(MstApiGetFieldStratumMstListRequest())).mstList
+        point = (await client.request(MstApiGetFieldPointMstListRequest())).mstList
+
+        top = await client.request(ExplorationApiGetFieldStageCollectionInfoListRequest())
+        cleared_field = set(x.fieldStageMstId for x in top.fieldStageCollectionInfoList if x.isClear)
+        party_data = next(
+            p for p in client.data.resp.partyDataList
+            if p.partyType == 1 and p.member1 + p.member2 + p.member3 + p.member4 + p.member5 > 0
+        )
+
+        styleDict = {
+            x.styleMstId: x for x in client.data.resp.styleDataList
+        }
+
+        for mission_type in (1,2,3,4):
+            req_mission = MissionApiGetMissionDataListRequest()
+            req_mission.missionType = mission_type
+            mission = await client.request(req_mission)
+
+            to_receive: List[int] = []
+            for m in mission.missionDataList:
+                mst = mission_mst[m.missionMstId]
+                if (
+                    m.count < mst.conditionCount and
+                    mst.triggerType == 6 and # QUEST_STAGE_CLEAR
+                    mst.conditionType in [252, 1451] # Quest, QuestInRound
+                ):
+                    questId = mst.conditionObjectId
+                    p = next(p for p in point if p.pointValue1 == questId and p.pointType == 3)
+                    s = next(s for s in stratum if s.fieldStratumMstId == p.fieldStratumMstId)
+
+                    if not s.fieldStageMstId in cleared_field:
+                        self._log(f"{mst.title}，需要通关 {p.fieldPointMstId} ({s.stratumName}-{p.name})")
+                        continue
+
+                    top = await client.request(ExplorationApiGetTopInfoV4Request(
+                        fieldStageMstId=s.fieldStageMstId
+                    ))
+                
+                    if top.fieldStageUserData.clearFieldPointMstIdCsv:
+                        cleared_points = set(int(x) for x in top.fieldStageUserData.clearFieldPointMstIdCsv.split(','))
+                    else:
+                        cleared_points = set()
+                    
+                    if not p.fieldPointMstId in cleared_points:
+                        self._log(f"{mst.title}，需要通关 {p.fieldPointMstId} ({s.stratumName}-{p.name})")
+                        continue
+
+                    reach = await client.request(ExplorationApiReachFieldPointRequest(
+                        fieldPointMstId=p.fieldPointMstId
+                    ))
+                    self._log(f"到达点 {p.fieldPointMstId} ({s.stratumName}-{p.name})")
+
+                    quest = await client.request(ExplorationBattleApiInitializeStageV4Request(
+                        fieldPointMstId=p.fieldPointMstId,
+                        fieldStageMstId=s.fieldStageMstId,
+                        dungeonEventMstId=0,
+                        dungeonRoomMstId=0,
+                        bossDirectionMstId=0,
+                        presetEventIndex=0,
+                        partyDataId=party_data.partyDataId
+                    ))
+                    await asyncio.sleep(2)
+                    finish = await client.request(ExplorationBattleApiFinalizeStageForUserV4Request(
+                        autoMode=1,
+                        battleLog=generate_battle_log(
+                            [
+                                styleDict[x] for x in [
+                                    party_data.member1,
+                                    party_data.member2,
+                                    party_data.member3,
+                                    party_data.member4,
+                                    party_data.member5
+                                ] if x != 0
+                            ]
+                        ),
+                        result=1
+                    ))
+                    self._log(f"完成战斗点 {p.fieldPointMstId} ({s.stratumName}-{p.name})")
