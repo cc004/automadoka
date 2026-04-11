@@ -212,3 +212,74 @@ class secret(Module):
                         self._log(f"完成战斗点 {p.fieldPointMstId} ({mst.name}-{p.name})")
 
         await clear_field(FIELD_CLEAR)
+
+
+@description('自动清理已通关迷宫的隐藏事件')
+@name('完成迷宫隐藏事件')
+@default(True)
+class clear_dungeon_event(Module):
+    async def do_task(self, client: pcrclient):
+
+        stratum = await db.mst(MstApiGetFieldStratumMstListRequest())
+        point = await db.mst(MstApiGetFieldPointMstListRequest())
+        field_mst = await db.mst(MstApiGetFieldStageMstListRequest())
+        dungeon_event_mst = await db.mst(MstApiGetDungeonEventMstListRequest())
+
+        top = await client.request(ExplorationApiGetFieldStageCollectionInfoListRequest())
+        cleared_field = set(x.fieldStageMstId for x in top.fieldStageCollectionInfoList if x.isClear)
+
+        for field in field_mst:
+            if field.difficulty == 4:
+                continue
+            if not field.fieldStageMstId in cleared_field:
+                self._log(f"跳过未通关篇章 {field.fieldStageMstId} ({field.name})")
+                continue
+                    
+            stratums = [x for x in stratum if x.fieldStageMstId == field.fieldStageMstId]
+            
+            top = await client.request(ExplorationApiGetTopInfoV4Request(
+                fieldStageMstId=field.fieldStageMstId
+            ))
+        
+            if top.fieldStageUserData.clearDungeonEventMstIdCsv:
+                cleared_event = set(int(x) for x in top.fieldStageUserData.clearDungeonEventMstIdCsv.split(','))
+            else:
+                cleared_event = set()
+            
+            for s in stratums:
+                points = [x for x in point if x.fieldStratumMstId == s.fieldStratumMstId]
+                for p in points:
+                    if p.pointType != 1: continue
+                    dungeon_events = [
+                        x for x in dungeon_event_mst
+                        if x.dungeonMstId == p.pointValue1 and x.eventType == 21
+                    ]
+                    if all(
+                        x.dungeonEventMstId in cleared_event for x in dungeon_events
+                    ):
+                        self._log(f"跳过已完成全部事件的点 {p.fieldPointMstId} ({field.name}-{p.name})")
+                        continue
+
+                    await client.request(ExplorationApiReachFieldPointRequest(
+                        fieldPointMstId=p.fieldPointMstId
+                    ))
+                    self._log(f"到达点 {p.fieldPointMstId} ({field.name}-{p.name})")
+
+                    await client.request(ExplorationApiDungeonStartRequest(
+                        fieldStageMstId=s.fieldStageMstId,
+                        dungeonMstId=p.pointValue1
+                    ))
+
+                    for event in dungeon_events:
+                        if event.dungeonEventMstId in cleared_event:
+                            continue
+                        await client.request(ExplorationApiOccurDungeonEventRequest(
+                            fieldStageMstId=s.fieldStageMstId,
+                            dungeonEventMstId=event.dungeonEventMstId
+                        ))
+                        self._log(f"完成事件 {event.dungeonEventMstId} ({field.name}-{p.name}-事件{event.dungeonEventMstId})")
+                    
+                    await client.request(ExplorationApiDungeonGoalRequest(
+                        fieldStageMstId=s.fieldStageMstId,
+                        dungeonMstId=p.pointValue1
+                    ))

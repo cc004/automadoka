@@ -78,10 +78,10 @@ backup_loader = {
 async def prepare_progress(worker: raidworker):
     client = worker.client
 
-    stratum = (await client.request(MstApiGetFieldStratumMstListRequest())).mstList
-    point = (await client.request(MstApiGetFieldPointMstListRequest())).mstList
+    stratum = await db.mst(MstApiGetFieldStratumMstListRequest())
+    point = await db.mst(MstApiGetFieldPointMstListRequest())
     field_mst = {
-        x.fieldStageMstId: x for x in (await client.request(MstApiGetFieldStageMstListRequest())).mstList
+        x.fieldStageMstId: x for x in await db.mst(MstApiGetFieldStageMstListRequest())
     }
 
     top = await client.request(ExplorationApiGetFieldStageCollectionInfoListRequest())

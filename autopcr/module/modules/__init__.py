@@ -6,7 +6,7 @@ from .stamina import stamina_buy, basic
 from .shop import event_shop, raid_shop, arena_shop
 from .common import loginbonus, info
 from .collection import eventscenario, collection
-from .tool import secret, auto_register, super_sweep
+from .tool import clear_dungeon_event, secret, auto_register, super_sweep
 from .wash import super_wash
 from .raid import raid_reward, self_raid, support_raid, raid_support
 from .gacha import freegacha
@@ -98,6 +98,7 @@ tool_modules = ModuleList(
         super_wash,
         raid_support,
         secret,
-        auto_register
+        auto_register,
+        clear_dungeon_event
     ]
 )
