@@ -413,6 +413,10 @@ class like_raid(Module):
 
         liked = set()
 
+        if client.data.resp.userParamData.todayFriendMedalCount >= client.data.config.friendConfig.gainTodayFriendMedalMaxNum:
+            self._log(f"好友勋章已满，无法继续点赞")
+            return
+        
         for i in range(times):
             raid_search = await client.request(MultiRaidApiGetMultiRaidStageDataListRequest(
                 isRescue=True
