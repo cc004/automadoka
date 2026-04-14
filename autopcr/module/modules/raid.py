@@ -315,11 +315,10 @@ class support_raid(RaidLPModule):
                         if r.multiRaidStageDataId == raid.multiRaidStageDataId
                     ]
             for i in range(times):
-                if i > 0:
-                    await asyncio.sleep(3)
                 raid_search = await client.request(MultiRaidApiGetMultiRaidStageDataListRequest(
                     isRescue=True
                 ))
+                await asyncio.sleep(3)
                 for raid in raid_search.multiRaidStageDataList:
                     if raid.isClosed: continue
                     yield raid, [
@@ -415,10 +414,10 @@ class like_raid(Module):
         liked = set()
 
         for i in range(times):
-            if i > 0: await asyncio.sleep(3)
             raid_search = await client.request(MultiRaidApiGetMultiRaidStageDataListRequest(
                 isRescue=True
             ))
+            await asyncio.sleep(3)
 
             for user in raid_search.joinUserInfoList:
                 key = (user.userId, user.multiRaidStageDataId)
