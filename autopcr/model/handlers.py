@@ -33,3 +33,18 @@ class CollectionApiUpdateAlreadyViewResponse(responses.CollectionApiUpdateAlread
 class UserApiSetStaminaRecoverResponse(responses.UserApiSetStaminaRecoverResponse):
     async def update(self, mgr: datamgr, request):
         mgr.resp.userParamData = self.userParamData
+
+@handles
+class LikeApiExecLikeResponse(responses.LikeApiExecLikeResponse):
+    async def update(self, mgr: datamgr, request):
+        if self.isFriendMedalAcquired:
+            medal_once = next(
+                x.num for x in mgr.config.friendConfig.friendMedal
+                if x.type == 'ExecLike'
+            )
+            medal_total = mgr.config.friendConfig.gainTodayFriendMedalMaxNum
+            
+            mgr.resp.userParamData.todayFriendMedalCount = min(
+                medal_total,
+                mgr.resp.userParamData.todayFriendMedalCount + medal_once
+            )
