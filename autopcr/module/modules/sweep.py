@@ -4,7 +4,6 @@ from ...core.pcrclient import pcrclient
 from ...model.models import *
 from datetime import datetime, timedelta, timezone
 import asyncio
-from ...util.utils import generate_battle_log
 
 @description('自动扫荡当前已通关活动')
 @name('扫荡活动')
@@ -418,10 +417,6 @@ class battle_mission(Module):
             if p.partyType == 1 and p.member1 + p.member2 + p.member3 + p.member4 + p.member5 > 0
         )
 
-        styleDict = {
-            x.styleMstId: x for x in client.data.resp.styleDataList
-        }
-
         for mission_type in (1,2,3,4):
             req_mission = MissionApiGetMissionDataListRequest()
             req_mission.missionType = mission_type
@@ -470,20 +465,13 @@ class battle_mission(Module):
                         presetEventIndex=0,
                         partyDataId=party_data.partyDataId
                     ))
+                    questInfo = await client.request(ExplorationBattleApiGetExplorationInfoRequest(
+                        questDataId=quest.questRoomData.questDataId
+                    ))
                     await asyncio.sleep(2)
                     finish = await client.request(ExplorationBattleApiFinalizeStageForUserV4Request(
                         autoMode=1,
-                        battleLog=generate_battle_log(
-                            [
-                                styleDict[x] for x in [
-                                    party_data.member1,
-                                    party_data.member2,
-                                    party_data.member3,
-                                    party_data.member4,
-                                    party_data.member5
-                                ] if x != 0
-                            ]
-                        ),
+                        battleLog=await client.data.generate_battle_log(questInfo.allyBattleUnitList),
                         result=1
                     ))
                     self._log(f"完成战斗点 {p.fieldPointMstId} ({s.stratumName}-{p.name})")

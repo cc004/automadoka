@@ -7,7 +7,6 @@ from ...db.database import db
 from ...model.models import *
 from collections import Counter
 from ...constants import USER_TZ as user_tz
-from ...util.utils import generate_battle_log
 
 @name('快速刷图')
 @default(False)
@@ -55,12 +54,6 @@ class super_sweep(Module):
             self._log(f"体力不足，当前体力 {stamina}，单次消耗 {once_cost}，最多可刷 {stamina // once_cost} 次")
             repeat_times = stamina // once_cost
 
-        teamRecord = next(x for x in client.data.resp.partyDataList if x.partyDataId == team)
-
-        styleDict = {
-            x.styleMstId: x for x in client.data.resp.styleDataList
-        }
-
         for _ in range(repeat_times):
             try:
                 req = QuestBattleApiInitializeStageRequest()
@@ -74,21 +67,16 @@ class super_sweep(Module):
                 
                 await asyncio.sleep(2)
 
-                await client.request(req)
+                init = await client.request(req)
 
+                req = QuestBattleApiGetQuestInfoRequest()
+                req.questDataId = init.questRoomData.questDataId
+
+                info = await client.request(req)
+                
                 req = QuestBattleApiFinalizeStageForUserRequest()
                 req.autoMode = self.get_config('force_battle_auto_mode')
-                req.battleLog = generate_battle_log(
-                    [
-                        styleDict[x] for x in [
-                            teamRecord.member1,
-                            teamRecord.member2,
-                            teamRecord.member3,
-                            teamRecord.member4,
-                            teamRecord.member5
-                        ] if x != 0
-                    ]
-                )
+                req.battleLog = await client.data.generate_battle_log(info.allyBattleUnitList)
                 req.result = 1
 
                 res = await client.request(req)
