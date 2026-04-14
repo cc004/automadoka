@@ -431,7 +431,15 @@ class battle_mission(Module):
                     mst.conditionType in [252, 1451] # Quest, QuestInRound
                 ):
                     questId = mst.conditionObjectId
-                    p = next(p for p in point if p.pointValue1 == questId and p.pointType == 3)
+
+                    may_point = list(p for p in point if p.pointValue1 == questId and p.pointType == 3)
+                    
+                    if may_point:
+                        p = may_point[0]
+                    else:
+                        self._log(f"任务 {mst.title} 的条件是通关 {questId}，但找不到对应的关卡，跳过")
+                        continue
+                    
                     s = next(s for s in stratum if s.fieldStratumMstId == p.fieldStratumMstId)
 
                     if not s.fieldStageMstId in cleared_field:

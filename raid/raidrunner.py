@@ -205,7 +205,7 @@ async def rescue(stageData: MultiRaidMultiRaidStageDataRecord, shouldRetry: bool
 from datetime import datetime, timedelta, timezone
 from autopcr.constants import USER_TZ as user_tz
 
-once_queue_dict: dict[region, List[MultiRaidMultiRaidStageDataRecord]] = {}
+once_queue_dict: Dict[region, List[MultiRaidMultiRaidStageDataRecord]] = {}
 
 def get_once_queue(region: region) -> List[MultiRaidMultiRaidStageDataRecord]:
     global once_queue_dict
