@@ -223,16 +223,27 @@ class tower(Module):
 @description('扫荡最高好感的心之器')
 @name('扫荡心之器')
 @booltype('heart_force_sweep', '强制扫荡未解锁的最高心之器', False)
+@texttype('heart_team', '队伍ID/名称', '心之器')
 @default(True)
 class heart(Module):
     async def do_task(self, client: pcrclient):
         quest_mst = await db.mst(MstApiGetQuestStageMstListRequest())
+        team = self.get_config('heart_team')
 
-        party_data_list = [p for p in client.data.resp.partyDataList if p.partyType == 1]
+        parties = client.data.resp.partyDataList
+
+        try:
+            team = int(team)
+            team = next((party for party in parties if party.partyDataId == team), None)
+        except ValueError:
+            team = next((party for party in parties if party.name == team), None)
+        
+        if team is None:
+            raise AbortError(f"队伍 '{team}' 未找到，请检查队伍ID或名称。")
+        
         config = client.data.config
 
-        req_heart = QuestOutGameApiGetUserQuestCharacterHeartListRequest()
-        heart_record = await client.request(req_heart)
+        heart_record = await client.request(QuestOutGameApiGetUserQuestCharacterHeartListRequest())
         # 判断是否跨天（4 点算新一天）
         if heart_record.userQuestCharacterHeartData.userId is None:
             raise SkipError("未解锁心之器")
@@ -275,6 +286,38 @@ class heart(Module):
 
         if rec is None:
             raise SkipError("未通关任何心之器")
+
+        if set([
+            rec.member1, rec.member2, rec.member3, rec.member4, rec.member5
+        ]) != set([
+            team.member1, team.member2, team.member3, team.member4, team.member5
+        ]):
+            self._log(f"当前队伍 {team.name} 与最高经验心之器的通关队伍不一致，进行重新扫荡")
+
+            req = QuestBattleApiInitializeStageRequest()
+            req.questStageMstId = rec.questStageMstId
+            req.partyDataId = team.partyDataId
+            req.repeatNum = 0
+            req.backGroundPlay = False
+            req.isArchiveEvent = False
+
+            await asyncio.sleep(2)
+
+            init = await client.request(req)
+
+            req = QuestBattleApiGetQuestInfoRequest()
+            req.questDataId = init.questRoomData.questDataId
+
+            info = await client.request(req)
+            
+            req = QuestBattleApiFinalizeStageForUserRequest()
+            req.autoMode = self.get_config('force_battle_auto_mode')
+            req.battleLog = await client.data.generate_battle_log(info.allyBattleUnitList)
+            req.result = 1
+
+            res = await client.request(req)
+
+            remaining -= 1
 
         req_skip_heart = QuestBattleApiSkipQuestBattleRequest()
         req_skip_heart.isArchiveEvent = False
