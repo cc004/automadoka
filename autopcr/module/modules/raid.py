@@ -315,11 +315,10 @@ class support_raid(RaidLPModule):
                         if r.multiRaidStageDataId == raid.multiRaidStageDataId
                     ]
             for i in range(times):
-                if i > 0:
-                    await asyncio.sleep(3)
                 raid_search = await client.request(MultiRaidApiGetMultiRaidStageDataListRequest(
                     isRescue=True
                 ))
+                await asyncio.sleep(3)
                 for raid in raid_search.multiRaidStageDataList:
                     if raid.isClosed: continue
                     yield raid, [
@@ -404,3 +403,40 @@ class support_raid(RaidLPModule):
 
             if self.get_config('support_queue'):
                 queue_raid(resp.multiRaidStageData, client.session.sdk.region)
+
+@name('魔女点赞')
+@inttype('search_times', '搜索列表内的团战次数', 10, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+@default(True)
+class like_raid(Module):
+    async def do_task(self, client: pcrclient):
+        times = self.get_config('search_times')
+
+        liked = set()
+
+        if client.data.resp.userParamData.todayFriendMedalCount >= client.data.config.friendConfig.gainTodayFriendMedalMaxNum:
+            self._log(f"好友勋章已满，无法继续点赞")
+            return
+        
+        for i in range(times):
+            raid_search = await client.request(MultiRaidApiGetMultiRaidStageDataListRequest(
+                isRescue=True
+            ))
+            await asyncio.sleep(3)
+
+            for user in raid_search.joinUserInfoList:
+                key = (user.userId, user.multiRaidStageDataId)
+                if key in liked:
+                    continue
+                liked.add(key)
+
+                req=LikeApiExecLikeRequest(targetUserId=user.userId, value=user.multiRaidStageDataId)
+                res = await client.request(req)
+                now = client.data.resp.userParamData.todayFriendMedalCount
+                max_num = client.data.config.friendConfig.gainTodayFriendMedalMaxNum
+                if res.result:
+                    self._log(f"已点赞用户 {user.userName} (关卡 {user.multiRaidStageDataId}) ({now}/{max_num})")
+
+                if res.result and not res.isFriendMedalAcquired or now >= max_num:
+                    self._log(f"好友勋章已满，无法继续点赞")
+                    return
+                

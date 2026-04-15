@@ -8,7 +8,7 @@ from .common import loginbonus, info
 from .collection import eventscenario, collection
 from .tool import clear_dungeon_event, secret, auto_register, super_sweep
 from .wash import super_wash
-from .raid import raid_reward, self_raid, support_raid, raid_support
+from .raid import raid_reward, self_raid, support_raid, raid_support, like_raid
 from .gacha import freegacha
 from typing import List
 from dataclasses import dataclass
@@ -42,6 +42,7 @@ daily_modules = ModuleList(
         raid_reward,
         self_raid,
         support_raid,
+        like_raid,
         arena,
         basic,
         event,

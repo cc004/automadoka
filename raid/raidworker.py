@@ -3,7 +3,6 @@ from autopcr.core.sdkclient import account, platform, sdkclient
 from autopcr.model.models import *
 from typing import Tuple, Type
 import asyncio
-from autopcr.util.utils import generate_battle_log
 
 class raidworker:
     def __init__(self, code, password, alias, sdkclient: Type[sdkclient]):
@@ -14,26 +13,6 @@ class raidworker:
         self.logger = lambda x: print(x)
         self.prepared = False
     
-    async def get_battle_log(self, partyDataId: int) -> str:
-        
-        teamRecord = next(x for x in self.client.data.resp.partyDataList if x.partyDataId == partyDataId)
-
-        styleDict = {
-            x.styleMstId: x for x in self.client.data.resp.styleDataList
-        }
-
-        return generate_battle_log(
-            [
-                styleDict[x] for x in [
-                    teamRecord.member1,
-                    teamRecord.member2,
-                    teamRecord.member3,
-                    teamRecord.member4,
-                    teamRecord.member5
-                ] if x != 0
-            ]
-        )
-
     @staticmethod
     def from_client(client: pcrclient, alias: str):
         worker = raidworker('', '', alias, client.session.sdk.__class__)
@@ -117,13 +96,16 @@ class raidworker:
             multiRaidStageMstId=multiRaidStageMstId,
             multiRaidStageDataId=0
         ))
+        info = await self.client.request(MultiRaidApiGetMultiRaidInfoRequest(
+            questDataId=resp.multiRaidRoomData.questDataId
+        ))
         resp2 = await self.client.request(MultiRaidApiAddDamageRequest(
             questDataId=resp.multiRaidRoomData.questDataId,
             damage=damage
         ))
         resp3 = await self.client.request(MultiRaidApiFinalizeStageForUserRequest(
             questDataId=resp.multiRaidRoomData.questDataId,
-            battleLog=await self.get_battle_log(partyDataId),
+            battleLog=await self.client.data.generate_battle_log(info.allyBattleUnitList),
             autoMode=0,
             result=result
         ))
@@ -141,15 +123,20 @@ class raidworker:
             multiRaidStageMstId=multiRaidStageDataRecord.multiRaidStageMstId,
             multiRaidStageDataId=multiRaidStageDataRecord.multiRaidStageDataId
         ))
+        info = await self.client.request(MultiRaidApiGetMultiRaidInfoRequest(
+            questDataId=resp.multiRaidRoomData.questDataId
+        ))
+        
         resp2 = await self.client.request(MultiRaidApiAddDamageRequest(
             questDataId=resp.multiRaidRoomData.questDataId,
             damage=damage
         ))
         if damage >= multiRaidStageDataRecord.hp:
             result = 1 # force to win if overkill
+            
         resp3 = await self.client.request(MultiRaidApiFinalizeStageForUserRequest(
             questDataId=resp.multiRaidRoomData.questDataId,
-            battleLog=await self.get_battle_log(partyDataId),
+            battleLog=await self.client.data.generate_battle_log(info.allyBattleUnitList),
             autoMode=0,
             result=result
         ))
