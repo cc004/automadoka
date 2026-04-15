@@ -425,7 +425,7 @@ class like_raid(Module):
 
             for user in raid_search.joinUserInfoList:
                 key = (user.userId, user.multiRaidStageDataId)
-                if key in liked:
+                if key in liked or user.userId == client.data.resp.userParamData.userId:
                     continue
                 liked.add(key)
 
