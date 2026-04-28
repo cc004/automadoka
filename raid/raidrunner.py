@@ -218,6 +218,15 @@ def queue_raid(raid: MultiRaidMultiRaidStageDataRecord, region: region):
     if not any(r.multiRaidStageDataId == raid.multiRaidStageDataId for r in once_queue):
         once_queue.append(raid)
 
+async def queue_raid_search(rid: str, region: region):
+    client = worker[region][0].client
+    try:
+        resp = await client.request(MultiRaidApiIdSearchRequest(searchId=rid))
+        queue_raid(resp.multiRaidStageDataList[0], region)
+    except Exception as ex:
+        log(f"[{region.value}] Failed to search for raid {rid}: {ex}")
+        raise
+
 async def once_routine(region: region):
     once_queue = get_once_queue(region)
     while True:

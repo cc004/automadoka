@@ -523,6 +523,15 @@ class HttpServer:
             login_user(AuthUser(qq))
             return "欢迎回来，" + qq, 200
 
+        @self.api.route('/saveraid', methods = ['GET'])
+        @rate_limit(1, timedelta(seconds=1))
+        async def saveraid():
+            from raid.raidrunner import region, queue_raid_search
+            rid = request.args.get('id', "")
+            r = request.args.get('region', region.Japan.value)
+            await queue_raid_search(rid, region(r))
+            return "已加入列表", 200
+
         @self.api.route('/logout', methods = ['POST'])
         @login_required
         @HttpServer.wrapaccountmgr(readonly = True)
