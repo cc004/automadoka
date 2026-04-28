@@ -222,6 +222,9 @@ async def queue_raid_search(rid: str, region: region):
     client = worker[region][0].client
     try:
         resp = await client.request(MultiRaidApiIdSearchRequest(searchId=rid))
+        if not resp.multiRaidStageDataList:
+            log(f"[{region.value}] No raid found for ID {rid}")
+            raise Exception("没有找到对应的raid")
         queue_raid(resp.multiRaidStageDataList[0], region)
     except Exception as ex:
         log(f"[{region.value}] Failed to search for raid {rid}: {ex}")

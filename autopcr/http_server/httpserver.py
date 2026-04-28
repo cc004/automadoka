@@ -529,7 +529,11 @@ class HttpServer:
             from raid.raidrunner import region, queue_raid_search
             rid = request.args.get('id', "")
             r = request.args.get('region', region.Japan.value)
-            await queue_raid_search(rid, region(r))
+            try:
+                await queue_raid_search(rid, region(r))
+            except:
+                import traceback
+                return traceback.format_exc(), 200
             return "已加入列表", 200
 
         @self.api.route('/logout', methods = ['POST'])
