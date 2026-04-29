@@ -241,13 +241,13 @@ async def once_routine(region: region):
             for stage in once_queue:
                 if stage.hp <= 0:
                     continue
-                raid_time = datetime.fromisoformat(stage.createdTime)
-                threshold = now_time - timedelta(minutes=150)
-                raid_time_user_tz = raid_time.astimezone(user_tz)
-                if raid_time_user_tz > threshold:
-                    log(f"Once routine Skipping raid {stage.multiRaidStageDataId} (Stage {stage.multiRaidStageMstId}) created at {raid_time_user_tz} (less than 150 minutes old)")
-                    new_queue.append(stage)
-                    continue
+                #raid_time = datetime.fromisoformat(stage.createdTime)
+                #threshold = now_time - timedelta(minutes=150)
+                #raid_time_user_tz = raid_time.astimezone(user_tz)
+                #if raid_time_user_tz > threshold:
+                #    log(f"Once routine Skipping raid {stage.multiRaidStageDataId} (Stage {stage.multiRaidStageMstId}) created at {raid_time_user_tz} (less than 150 minutes old)")
+                #    new_queue.append(stage)
+                #    continue
                 log(f"Once routine Found raid {stage.multiRaidStageDataId} (Stage {stage.multiRaidStageMstId}) with {stage.hp}? HP")
                 to_rescue.append(rescue(stage, False, region))
             once_queue.clear()
@@ -270,12 +270,12 @@ async def monitor_routine(monitor: raidworker):
             for stage in stages:
                 if stage.hp <= 0:
                     continue
-                raid_time = datetime.fromisoformat(stage.createdTime)
-                threshold = now_time - timedelta(minutes=30)
-                raid_time_user_tz = raid_time.astimezone(user_tz)
-                if raid_time_user_tz > threshold:
-                    log(f"[{monitor.alias}] Skipping raid {stage.multiRaidStageDataId} (Stage {stage.multiRaidStageMstId}) created at {raid_time_user_tz} (less than 30 minutes old)")
-                    continue
+                #raid_time = datetime.fromisoformat(stage.createdTime)
+                #threshold = now_time - timedelta(minutes=30)
+                #raid_time_user_tz = raid_time.astimezone(user_tz)
+                #if raid_time_user_tz > threshold:
+                #    log(f"[{monitor.alias}] Skipping raid {stage.multiRaidStageDataId} (Stage {stage.multiRaidStageMstId}) created at {raid_time_user_tz} (less than 30 minutes old)")
+                #    continue
                 log(f"[{monitor.alias}] Found raid {stage.multiRaidStageDataId} (Stage {stage.multiRaidStageMstId}) with {stage.hp} HP")
                 to_rescue.append(rescue(stage, True, monitor.client.session.sdk.region))
             await asyncio.gather(*to_rescue)
