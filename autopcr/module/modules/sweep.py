@@ -468,10 +468,13 @@ class battle_mission(Module):
             to_receive: List[int] = []
             for m in mission.missionDataList:
                 mst = mission_mst[m.missionMstId]
+                print(mst.title, mst.conditionType, mst.triggerType)
                 if (
                     m.count < mst.conditionCount and
-                    mst.triggerType == 6 and # QUEST_STAGE_CLEAR
-                    mst.conditionType in [252, 1451] # Quest, QuestInRound
+                    (mst.triggerType, mst.conditionType) in [
+                        (6, 252), # (QUEST_STAGE_CLEAR, Quest)
+                        (31, 1451) # (QUEST_STAGE_CLEAR_FOR_BATTLE_LOG, QuestInRound)
+                    ]
                 ):
                     questId = mst.conditionObjectId
 
