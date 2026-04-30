@@ -468,7 +468,6 @@ class battle_mission(Module):
             to_receive: List[int] = []
             for m in mission.missionDataList:
                 mst = mission_mst[m.missionMstId]
-                print(mst.title, mst.conditionType, mst.triggerType)
                 if (
                     m.count < mst.conditionCount and
                     (mst.triggerType, mst.conditionType) in [
