@@ -13,6 +13,14 @@ class TitleTitleViewData(BaseModel):
 class TermsTermsInfo(BaseModel):
     termsNum: int = None
     text: str = None
+class SelectionAbilityApiLearnSubSelectionAbilityRepeatConditions(BaseModel):
+    subRarityGroups: List[int] = None
+    effectIds: List[int] = None
+class SelectionAbilityApiLearnSubSelectionAbilityRepeatDrawnSlot(BaseModel):
+    slotIndex: int = None
+    subSelectionAbilityMstId: int = None
+class SelectionAbilityApiLearnSubSelectionAbilityRepeatAttemptHistory(BaseModel):
+    drawnSlots: List[SelectionAbilityApiLearnSubSelectionAbilityRepeatDrawnSlot] = None
 class UserUserDataRecord(BaseModel):
     userId: int = None
     uuid: str = None
