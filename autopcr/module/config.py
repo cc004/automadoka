@@ -288,6 +288,9 @@ def singlechoice(key: str, desc: str, default, candidates: Union[List, Callable]
 def multichoice(key: str, desc: str, default, candidates: Union[List, Callable]):
     return MultiChoiceConfig(key, desc, default, candidates)
 
+def multisearch(key: str, desc: str, default, candidates: Union[List, Callable]):
+    return MultiSearchConfig(key, desc, default, candidates)
+
 def timetype(key: str, desc: str, default):
     return TimeConfig(key, desc, default)
 

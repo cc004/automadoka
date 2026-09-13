@@ -1152,6 +1152,17 @@ class SelectionAbilityApiLearnSubSelectionAbilityRequest(RequestBase[SelectionAb
     @property
     def url(self) -> str:
         return "/api/selection_ability/learn_sub_selection_ability"
+class SelectionAbilityApiLearnSubSelectionAbilityRepeatRequest(RequestBase[SelectionAbilityApiLearnSubSelectionAbilityRepeatResponse]):
+    styleMstId: int = None
+    selectionAbilityMstId: int = None
+    lockIds: List[int] = None
+    permanentLockIds: List[int] = None
+    maxAttemptCount: int = None
+    conditions: SelectionAbilityApiLearnSubSelectionAbilityRepeatConditions = None
+
+    @property
+    def url(self) -> str:
+        return "/api/selection_ability/learn_sub_selection_ability_repeat"
 class SelectionAbilityApiSetSelectionAbilityRequest(RequestBase[SelectionAbilityApiSetSelectionAbilityResponse]):
     styleMstId: int = None
     selectionAbilityNums: List[int] = None

@@ -220,7 +220,7 @@ class Module:
         else:
             default = self.config[key].default
         value = self._parent.get_config(key, default)
-        if key in self.config and self.config[key].config_type == "multi":
+        if key in self.config and self.config[key].config_type in ("multi", "multi_search"):
             if not isinstance(value, list):
                 value = default
             else:
@@ -228,7 +228,7 @@ class Module:
         if key != self.key and self.config[key].candidates and (
             not isinstance(value, list) and (
                 value not in self.config[key].candidates or 
-                self.config[key].config_type == "multi"
+                self.config[key].config_type in ("multi", "multi_search")
                 ) or
             isinstance(value, list) and any(item not in self.config[key].candidates for item in value)
             ):

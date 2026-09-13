@@ -433,6 +433,15 @@ class SelectionAbilityApiLearnSubSelectionAbilityResponse(ResponseBase):
     userParamData: UserUserParamDataRecord = None
     styleData: StyleStyleDataRecord = None
     partyDataList: List[PartyPartyDataRecord] = None
+class SelectionAbilityApiLearnSubSelectionAbilityRepeatResponse(ResponseBase):
+    selectionAbilityData: SelectionAbilitySelectionAbilityDataRecord = None
+    itemDataList: List[ItemItemDataRecord] = None
+    userParamData: UserUserParamDataRecord = None
+    styleData: StyleStyleDataRecord = None
+    partyDataList: List[PartyPartyDataRecord] = None
+    attemptCount: int = None
+    isConditionMet: bool = None
+    attemptHistory: List[SelectionAbilityApiLearnSubSelectionAbilityRepeatAttemptHistory] = None
 class SelectionAbilityApiSetSelectionAbilityResponse(ResponseBase):
     selectionAbilityData: SelectionAbilitySelectionAbilityDataRecord = None
     itemDataList: List[ItemItemDataRecord] = None
