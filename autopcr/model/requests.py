@@ -864,12 +864,15 @@ class LoginApiLoginRequest(RequestBase[LoginApiLoginResponse]):
     @property
     def url(self) -> str:
         return "/api/login"
-class LikeApiExecLikeRequest(RequestBase[LikeApiExecLikeResponse]):
-    targetUserId: int = None
+class LikeApiExecLikeListRequest(
+    RequestBase[LikeApiExecLikeListResponse]
+):
+    targetUserIdList: list[int] = None
     value: int = None
+
     @property
     def url(self) -> str:
-        return "/api/like/exec_like"
+        return "/api/like/exec_like_list"
 class InAppSnsApiCreateLoginUrlRequest(RequestBase[InAppSnsApiCreateLoginUrlResponse]):
     platform: int = None
     @property
