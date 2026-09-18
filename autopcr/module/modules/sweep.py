@@ -555,18 +555,40 @@ class high_score(Module):
     async def do_task(self, client: pcrclient):
         now = datetime.now().astimezone()
 
-        for high_score_mst in await db.mst(MstApiGetScoreAttackMstListRequest()):
-            if datetime.fromisoformat(high_score_mst.endTime) < now or datetime.fromisoformat(high_score_mst.startTime) > now:
-                continue
-        
-            high_score_top = await client.request(ScoreAttackApiGetScoreAttackTopRequest(scoreAttackMstId=high_score_mst.scoreAttackMstId))
-            max_times = client.data.config.scoreAttackConfig.resetScoreAttackSkipNum - high_score_top.userScoreAttackData.skipNum
-            if max_times <= 0:
-                raise SkipError(f"{high_score_mst.name}打分没有剩余次数")
-            
-            await client.request(ScoreAttackApiSkipQuestBattleRequest(
-                scoreAttackMstId=high_score_mst.scoreAttackMstId,
-                repeatNum=max_times
-            ))
+        for high_score_mst in await db.mst(
+            MstApiGetScoreAttackMstListRequest()
+        ):
+            start_time = datetime.fromisoformat(
+                high_score_mst.startTime
+            )
+            end_time = datetime.fromisoformat(
+                high_score_mst.endTime
+            )
 
-            self._log(f"扫荡了{max_times}次打分{high_score_mst.name}")
+            if end_time < now or start_time > now:
+                continue
+
+            high_score_top = await client.request(
+                ScoreAttackApiGetScoreAttackTopRequest(
+                    scoreAttackMstId=high_score_mst.scoreAttackMstId
+                )
+            )
+
+            # skipNum 是当前剩余扫荡次数
+            max_times = high_score_top.userScoreAttackData.skipNum
+
+            if max_times <= 0:
+                raise SkipError(
+                    f"{high_score_mst.name}打分没有剩余次数"
+                )
+
+            await client.request(
+                ScoreAttackApiSkipQuestBattleRequest(
+                    scoreAttackMstId=high_score_mst.scoreAttackMstId,
+                    repeatNum=max_times
+                )
+            )
+
+            self._log(
+                f"扫荡了{max_times}次打分{high_score_mst.name}"
+            )
