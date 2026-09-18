@@ -97,6 +97,14 @@ class LoginApiLoginResponse(ResponseBase):
 class LikeApiExecLikeResponse(ResponseBase):
     result: bool = None
     isFriendMedalAcquired: bool = None
+
+class LikeApiExecLikeResult(ResponseBase):
+    targetUserId: int = None
+    result: bool = None
+    isFriendMedalAcquired: bool = None
+
+class LikeApiExecLikeListResponse(ResponseBase):
+    resultList: list[LikeApiExecLikeResult] = None
 class InAppSnsApiCreateLoginUrlResponse(ResponseBase):
     url: str = None
     state: str = None
