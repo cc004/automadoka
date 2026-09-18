@@ -4,18 +4,26 @@ from ...core.pcrclient import pcrclient
 from ...model.models import *
 from datetime import datetime, timezone
 
+
 def item(category, item_mst_id, is_infinite):
     def wrapper(shop: ShopShopMstRecord):
-        return shop.objectReceiveType == category and shop.objectId == item_mst_id and (shop.purchaseLimitCount == 0) == is_infinite
+        return (
+            shop.objectReceiveType == category
+            and shop.objectId == item_mst_id
+            and (shop.purchaseLimitCount == 0) == is_infinite
+        )
     return wrapper
+
 
 def anyof(*conds):
     def wrapper(shop: ShopShopMstRecord):
         return any(cond(shop) for cond in conds)
     return wrapper
 
+
 def it(id):
     return item(5, id, False)
+
 
 item_category: Dict[str, Callable[[ShopShopMstRecord], bool]] = {
     '白送的东西': lambda shop: shop.price <= 0,
@@ -29,9 +37,16 @@ item_category: Dict[str, Callable[[ShopShopMstRecord], bool]] = {
     '钻石': item(2, 0, False),
     '玩家经验': lambda shop: shop.objectReceiveType == 18,
     '称号': lambda shop: shop.objectReceiveType == 15,
-    '玩偶屋': lambda shop: shop.objectReceiveType == 19 or shop.objectReceiveType == 20 or shop.objectReceiveType == 21 or shop.objectReceiveType == 22,
+    '玩偶屋': lambda shop:
+        shop.objectReceiveType == 19
+        or shop.objectReceiveType == 20
+        or shop.objectReceiveType == 21
+        or shop.objectReceiveType == 22,
     '光之间内容': anyof(
-        lambda shop: shop.objectReceiveType == 14 or shop.objectReceiveType == 16 or shop.objectReceiveType == 17,
+        lambda shop:
+            shop.objectReceiveType == 14
+            or shop.objectReceiveType == 16
+            or shop.objectReceiveType == 17,
         it(201046)
     ),
     '记忆切符': it(262001),
@@ -42,10 +57,12 @@ item_category: Dict[str, Callable[[ShopShopMstRecord], bool]] = {
         it(123001), it(123002), it(123003)
     ),
     '新属性球': anyof(
-        it(121023), it(121024), it(121025), it(121026), it(121027), it(121028)
+        it(121023), it(121024), it(121025),
+        it(121026), it(121027), it(121028)
     ),
     '属性球': anyof(
-        it(121006), it(121009), it(121012), it(121015), it(121018), it(121021), it(121022)
+        it(121006), it(121009), it(121012),
+        it(121015), it(121018), it(121021), it(121022)
     ),
     'LP体力石': it(290001),
     '画板': anyof(
@@ -65,10 +82,12 @@ item_category: Dict[str, Callable[[ShopShopMstRecord], bool]] = {
     ),
     '临时锁': it(180004),
     '小石头': anyof(
-        it(121001), it(121004), it(121007), it(121010), it(121013), it(121016), it(121019)
+        it(121001), it(121004), it(121007),
+        it(121010), it(121013), it(121016), it(121019)
     ),
     '大石头': anyof(
-        it(121002), it(121005), it(121008), it(121011), it(121014), it(121017), it(121020)
+        it(121002), it(121005), it(121008),
+        it(121011), it(121014), it(121017), it(121020)
     ),
     '金币': item(11, 0, False),
     '泪滴（无限池）': item(5, 180003, True),
@@ -77,128 +96,312 @@ item_category: Dict[str, Callable[[ShopShopMstRecord], bool]] = {
     '金币（无限池）': item(11, 0, True)
 }
 
+
 def shop_priority(prefix: str):
     def wrapper(cls):
         setattr(cls, 'prefix', prefix)
         candidate = [i for i in range(0, 101)]
         priority = 100
+
         for key in item_category:
-            cls = inttype(f'{prefix}_shop_priority_{key}', f'{key}优先级，越高越优先，0为不购买', priority, candidate)(cls)
+            cls = inttype(
+                f'{prefix}_shop_priority_{key}',
+                f'{key}优先级，越高越优先，0为不购买',
+                priority,
+                candidate
+            )(cls)
             priority -= 3
+
         return cls
+
     return wrapper
 
-NULL_TIME = datetime.fromisoformat('1970-01-01T09:00:00+09:00')
+
+NULL_TIME = datetime.fromisoformat(
+    '1970-01-01T09:00:00+09:00'
+)
+
 
 class shop_base(Module):
     prefix: str = 'base'
 
+    # 【修改1】
+    # 未知物品使用这个优先级，不创建新的配置项。
+    # 1000000 足够高，可以高于现有最高优先级 100。
+    UNKNOWN_PRIORITY = 1000000
+
     def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool: ...
 
     async def do_task(self, client: pcrclient):
-        user_items = (await client.request(ItemApiGetItemDataListRequest())).itemDataList
-        item_keys = {item.itemMstId for item in user_items}
-        user_items = {
-            x: sum(i.num for i in user_items if i.itemMstId == x) for x in item_keys
+        user_items = (
+            await client.request(
+                ItemApiGetItemDataListRequest()
+            )
+        ).itemDataList
+
+        item_keys = {
+            item.itemMstId for item in user_items
         }
-        shop = await client.request(ShopApiGetShopListRequest())
-        shop_mst = await db.mst(MstApiGetShopMstListRequest())
-        shop_series_mst = await db.mst(MstApiGetShopSeriesMstListRequest())
-        
+
+        user_items = {
+            x: sum(
+                i.num
+                for i in user_items
+                if i.itemMstId == x
+            )
+            for x in item_keys
+        }
+
+        shop = await client.request(
+            ShopApiGetShopListRequest()
+        )
+
+        shop_mst = await db.mst(
+            MstApiGetShopMstListRequest()
+        )
+
+        shop_series_mst = await db.mst(
+            MstApiGetShopSeriesMstListRequest()
+        )
+
         item_dict = {
-            x.itemMstId: x for x in await db.mst(MstApiGetItemMstListRequest())
+            x.itemMstId: x
+            for x in await db.mst(
+                MstApiGetItemMstListRequest()
+            )
         }
 
         def category_of(shop: ShopShopMstRecord):
             for key, cond in item_category.items():
                 if cond(shop):
                     return key
-            return "未知"
+
+            # 【修改2】
+            # 未知物品不再返回一个需要读取配置的“未知”类别，
+            # 而是直接返回 None。
+            return None
 
         def sort_key(shop: ShopShopMstRecord):
-            for key, cond in item_category.items():
-                if cond(shop):
-                    priority = self.get_config(f'{self.__class__.prefix}_shop_priority_{key}')
-                    rarity = item_dict[shop.objectId].rarity if shop.objectReceiveType == 5 and shop.objectId in item_dict else 0
-                    efficiency = shop.num / shop.price if shop.price > 0 else 0
-                    return (-priority, -rarity, -efficiency)
+            category = category_of(shop)
 
-            raise AbortError(f"商店ID：{shop.shopMstId}，物品类别：{shop.objectReceiveType}，物品ID：{shop.objectId}")
+            # 【修改3】
+            # 已知类别使用原来的优先级；
+            # 未知类别直接使用最高优先级。
+            if category is None:
+                priority = self.UNKNOWN_PRIORITY
+            else:
+                priority = self.get_config(
+                    f'{self.__class__.prefix}_shop_priority_{category}'
+                )
 
-        now = datetime.now(timezone.utc).astimezone()
-        
+            rarity = (
+                item_dict[shop.objectId].rarity
+                if shop.objectReceiveType == 5
+                and shop.objectId in item_dict
+                else 0
+            )
+
+            efficiency = (
+                shop.num / shop.price
+                if shop.price > 0
+                else 0
+            )
+
+            return (
+                -priority,
+                -rarity,
+                -efficiency
+            )
+
+        now = datetime.now(
+            timezone.utc
+        ).astimezone()
+
         for mst in shop_series_mst:
-            start = datetime.fromisoformat(mst.startTime)
-            end = datetime.fromisoformat(mst.endTime)
-            if start != NULL_TIME and start > now or end != NULL_TIME and end < now:
+            start = datetime.fromisoformat(
+                mst.startTime
+            )
+            end = datetime.fromisoformat(
+                mst.endTime
+            )
+
+            if (
+                start != NULL_TIME and start > now
+            ) or (
+                end != NULL_TIME and end < now
+            ):
                 continue
+
             if not self.shop_filter(mst):
                 continue
+
             series = mst.shopSeriesMstId
-            all_items = [s for s in shop_mst if s.shopGroupId in (mst.shopGroupId1, mst.shopGroupId2)]
+
+            all_items = [
+                s
+                for s in shop_mst
+                if s.shopGroupId in (
+                    mst.shopGroupId1,
+                    mst.shopGroupId2
+                )
+            ]
+
             purchased = {
-                s.shopMstId: s for s in shop.shopCountDataList if s.shopSeriesMstId == series
+                s.shopMstId: s
+                for s in shop.shopCountDataList
+                if s.shopSeriesMstId == series
             }
 
-            try:
-                all_items.sort(key=sort_key)
-            except AbortError as e:
-                self._log(f"跳过商店{mst.title}，无法识别物品类别: {str(e)}")
-                continue
+            # 【修改4】
+            # 不再因为未知物品抛 AbortError，
+            # 所以不会因为一个新道具导致整个商店被跳过。
+            all_items.sort(key=sort_key)
 
             for item in all_items:
-                start = datetime.fromisoformat(item.startTime)
-                end = datetime.fromisoformat(item.endTime)
-                if start != NULL_TIME and start > now or end != NULL_TIME and end < now:
+                start = datetime.fromisoformat(
+                    item.startTime
+                )
+                end = datetime.fromisoformat(
+                    item.endTime
+                )
+
+                if (
+                    start != NULL_TIME and start > now
+                ) or (
+                    end != NULL_TIME and end < now
+                ):
                     continue
+
                 category = category_of(item)
-                if self.get_config(f'{self.__class__.prefix}_shop_priority_{category}') == 0:
-                    self._log(f"商店{mst.title}的{item_name}类别{category}优先级为0，跳过")
+
+                # 【修改5】
+                # 先定义 item_name，再使用它。
+                item_name = (
+                    item_dict[item.objectId].name
+                    if item.objectId in item_dict
+                    else f"未知物品({item.objectId})"
+                )
+
+                # 【修改6】
+                # 未知物品直接使用最高优先级，
+                # 不读取不存在的 base_shop_priority_未知。
+                if category is None:
+                    priority = self.UNKNOWN_PRIORITY
+
+                    self._log(
+                        f"发现未知商品："
+                        f"{item_name}，"
+                        f"shopMstId={item.shopMstId}，"
+                        f"objectReceiveType={item.objectReceiveType}，"
+                        f"objectId={item.objectId}，"
+                        f"自动按最高优先级处理"
+                    )
+                else:
+                    priority = self.get_config(
+                        f'{self.__class__.prefix}_shop_priority_{category}'
+                    )
+
+                if priority == 0:
+                    self._log(
+                        f"商店{mst.title}的"
+                        f"{item_name}类别{category}优先级为0，跳过"
+                    )
                     continue
-                bought = purchased[item.shopMstId].purchaseCount if item.shopMstId in purchased else 0
-                item_name = item_dict[item.objectId].name if item.objectId in item_dict else category
-                if item.purchaseLimitCount != 0 and bought >= item.purchaseLimitCount:
+
+                bought = (
+                    purchased[item.shopMstId].purchaseCount
+                    if item.shopMstId in purchased
+                    else 0
+                )
+
+                if (
+                    item.purchaseLimitCount != 0
+                    and bought >= item.purchaseLimitCount
+                ):
                     continue
+
                 if item.price <= 0:
-                    self._log(f"商店{mst.title}的{item_name}价格异常，跳过")
+                    self._log(
+                        f"商店{mst.title}的"
+                        f"{item_name}价格异常，跳过"
+                    )
                     continue
-                coin_cnt = user_items.get(mst.payId, 0)
+
+                coin_cnt = user_items.get(
+                    mst.payId,
+                    0
+                )
+
                 if coin_cnt < item.price:
-                    self._log(f"商店{mst.title}的{item_name}金币不足，跳过")
+                    self._log(
+                        f"商店{mst.title}的"
+                        f"{item_name}金币不足，跳过"
+                    )
                     break
-                buy_num = coin_cnt // item.price
+
+                buy_num = (
+                    coin_cnt // item.price
+                )
+
                 if item.purchaseLimitCount != 0:
-                    buy_num = min(buy_num, item.purchaseLimitCount - bought)
+                    buy_num = min(
+                        buy_num,
+                        item.purchaseLimitCount - bought
+                    )
+
+                # 防止 buy_num 算出 0
+                if buy_num <= 0:
+                    continue
 
                 req_buy = ShopApiBuyRequest()
                 req_buy.num = buy_num
                 req_buy.shopMstId = item.shopMstId
                 req_buy.shopSeriesMstId = series
+
                 await client.request(req_buy)
-                self._log(f"购买商店{mst.title}的{item_name}[{item.price}]，数量：{buy_num}")
-                user_items[mst.payId] = user_items.get(mst.payId, 0) - item.price * buy_num
+
+                self._log(
+                    f"购买商店{mst.title}的"
+                    f"{item_name}[{item.price}]，"
+                    f"数量：{buy_num}"
+                )
+
+                user_items[mst.payId] = (
+                    user_items.get(mst.payId, 0)
+                    - item.price * buy_num
+                )
+
 
 @description('按顺序兑换活动商店物品')
 @shop_priority('event')
 @name('清空活动兑换币')
 @default(True)
 class event_shop(shop_base):
-    def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
+    def shop_filter(
+        self,
+        mst: ShopShopSeriesMstRecord
+    ) -> bool:
         return mst.category == 3 and not (
-            'ゴールドクライシスメダル' in mst.title or # fuck you pklb
+            'ゴールドクライシスメダル' in mst.title
+            or
             'シルバークライシスメダル' in mst.title
         )
+
 
 @description('按顺序兑换raid商店物品')
 @shop_priority('raid')
 @name('清空raid兑换币')
 @default(True)
 class raid_shop(shop_base):
-    def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
+    def shop_filter(
+        self,
+        mst: ShopShopSeriesMstRecord
+    ) -> bool:
         return (
-            mst.payId == 201029 or mst.payId == 201030 or
-            'ゴールドクライシスメダル' in mst.title or # fuck you pklb
-            'シルバークライシスメダル' in mst.title 
+            mst.payId == 201029
+            or mst.payId == 201030
+            or 'ゴールドクライシスメダル' in mst.title
+            or 'シルバークライシスメダル' in mst.title
         )
 
 
@@ -207,6 +410,8 @@ class raid_shop(shop_base):
 @name('清空jjc兑换币')
 @default(True)
 class arena_shop(shop_base):
-    def shop_filter(self, mst: ShopShopSeriesMstRecord) -> bool:
+    def shop_filter(
+        self,
+        mst: ShopShopSeriesMstRecord
+    ) -> bool:
         return mst.payId == 201009
-
