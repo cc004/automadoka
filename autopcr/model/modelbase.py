@@ -68,3 +68,6 @@ class Request(Generic[TResponse], BaseModel):
     actionToken: Optional[str]
     ctag: Optional[str]
     actionTime: int
+    timestamp: int
+    nonce: str
+    path: str
