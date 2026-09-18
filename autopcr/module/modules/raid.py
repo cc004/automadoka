@@ -428,14 +428,27 @@ class like_raid(Module):
                     continue
                 liked.add(key)
 
-                req=LikeApiExecLikeRequest(targetUserId=user.userId, value=user.multiRaidStageDataId)
-                res = await client.request(req)
-                now = client.data.resp.userParamData.todayFriendMedalCount
-                max_num = client.data.config.friendConfig.gainTodayFriendMedalMaxNum
-                if res.result:
-                    self._log(f"已点赞用户 {user.userName} (关卡 {user.multiRaidStageDataId}) ({now}/{max_num})")
+                req = LikeApiExecLikeListRequest(
+                    targetUserIdList=[user.userId],
+                    value=user.multiRaidStageDataId
+                )
 
-                if res.result and not res.isFriendMedalAcquired or now >= max_num:
-                    self._log(f"好友勋章已满，无法继续点赞")
-                    return
-                
+                res = await client.request(req)
+
+                for item in res.resultList or []:
+                    if item.targetUserId != user.userId:
+                        continue
+
+                    now = client.data.resp.userParamData.todayFriendMedalCount
+                    max_num = client.data.config.friendConfig.gainTodayFriendMedalMaxNum
+
+                    if item.result:
+                        self._log(
+                            f"已点赞用户 {user.userName} "
+                            f"(关卡 {user.multiRaidStageDataId}) "
+                            f"({now}/{max_num})"
+                        )
+
+                    if now >= max_num:
+                        self._log("好友勋章已满，无法继续点赞")
+                        return
