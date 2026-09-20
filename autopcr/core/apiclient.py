@@ -9,6 +9,7 @@ from ..util import aiorequests, freqlimiter
 from ..constants import DEBUG_LOG, API_LIMIT_TIMES, API_LIMIT_INTERVAL
 import time, datetime
 import json
+import base64, os
 from ..util.logger import instance as logger
 from .sdkclient import sdkclient
 from . import crypto
@@ -90,7 +91,10 @@ class apiclient(Container["apiclient"]):
             userId=self.userId,
             actionToken=None,
             uuid=self.uuid,
-            ctag=None
+            ctag=None,
+            timestamp=int(time.time()),
+            nonce=base64.b64encode(os.urandom(20)).decode(),
+            path=request.url,
         )
 
         urlroot = self.servers[self.active_server]
