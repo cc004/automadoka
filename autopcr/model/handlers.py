@@ -1,9 +1,10 @@
 from . import responses
 from .common import *
 from ..core.datamgr import datamgr
+from .registry import register_handler
 
 def handles(cls):
-    cls.__base__.update = cls.update
+    register_handler(cls.__base__._name, cls.update)
     return None
 
 @handles

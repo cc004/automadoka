@@ -41,14 +41,19 @@ class UrlRangeReader(RangeReader):
 
 class FileRangeReader(RangeReader):
     def __init__(self, url):
-        with open(url, 'rb') as f:
-            self.file = f.read()
+        self.file = open(url, 'rb')
+        self.file.seek(0, io.SEEK_END)
+        self.size = self.file.tell()
     
     def total_size(self):
-        return len(self.file)
+        return self.size
     
     def chunk(self, start, size):
-        return self.file[start:start+size]
+        self.file.seek(start)
+        return self.file.read(size)
+
+    def close(self):
+        self.file.close()
 
 def create_range_reader(source):
     if source.startswith('http://') or source.startswith('https://'):

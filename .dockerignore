@@ -1,3 +1,11 @@
 .vscode/
 .github/
 .dockerignore
+.git/
+cache/
+log/
+result/
+**/__pycache__/
+**/bin/
+**/obj/
+acc.txt

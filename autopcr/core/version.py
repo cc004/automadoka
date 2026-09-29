@@ -1,108 +1,99 @@
-import asyncio, hashlib, zipfile, os, json, requests, io
+"""Update app signing data and protocol models as one committed generation."""
+import asyncio
+import json
+import threading
+from pathlib import Path
 from ..constants import CACHE_DIR
 from ..util import streamzip
 
+
 class AppInfo:
     def __init__(self):
-        pass
+        self._state = {
+            'version': '2.6.0', 'sign': '94bf87cd37b5a4f527f4fa5051929454', 'libcount': 0x1f,
+        }
 
-    def set_version(self, v: str):
-        self.version = v
-    
-    def set_md5(self, sign: str):
-        self.sign = sign
-
-    def set_libcount(self, count: int):
-        self.libcount = count
-    
     @property
-    def sm(self) -> str:
-        return f'd{self.sign}o{self.libcount}1E88A0177575728C9A399A9BD1F43A11D4100065n'
+    def version(self): return self._state['version']
+    @property
+    def sign(self): return self._state['sign']
+    @property
+    def libcount(self): return self._state['libcount']
+    @property
+    def sm(self):
+        state = self._state
+        return f"d{state['sign']}o{state['libcount']}1E88A0177575728C9A399A9BD1F43A11D4100065n"
 
-version_info: AppInfo = AppInfo()
-version_info.set_version("2.6.0")
-version_info.set_md5("94bf87cd37b5a4f527f4fa5051929454")
-version_info.set_libcount(0x1f)
+    def set_version(self, value): self._state = dict(self._state, version=value)
+    def set_md5(self, value): self._state = dict(self._state, sign=value)
+    def set_libcount(self, value): self._state = dict(self._state, libcount=value)
+    def apply(self, state): self._state = dict(state)
 
-PATH = os.path.join(CACHE_DIR, 'version.json')
+
+version_info = AppInfo()
+PATH = str(Path(CACHE_DIR) / 'version.json')
+DOWNLOAD_URL = 'https://d.apkpure.net/b/XAPK/com.aniplex.magia.exedra.en?version=latest'
+update_lck = asyncio.Lock()
+_sync_update_lock = threading.Lock()
+
 
 def load_version_info():
-    with open(PATH, 'rb') as f:
-        data = json.load(f)
-    
-    version_info.set_version(data['version'])
-    version_info.set_md5(data['sign'])
-    version_info.set_libcount(data['libcount'])
-        
-    print(f'Loaded version info: {version_info.version}, {version_info.sign}, {version_info.libcount}')
+    with open(PATH, 'r', encoding='utf-8') as stream:
+        data = json.load(stream)
+    for key in ('version', 'sign', 'libcount'):
+        if key not in data: raise ValueError('Invalid version state: missing ' + key)
+    version_info.apply(data)
+
 
 def save_version_info():
-    data = {
-        'version': version_info.version,
-        'sign': version_info.sign,
-        'libcount': version_info.libcount
-    }
-    with open(PATH, 'w') as f:
-        json.dump(data, f)
-    
-    print(f'Saved version info: {version_info.version}, {version_info.sign}, {version_info.libcount}')
+    from ..model.update import atomic_json
+    atomic_json(PATH, version_info._state)
 
-update_lck = asyncio.Lock()
 
 try:
     load_version_info()
-except:
-    save_version_info()
+except FileNotFoundError:
+    # Do not create files merely by importing model classes.
+    pass
 
-from typing import IO
 
-def _update_version_sync():
-    print(f'Updating version from {version_info.version}...')
-    url = 'https://d.apkpure.net/b/XAPK/com.aniplex.magia.exedra.en?version=latest'
-    print(f'Downloading latest version from {url} ...')
+def _update_version_sync(source=None, activate=True):
+    from ..model import registry
+    from ..model.update import prepare_models, atomic_json
+    with _sync_update_lock:
+        print(f'Checking app/protocol update from {version_info.version}...', flush=True)
+        with streamzip.StreamZip(str(source or DOWNLOAD_URL)) as archive:
+            with archive.open('manifest.json') as stream:
+                manifest = json.load(stream)
+            version = str(manifest['version_name'])
+            if (activate and version == version_info.version and version_info._state.get('models')
+                    and registry.current().version == version):
+                print(f'App and models are already at {version}', flush=True)
+                return None
+            try:
+                generation, state = prepare_models(archive, manifest)
+            except registry.ProtocolError:
+                raise
+            except Exception as exc:
+                raise registry.ProtocolError('Protocol preparation failed: ' + str(exc)) from exc
+        registry.check_activation(generation)
+        if not activate:
+            print('Prepared protocol models: ' + str(generation.directory), flush=True)
+            return generation, state
 
-    file = streamzip.StreamZip(url)
+        def commit():
+            atomic_json(PATH, state)
+            version_info.apply(state)
+        registry.activate(generation, commit=commit)
+        print(f'Updated app and protocol models to {version}', flush=True)
+        return generation, state
 
-    with file.open('manifest.json') as fp:
-        manifest = json.load(fp)
-    
-    version = manifest['version_name']
 
-    if version == version_info.version:
-        print(f'Already the latest version {version}, skip updating')
-        return
-
-    base_apk = next(f for f in manifest['split_apks'] if f['id'] == 'base')
-    lib_apk = next(f for f in manifest['split_apks'] if f['id'] == 'config.arm64_v8a')
-
-    with file.open(base_apk['file']) as apk_fp:
-        apk_data = apk_fp.read()
-        md5 = hashlib.md5(apk_data).hexdigest()
-
-    with file.open(lib_apk['file']) as apk_fp:
-        with zipfile.ZipFile(apk_fp) as apk_zip:
-            lib_files = [f for f in apk_zip.namelist() if f.startswith('lib/arm64-v8a/')]
-            libcount = len(lib_files)
-
-    version_info.set_version(version)
-    version_info.set_md5(md5)
-    version_info.set_libcount(libcount)
-
-    save_version_info()
-    print(f'Updated to version {version_info.version}, sign {version_info.sign}, libcount {version_info.libcount}')
-
-import sys
-
-#if sys.gettrace() is None:
-#    _update_version_sync()
-
-async def update_version():
-    version_to_update = version_info.version
+async def update_version(rejected_version=None):
+    state_before = version_info._state
     async with update_lck:
-        if version_to_update != version_info.version:
-            print(f'Another coroutine updated version to {version_info.version}, skip updating {version_to_update}')
-            return
-        
-        await asyncio.get_event_loop().run_in_executor(None, _update_version_sync)
-        
-
+        if (version_info._state is not state_before or
+                (rejected_version is not None and rejected_version != version_info.version)):
+            return True
+        result = await asyncio.get_event_loop().run_in_executor(None, _update_version_sync)
+        return result is not None

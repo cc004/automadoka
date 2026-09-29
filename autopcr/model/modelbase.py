@@ -1,9 +1,8 @@
 #type: ignore
 from re import T
 from typing import Generic, TypeVar, Optional, List, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr
 from pydantic.generics import GenericModel
-from ..core.version import version_info
 
 class ServerError(BaseModel):
     domain: str = None
@@ -12,6 +11,7 @@ class ServerError(BaseModel):
     reason: str = None
 
 class ResponseBase(BaseModel):
+    _protocol_request: Any = PrivateAttr(None)
     async def update(self, mgr: "datamgr", request): ...
 
 TResponse = TypeVar('TResponse', bound=ResponseBase, covariant=True)
@@ -26,6 +26,8 @@ from pydantic.main import validate_model, object_setattr
 from typing import Any
 
 class RequestBase(Generic[TResponse], BaseModel):
+    _protocol_sm: Optional[str] = PrivateAttr(None)
+    _protocol_version: Optional[str] = PrivateAttr(None)
     lastHomeAccessTime: str = ''
     sm: str = ''
     @property
@@ -50,7 +52,8 @@ class RequestBase(Generic[TResponse], BaseModel):
         __pydantic_self__._init_private_attributes()
     
     def prepare(self):
-        self.sm = version_info.sm
+        from ..core.version import version_info
+        self.sm = self._protocol_sm or version_info.sm
 
 TMstType = TypeVar('TMstType', bound=Any, covariant=True)
 

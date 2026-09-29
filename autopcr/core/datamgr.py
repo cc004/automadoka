@@ -16,7 +16,7 @@ class datamgr(Component[apiclient]):
     async def request(self, request: RequestBase[TResponse], next: RequestHandler) -> TResponse:
         resp = await next.request(request)
         if resp:
-            await resp.update(self, request)
+            await resp.update(self, resp._protocol_request or request)
         return resp
 
     async def generate_battle_log(self, units: List[QuestBattleBattleUnit]) -> str:

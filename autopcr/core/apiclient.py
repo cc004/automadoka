@@ -16,6 +16,7 @@ from . import crypto
 from ..util import type_utils
 from .version import update_version
 from abc import abstractmethod
+from ..model.registry import bind_request, ProtocolError
 
 class VersionUpdatedException(Exception):
     pass
@@ -79,6 +80,7 @@ class apiclient(Container["apiclient"]):
     @freqlimiter.FreqLimiter(API_LIMIT_TIMES, API_LIMIT_INTERVAL)
     async def _request_internal(self, request: RequestBase[TResponse], noRetry=False) -> TResponse:
         if not request: return None
+        request = bind_request(request)
         # logger.info(f'{self.user_name} requested {request.__class__.__name__} at /{request.url}')
         request.lastHomeAccessTime = self.lastHomeAccessTime
         request.prepare()
@@ -107,7 +109,9 @@ class apiclient(Container["apiclient"]):
             resp = await aiorequests.post(urlroot + request.url, data=crypted, headers=self._headers, timeout=10)
 
             if resp.status_code == 428:
-                await update_version()
+                if not await update_version(request._protocol_version):
+                    raise ApiException('Server requires an update, but APKPure has no newer app/protocol version',
+                                       status='VersionMismatch', result_code=428)
                 raise VersionUpdatedException()
 
             if resp.status_code == 401:
@@ -118,14 +122,14 @@ class apiclient(Container["apiclient"]):
             response = await resp.content
 
             response = crypto.PackHelper.unpack(response, self.get_crypto_key())
-        except ApiException:
+        except (ApiException, VersionUpdatedException, ProtocolError):
             raise
         except:
             import traceback
             traceback.print_exc()
             raise NetworkException
 
-        cls = type_utils.find_type_base(request.__class__, RequestBase)
+        cls = getattr(type(request), '__response_type__', None) or type_utils.find_type_base(type(request), RequestBase)
 
         if DEBUG_LOG:
             with open('req.log', 'a', encoding='utf8') as fp:
@@ -142,6 +146,7 @@ class apiclient(Container["apiclient"]):
             raise ApiException('\n'.join(err.reason for err in response.errors), status=response.status, result_code=resp.status_code)
 
         assert response.payload is not None
+        response.payload._protocol_request = request
 
         if (request.url == '/api/home/get_home_info'):
             self.access_home()

@@ -66,6 +66,8 @@ class sessionmgr(Component[apiclient]):
             resp = await next.request(req)
             self._container.sessionId = resp.sessionId
             self._container.userId = resp.userId
+        except VersionUpdatedException:
+            raise
         except Exception as e:
             logger.exception(e)
             raise PanicError(f"登录出错: {e}")
@@ -109,6 +111,10 @@ class sessionmgr(Component[apiclient]):
         if not self._logged:
             await self._login(next)
         try:
+            return await next.request(request)
+        except VersionUpdatedException:
+            self._logged = False
+            await self._login(next)
             return await next.request(request)
         except ApiException as ex:
             self._logged = False

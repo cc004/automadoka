@@ -30,7 +30,7 @@ ALLOW_REGISTER = strtobool(os.getenv("AUTOPCR_SERVER_ALLOW_REGISTER", 'true'))
 SUPERUSER = str(os.getenv("AUTOPCR_SERVER_SUPERUSER", ""))
 
 ROOT_DIR = os.path.join(os.path.dirname(__file__), '..')
-CACHE_DIR = os.path.join(ROOT_DIR, './cache/')
+CACHE_DIR = os.getenv('AUTOPCR_CACHE_DIR', os.path.join(ROOT_DIR, './cache/'))
 RESULT_DIR = os.path.join(ROOT_DIR, './result/')
 DATA_DIR = os.path.join(ROOT_DIR, './data/')
 CONFIG_PATH = os.path.join(CACHE_DIR, './http_server/') 
