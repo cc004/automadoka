@@ -76,6 +76,11 @@ class TalismanApiSetTalismanProtectRequest(RequestBase[TalismanApiSetTalismanPro
     @property
     def url(self) -> str:
         return "/api/talisman/set_talisman_protect"
+class SnsApiPostRequest(RequestBase[SnsApiPostResponse]):
+    postType: SnsPostType = None
+    @property
+    def url(self) -> str:
+        return "/api/sns/post"
 class ServerApiGetTimeZoneInfoRequest(RequestBase[ServerApiGetTimeZoneInfoResponse]):
     @property
     def url(self) -> str:
@@ -213,6 +218,10 @@ class MstApiGetTowerMstListRequest(MstRequestBase[TowerTowerMstRecord]):
     @property
     def url(self) -> str:
         return "/api/mst/get_tower_mst_list"
+class MstApiGetTowerThemeMstListRequest(MstRequestBase[TowerTowerThemeMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_tower_theme_mst_list"
 class MstApiGetQuestCategoryMstListRequest(MstRequestBase[QuestOutGameQuestCategoryMstRecord]):
     @property
     def url(self) -> str:
@@ -241,6 +250,14 @@ class MstApiGetMissionTitleMstListRequest(MstRequestBase[MissionMissionTitleMstR
     @property
     def url(self) -> str:
         return "/api/mst/get_mission_title_mst_list"
+class MstApiGetBingoMissionMstListRequest(MstRequestBase[MissionBingoMissionMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_bingo_mission_mst_list"
+class MstApiGetBingoMissionRewardMstListRequest(MstRequestBase[MissionBingoMissionRewardMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_bingo_mission_reward_mst_list"
 class MstApiGetMissionTransitionMstListRequest(MstRequestBase[MissionMissionTransitionMstRecord]):
     @property
     def url(self) -> str:
@@ -285,6 +302,10 @@ class MstApiGetQuestRewardMstListRequest(MstRequestBase[QuestOutGameQuestRewardM
     @property
     def url(self) -> str:
         return "/api/mst/get_quest_reward_mst_list"
+class MstApiGetExplorationShortcutMstListRequest(MstRequestBase[ExplorationExplorationShortcutMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_exploration_shortcut_mst_list"
 class MstApiGetFieldSeriesMstListRequest(MstRequestBase[ExplorationFieldSeriesMstRecord]):
     @property
     def url(self) -> str:
@@ -337,6 +358,10 @@ class MstApiGetUniqueStatePatternMstListRequest(MstRequestBase[SkillUniqueStateP
     @property
     def url(self) -> str:
         return "/api/mst/get_unique_state_pattern_mst_list"
+class MstApiGetUniqueStateLevelMstListRequest(MstRequestBase[SkillUniqueStateLevelMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_unique_state_level_mst_list"
 class MstApiGetLeaderSkillMstListRequest(MstRequestBase[SkillLeaderSkillMstRecord]):
     @property
     def url(self) -> str:
@@ -661,6 +686,10 @@ class MstApiGetSelectionAbilityLotteryRateMstListRequest(MstRequestBase[Selectio
     @property
     def url(self) -> str:
         return "/api/mst/get_selection_ability_lottery_rate_mst_list"
+class MstApiGetSelectionAbilityEffectMstListRequest(MstRequestBase[SelectionAbilitySelectionAbilityEffectMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_selection_ability_effect_mst_list"
 class MstApiGetSteamAchievementMstListRequest(MstRequestBase[SteamSteamAchievementMstRecord]):
     @property
     def url(self) -> str:
@@ -805,6 +834,10 @@ class MstApiGetAlternativeStoryPointSequenceMstListRequest(MstRequestBase[Altern
     @property
     def url(self) -> str:
         return "/api/mst/get_alternative_story_point_sequence_mst_list"
+class MstApiGetAlternativeStoryPointGroupMstListRequest(MstRequestBase[AlternativeStoryAlternativeStoryPointGroupMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_alternative_story_point_group_mst_list"
 class MstApiGetCharacterStoryAlertViewMstListRequest(MstRequestBase[CharacterCharacterStoryAlertViewMstRecord]):
     @property
     def url(self) -> str:
@@ -825,6 +858,18 @@ class MstApiGetMissionCampaignGroupMstListRequest(MstRequestBase[MissionMissionC
     @property
     def url(self) -> str:
         return "/api/mst/get_mission_campaign_group_mst_list"
+class MstApiGetPassiveSkillSortCategoryMstListRequest(MstRequestBase[SkillPassiveSkillSortCategoryMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_passive_skill_sort_category_mst_list"
+class MstApiGetRolePriorityAbilityCategoryMstListRequest(MstRequestBase[SkillRolePriorityAbilityCategoryMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_role_priority_ability_category_mst_list"
+class MstApiGetMissionTransitionConditionMstListRequest(MstRequestBase[MissionMissionTransitionConditionMstRecord]):
+    @property
+    def url(self) -> str:
+        return "/api/mst/get_mission_transition_condition_mst_list"
 class MapGveApiGetTopInfoRequest(RequestBase[MapGveApiGetTopInfoResponse]):
     @property
     def url(self) -> str:
@@ -864,12 +909,15 @@ class LoginApiLoginRequest(RequestBase[LoginApiLoginResponse]):
     @property
     def url(self) -> str:
         return "/api/login"
-class LikeApiExecLikeListRequest(
-    RequestBase[LikeApiExecLikeListResponse]
-):
-    targetUserIdList: list[int] = None
+class LikeApiExecLikeRequest(RequestBase[LikeApiExecLikeResponse]):
+    targetUserId: int = None
     value: int = None
-
+    @property
+    def url(self) -> str:
+        return "/api/like/exec_like"
+class LikeApiExecLikeListRequest(RequestBase[LikeApiExecLikeListResponse]):
+    targetUserIdList: List[int] = None
+    value: int = None
     @property
     def url(self) -> str:
         return "/api/like/exec_like_list"
@@ -939,6 +987,22 @@ class DebugSubscriptionApiDoSubscribeForceRequest(RequestBase[DebugSubscriptionA
     @property
     def url(self) -> str:
         return "/api/debug/debug_subscription/do_subscribe_force"
+class DebugGachaApiSimulateRequest(RequestBase[DebugGachaApiSimulateResponse]):
+    gachaMstId: int = None
+    playCount: int = None
+    step: int = None
+    @property
+    def url(self) -> str:
+        return "/api/debug/debug_gacha/simulate"
+class DailySkipApiGetDailySkipListRequest(RequestBase[DailySkipApiGetDailySkipListResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/daily_skip/get_daily_skip_list"
+class DailySkipApiSaveCheckedListRequest(RequestBase[DailySkipApiSaveCheckedListResponse]):
+    checkedList: List[DailySkipSaveCheckedListReqParam] = None
+    @property
+    def url(self) -> str:
+        return "/api/daily_skip/save_checked_list"
 class CameraApiCameraLogRequest(RequestBase[CameraApiCameraLogResponse]):
     cameraLogList: List[CameraCameraLogRecord] = None
     @property
@@ -971,6 +1035,27 @@ class TowerApiSkipQuestBattleRequest(RequestBase[TowerApiSkipQuestBattleResponse
     @property
     def url(self) -> str:
         return "/api/tower/skip_quest_battle"
+class TowerApiBulkSkipQuestBattleRequest(RequestBase[TowerApiBulkSkipQuestBattleResponse]):
+    partyDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/tower/bulk_skip_quest_battle"
+class TowerApiGetThemeTowerTopRequest(RequestBase[TowerApiGetThemeTowerTopResponse]):
+    towerThemeMstId: int = None
+    difficulty: int = None
+    @property
+    def url(self) -> str:
+        return "/api/tower/get_theme_tower_top"
+class TowerApiBulkSkipThemeTowerQuestBattleRequest(RequestBase[TowerApiBulkSkipThemeTowerQuestBattleResponse]):
+    towerThemeMstId: int = None
+    partyDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/tower/bulk_skip_theme_tower_quest_battle"
+class TowerApiGetTowerListRequest(RequestBase[TowerApiGetTowerListResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/tower/get_tower_list"
 class StyleApiGetStyleDataListRequest(RequestBase[StyleApiGetStyleDataListResponse]):
     @property
     def url(self) -> str:
@@ -1008,6 +1093,13 @@ class StyleApiStyleLimitBreakRequest(RequestBase[StyleApiStyleLimitBreakResponse
     @property
     def url(self) -> str:
         return "/api/style/style_limit_break"
+class StyleApiStyleLimitBreakByItemRequest(RequestBase[StyleApiStyleLimitBreakByItemResponse]):
+    styleMstId: int = None
+    afterLimitBreakCount: int = None
+    consumeItemList: List[StyleLimitBreakConsumeItemRecord] = None
+    @property
+    def url(self) -> str:
+        return "/api/style/style_limit_break_by_item"
 class StyleApiOpenStyleParamUpTreeRequest(RequestBase[StyleApiOpenStyleParamUpTreeResponse]):
     styleMstId: int = None
     styleParamUpTreeMstId: int = None
@@ -1161,8 +1253,7 @@ class SelectionAbilityApiLearnSubSelectionAbilityRepeatRequest(RequestBase[Selec
     lockIds: List[int] = None
     permanentLockIds: List[int] = None
     maxAttemptCount: int = None
-    conditions: SelectionAbilityApiLearnSubSelectionAbilityRepeatConditions = None
-
+    conditions: SelectionAbilityLearnSubSelectionAbilityRepeatConditions = None
     @property
     def url(self) -> str:
         return "/api/selection_ability/learn_sub_selection_ability_repeat"
@@ -1335,6 +1426,10 @@ class UserApiGetUserProfileDataRequest(RequestBase[UserApiGetUserProfileDataResp
     @property
     def url(self) -> str:
         return "/api/user/get_user_profile_data"
+class UserApiGetUserProfileTrophyListRequest(RequestBase[UserApiGetUserProfileTrophyListResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/user/get_user_profile_trophy_list"
 class UserApiGetOtherUserProfileDataRequest(RequestBase[UserApiGetOtherUserProfileDataResponse]):
     targetUserId: int = None
     @property
@@ -1363,6 +1458,18 @@ class UserApiSetDisplayUserTitleRequest(RequestBase[UserApiSetDisplayUserTitleRe
     @property
     def url(self) -> str:
         return "/api/user/set_display_user_title"
+class UserApiSetUserProfileRequest(RequestBase[UserApiSetUserProfileResponse]):
+    name: str = None
+    comment: str = None
+    displayItemTypes: List[UserProfileDisplayItemType] = None
+    favoriteStyleMstId: int = None
+    favoriteCharacterMstIds: List[int] = None
+    displayTrophyItemMstIds: List[int] = None
+    userTitleMstIds: List[int] = None
+    userTitleValue1List: List[int] = None
+    @property
+    def url(self) -> str:
+        return "/api/user/set_user_profile"
 class UserApiSetStaminaRecoverRequest(RequestBase[UserApiSetStaminaRecoverResponse]):
     recoverType: int = None
     itemMstId: int = None
@@ -1406,6 +1513,11 @@ class UserApiSaveOptionRequest(RequestBase[UserApiSaveOptionResponse]):
     showNotifyExpiryItemPopupTimestamp: int = None
     styleRentalAutoSelectInfo: UserStyleRentalAutoSelectInfo = None
     isUseGuestStyle: bool = None
+    multiRaidLikeAll: bool = None
+    characterBuildDetailPublishMultiRaid: bool = None
+    characterBuildDetailPublishScoreAttack: bool = None
+    characterBuildDetailPublishSoloRaid: bool = None
+    dollhouseRandomInfo: UserDollhouseRandomInfo = None
     @property
     def url(self) -> str:
         return "/api/user/save_option"
@@ -1532,6 +1644,8 @@ class MultiRaidApiInitializeStageRequest(RequestBase[MultiRaidApiInitializeStage
     partyDataId: int = None
     rescueType: int = None
     multiRaidStageDataId: int = None
+    styleRentalUsingStatus: StyleRentalUsingStatus = None
+    isSkip: bool = None
     @property
     def url(self) -> str:
         return "/api/multi_raid/initialize_stage"
@@ -1560,6 +1674,11 @@ class MultiRaidApiRetireRequest(RequestBase[MultiRaidApiRetireResponse]):
     @property
     def url(self) -> str:
         return "/api/multi_raid/retire"
+class MultiRaidApiSetStaminaBoostRequest(RequestBase[MultiRaidApiSetStaminaBoostResponse]):
+    isStaminaBoostEnabled: bool = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/set_stamina_boost"
 class MultiRaidApiRecoverStaminaRequest(RequestBase[MultiRaidApiRecoverStaminaResponse]):
     num: int = None
     itemMstId: int = None
@@ -1587,6 +1706,12 @@ class MultiRaidApiIdSearchRequest(RequestBase[MultiRaidApiIdSearchResponse]):
     @property
     def url(self) -> str:
         return "/api/multi_raid/id_search"
+class MultiRaidApiGetRaidUserCharacterBuildDetailRequest(RequestBase[MultiRaidApiGetRaidUserCharacterBuildDetailResponse]):
+    targetUserId: int = None
+    multiRaidStageDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/multi_raid/get_raid_user_character_build_detail"
 class MissionApiGetMissionDataListRequest(RequestBase[MissionApiGetMissionDataListResponse]):
     missionType: int = None
     @property
@@ -1597,6 +1722,11 @@ class MissionApiReceiveRequest(RequestBase[MissionApiReceiveResponse]):
     @property
     def url(self) -> str:
         return "/api/mission/receive"
+class MissionApiGetBingoMissionTopRequest(RequestBase[MissionApiGetBingoMissionTopResponse]):
+    bingoMissionMstId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/mission/get_bingo_mission_top"
 class TutorialApiUpdateTutorialStepRequest(RequestBase[TutorialApiUpdateTutorialStepResponse]):
     tutorialStep: int = None
     @property
@@ -1654,6 +1784,10 @@ class InvitationApiInviteRequest(RequestBase[InvitationApiInviteResponse]):
     @property
     def url(self) -> str:
         return "/api/invitation/invite"
+class HomeApiGetGemRewardListRequest(RequestBase[HomeApiGetGemRewardListResponse]):
+    @property
+    def url(self) -> str:
+        return "/api/home/get_gem_reward_list"
 class HomeApiGetHomeInfoRequest(RequestBase[HomeApiGetHomeInfoResponse]):
     skipLoginBonus: bool = None
     @property
@@ -2003,6 +2137,12 @@ class GachaApiGachaExecRequest(RequestBase[GachaApiGachaExecResponse]):
     @property
     def url(self) -> str:
         return "/api/gacha/gacha_exec"
+class GachaApiSelectWishlistRequest(RequestBase[GachaApiSelectWishlistResponse]):
+    gachaSeriesMstId: int = None
+    gachaWishlistSelectionRequestList: List[GachaGachaWishlistSelectionRequest] = None
+    @property
+    def url(self) -> str:
+        return "/api/gacha/select_wishlist"
 class GachaApiUpdateAlreadyViewRequest(RequestBase[GachaApiUpdateAlreadyViewResponse]):
     gachaSeriesMstIdList: List[int] = None
     @property
@@ -2289,6 +2429,19 @@ class PartyApiGetRecommendPartyDataRequest(RequestBase[PartyApiGetRecommendParty
     @property
     def url(self) -> str:
         return "/api/party/get_recommend_party_data"
+class PartyApiGetRecommendPartyDataV2Request(RequestBase[PartyApiGetRecommendPartyDataV2Response]):
+    selectedStyleElements: List[int] = None
+    selectedParameter: int = None
+    isAutoSetupMember: bool = None
+    isAutoSetupCard: bool = None
+    isAutoSetupSubStyle: bool = None
+    sameCharacterInParty: bool = None
+    isEnableStyleForSoloRaid: bool = None
+    styleRentalDefineContentId: StyleRentalContentId = None
+    partyDataId: int = None
+    @property
+    def url(self) -> str:
+        return "/api/party/get_recommend_party_data_v2"
 class PartyApiGetRecommendSubStyleRequest(RequestBase[PartyApiGetRecommendSubStyleResponse]):
     characterBuildDataId: int = None
     @property

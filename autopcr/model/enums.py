@@ -9,6 +9,15 @@ class FriendFriendType(IntEnum):
     Blocked = 5
     CrossBlock = 6
 
+class SnsPostType(IntEnum):
+    None_ = 0
+    Profile = 1
+
+class SelectionAbilityLockType(IntEnum):
+    None_ = 0
+    Temporary = 1
+    Permanent = 2
+
 class QuestOutGameEnemyUnlockType(IntEnum):
     None_ = 1
     MiniTutorialNum = 2
@@ -30,6 +39,10 @@ class QuestOutGameLinkHpType(IntEnum):
     None_ = 0
     NormalLink = 1
     BossLink = 2
+
+class LotteryLotteryType(IntEnum):
+    Normal = 0
+    Mini = 1
 
 class LotteryConditionType(IntEnum):
     NotMatch = 0
@@ -61,6 +74,36 @@ class CollaborationTargetObjectType(IntEnum):
     Live2d = 3
     Dollhouse3dBackground = 4
     Dollhouse2dBackground = 5
+    Character = 6
+
+class BattleRoleType(IntEnum):
+    Attacker = 1
+    Breaker = 2
+    Healer = 3
+    Buffer = 4
+    Debuffer = 5
+    Defender = 6
+
+class MissionTransitionType(IntEnum):
+    None_ = 0
+    ByQuestStageMstId = 1
+    ByQuestMapMstId = 2
+    ByQuestCategoryMstId = 3
+    ByQuestGroupMstId = 4
+    ByFieldStageMstId = 5
+    TrainingStyle = 6
+    TrainingCard = 7
+    Pvp = 8
+    EnhanceQuest = 9
+    Profile = 10
+    Guild = 11
+    CharacterHeartGallery = 12
+    Gacha = 13
+    Party = 14
+    ScoreAttackByScoreAttackMstId = 15
+    MultiRaid = 16
+    SoloRaid = 17
+    AlternativeStory = 18
 
 class ObjectObjectType(IntEnum):
     Gem = 1
@@ -81,6 +124,7 @@ class ObjectObjectType(IntEnum):
     Dollhouse2dBackground = 16
     StyleLive2dCostume = 17
     Style3dCharacter = 18
+    WishlistSlot = 19
     KiokuHikari = 999
 
 class StyleRentalUsingStatus(IntEnum):
@@ -100,6 +144,7 @@ class QuestBattleResult(IntEnum):
 class StyleRentalContentId(IntEnum):
     Exploration = 1
     SoloRaid = 2
+    MultiRaid = 3
 
 class StyleRentalRole(IntEnum):
     All = 0
@@ -110,10 +155,14 @@ class StyleRentalRole(IntEnum):
     Debuffer = 5
     Defender = 6
 
-class SelectionAbilityLockType(IntEnum):
-    None_ = 0
-    Temporary = 1
-    Permanent = 2
+class DailySkipDailyClearType(IntEnum):
+    EventQuest = 1
+    ScoreAttack = 2
+    EventArchive = 3
+    TrainingQuest = 4
+    CharacterHeartQuest = 5
+    GatheringShortcutQuest = 6
+    GatheringReward = 7
 
 class SoloRaidRoomResult(IntEnum):
     Init = -1
@@ -136,6 +185,28 @@ class SoloRaidStageResult(IntEnum):
     Win = 1
     Lose = 2
 
+class SelectionAbilitySubRarityGroup(IntEnum):
+    B = 1
+    A = 2
+    S = 3
+
+class UserProfileDisplayItemType(IntEnum):
+    None_ = 0
+    FavoriteCharacter = 1
+    SoloRaidHighestRank = 2
+    ScoreAttackHighestRank = 3
+    TrophyCount = 4
+    CollectionAchievedLevel = 5
+    PvpHighestRank = 6
+    PartyMaxPower = 7
+    AcquiredStyleNum = 8
+    StartDatetime = 9
+    MultiRaidLikeCount = 10
+
+class DollhouseRandomScopeType(IntEnum):
+    All = 1
+    Configured = 2
+
 class MultiRaidRoomResult(IntEnum):
     Init = -1
     None_ = 0
@@ -145,9 +216,49 @@ class MultiRaidRoomResult(IntEnum):
     Timeout = 4
     Retire = 5
 
+class GemRewardTabType(IntEnum):
+    None_ = 0
+    Standing = 1
+    Limited = 2
+
+class GemRewardContentType(IntEnum):
+    None_ = 0
+    Exploration = 1
+    Collection = 2
+    AlternativeStory = 3
+    StoryEvent = 4
+    ShopSeries = 5
+    StoryEventArchive = 6
+    MultiRaid = 7
+    Tower = 8
+    StyleTraining = 9
+    StyleParamUpTraining = 10
+    SelectionAbilityTraining = 11
+    CharacterHeart = 12
+    CollectionFirstView = 13
+
+class TransitionTransitionType(IntEnum):
+    None_ = 0
+    ByFieldStageMstId = 100
+    ByFieldPointMstId = 101
+    ByAlternativeStoryMstId = 110
+    ByAlternativeStoryPointMstId = 111
+    ByStoryEventMstId = 120
+    ByStoryEventQuestStageMstId = 121
+    StyleTrainingTop = 200
+    StyleParamUpTrainingTop = 201
+    SelectionAbilityTrainingTop = 210
+    CharacterHeartTop = 220
+    MultiRaidTop = 300
+    TowerTop = 310
+    ByTowerQuestStageMstId = 311
+    ByShopSeriesMstId = 400
+    CollectionFirstViewTop = 500
+
 class HomeDispBalloonType(IntEnum):
     Exploration = 1
     AlternativeStory = 2
+    AlternativeStoryPointGroup = 3
 
 class GachaGachaType(IntEnum):
     Normal = 1
@@ -156,11 +267,15 @@ class GachaGachaType(IntEnum):
     Comeback = 4
     Tutorial = 5
     Bonus = 6
+    WishlistNormal = 8
+    WishlistStepUp = 9
 
 class GachaGachaDrawType(IntEnum):
     Normal = 1
     StepUp = 2
     Tutorial = 3
+    WishlistNormal = 5
+    WishlistStepUp = 6
 
 class FriendSortCondition(IntEnum):
     Level = 0
@@ -170,6 +285,10 @@ class FriendSortCondition(IntEnum):
 class FriendSortOrder(IntEnum):
     SortAsc = 0
     SortDesc = 1
+
+class QuestOutGamePlayType(IntEnum):
+    roundEnd = 1
+    battleStart = 2
 
 class CollectionAdvSkipType(IntEnum):
     None_ = 0

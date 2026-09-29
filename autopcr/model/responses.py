@@ -47,6 +47,8 @@ class TalismanApiTalismanSellResponse(ResponseBase):
     userParamData: UserUserParamDataRecord = None
 class TalismanApiSetTalismanProtectResponse(ResponseBase):
     talismanData: TalismanTalismanDataRecord = None
+class SnsApiPostResponse(ResponseBase):
+    isSuccess: bool = None
 class ServerApiGetTimeZoneInfoResponse(ResponseBase):
     timezone: str = None
     offsetSeconds: int = None
@@ -97,14 +99,8 @@ class LoginApiLoginResponse(ResponseBase):
 class LikeApiExecLikeResponse(ResponseBase):
     result: bool = None
     isFriendMedalAcquired: bool = None
-
-class LikeApiExecLikeResult(ResponseBase):
-    targetUserId: int = None
-    result: bool = None
-    isFriendMedalAcquired: bool = None
-
 class LikeApiExecLikeListResponse(ResponseBase):
-    resultList: list[LikeApiExecLikeResult] = None
+    resultList: List[LikeExecLikeResult] = None
 class InAppSnsApiCreateLoginUrlResponse(ResponseBase):
     url: str = None
     state: str = None
@@ -167,12 +163,24 @@ class DebugSubscriptionApiIsValidSubscriptionResponse(ResponseBase):
     isValid: bool = None
 class DebugSubscriptionApiDoSubscribeForceResponse(ResponseBase):
     isSuccess: bool = None
+class DebugGachaApiSimulateResponse(ResponseBase):
+    resultList: List[DebugGachaGachaSimulateResultRecord] = None
+    mainPickUpMstIdList: List[int] = None
+    subPickUpMstIdList: List[int] = None
+    candidateRarityList: List[int] = None
+    specialDirectionInfo: GachaSpecialDirectionInfo = None
+class DailySkipApiGetDailySkipListResponse(ResponseBase):
+    dailySkipList: List[DailySkipDailySkipResParam] = None
+class DailySkipApiSaveCheckedListResponse(ResponseBase):
+    result: bool = None
 class CameraApiCameraLogResponse(ResponseBase):
     isSuccess: bool = None
 class AppVersionApiGetReviewVersionDataResponse(ResponseBase):
     isReviewVersion: bool = None
     appealTitleInfo: AppVersionAppealTitleInfo = None
     collaborationInfo: AppVersionCollaborationInfo = None
+    targetAlpha3: List[str] = None
+    targetAlpha2: List[str] = None
 class AkamaiApiCreateTokenResponse(ResponseBase):
     token: str = None
 class TowerApiGetTowerTopResponse(ResponseBase):
@@ -201,6 +209,46 @@ class TowerApiSkipQuestBattleResponse(ResponseBase):
     partyDataList: List[PartyPartyDataRecord] = None
     userTowerData: TowerUserTowerDataRecord = None
     acquiredRewardMoney: int = None
+class TowerApiBulkSkipQuestBattleResponse(ResponseBase):
+    result: QuestBattleResult = None
+    beforeLevel: int = None
+    afterLevel: int = None
+    beforeExp: int = None
+    afterExp: int = None
+    beforeStamina: int = None
+    userQuestStageDataList: List[QuestOutGameUserQuestStageDataRecord] = None
+    acquiredQuestRewardMstIds: List[int] = None
+    canReplay: bool = None
+    remainPlayCount: int = None
+    objectDataRecord: ObjectObjectDataRecord = None
+    keyItemDataList: List[ItemItemDataRecord] = None
+    styleLevelUpInfoList: List[StyleStyleLevelUpInfo] = None
+    partyDataList: List[PartyPartyDataRecord] = None
+    userTowerData: TowerUserTowerDataRecord = None
+    acquiredRewardMoney: int = None
+class TowerApiGetThemeTowerTopResponse(ResponseBase):
+    userTowerThemeData: TowerUserTowerThemeDataRecord = None
+class TowerApiBulkSkipThemeTowerQuestBattleResponse(ResponseBase):
+    result: QuestBattleResult = None
+    beforeLevel: int = None
+    afterLevel: int = None
+    beforeExp: int = None
+    afterExp: int = None
+    beforeStamina: int = None
+    userQuestStageDataList: List[QuestOutGameUserQuestStageDataRecord] = None
+    acquiredQuestRewardMstIds: List[int] = None
+    canReplay: bool = None
+    remainPlayCount: int = None
+    objectDataRecord: ObjectObjectDataRecord = None
+    keyItemDataList: List[ItemItemDataRecord] = None
+    characterLevelUpInfoList: List[CharacterCharacterLevelUpInfo] = None
+    styleLevelUpInfoList: List[StyleStyleLevelUpInfo] = None
+    partyDataList: List[PartyPartyDataRecord] = None
+    userTowerThemeData: TowerUserTowerThemeDataRecord = None
+    acquiredRewardMoney: int = None
+class TowerApiGetTowerListResponse(ResponseBase):
+    userTowerData: TowerUserTowerDataRecord = None
+    userTowerThemeDataList: List[TowerUserTowerThemeDataRecord] = None
 class StyleApiGetStyleDataListResponse(ResponseBase):
     styleDataList: List[StyleStyleDataRecord] = None
 class StyleApiStyleLevelUpResponse(ResponseBase):
@@ -226,6 +274,11 @@ class StyleApiStyleSpecialAttackSkillLevelUpResponse(ResponseBase):
 class StyleApiStyleLimitBreakResponse(ResponseBase):
     styleData: StyleStyleDataRecord = None
     itemDataList: List[ItemItemDataRecord] = None
+    partyDataList: List[PartyPartyDataRecord] = None
+class StyleApiStyleLimitBreakByItemResponse(ResponseBase):
+    styleData: StyleStyleDataRecord = None
+    itemDataList: List[ItemItemDataRecord] = None
+    userParamData: UserUserParamDataRecord = None
     partyDataList: List[PartyPartyDataRecord] = None
 class StyleApiOpenStyleParamUpTreeResponse(ResponseBase):
     styleData: StyleStyleDataRecord = None
@@ -253,6 +306,7 @@ class StoryEventApiGetTopResponse(ResponseBase):
     scoreAttackMstIdList: List[int] = None
     userScoreAttackDataList: List[ScoreAttackUserScoreAttackDataRecord] = None
     enableEventMissionBadge: bool = None
+    enableBingoMissionBadge: bool = None
 class StoryEventApiGetArchiveEventListResponse(ResponseBase):
     storyEventDataList: List[StoryEventStoryEventDataRecord] = None
     storyEventInfoList: List[StoryEventStoryEventInfo] = None
@@ -388,8 +442,8 @@ class SoloRaidApiGetTopResponse(ResponseBase):
     isClosedStageByTimeout: bool = None
 class SoloRaidApiInitializeStageResponse(ResponseBase):
     initializeStatus: int = None
-    soloRaidRoomData: SoloRaidSoloRaidRoomDataRecord = None
     soloRaidStageData: SoloRaidSoloRaidStageDataRecord = None
+    soloRaidRoomData: SoloRaidSoloRaidRoomDataRecord = None
     soloRaidUserData: SoloRaidSoloRaidUserDataRecord = None
     userQuestStageData: QuestOutGameUserQuestStageDataRecord = None
     partyDataList: List[PartyPartyDataRecord] = None
@@ -449,7 +503,7 @@ class SelectionAbilityApiLearnSubSelectionAbilityRepeatResponse(ResponseBase):
     partyDataList: List[PartyPartyDataRecord] = None
     attemptCount: int = None
     isConditionMet: bool = None
-    attemptHistory: List[SelectionAbilityApiLearnSubSelectionAbilityRepeatAttemptHistory] = None
+    attemptHistory: List[SelectionAbilityLearnSubSelectionAbilityRepeatAttemptInfo] = None
 class SelectionAbilityApiSetSelectionAbilityResponse(ResponseBase):
     selectionAbilityData: SelectionAbilitySelectionAbilityDataRecord = None
     itemDataList: List[ItemItemDataRecord] = None
@@ -586,6 +640,9 @@ class UserApiGetUserProfileDataResponse(ResponseBase):
     userProfileData: UserUserProfileDataRecord = None
     playerId: str = None
     createdTime: str = None
+    userProfileSlotDataList: List[UserUserProfileSlotDataRecord] = None
+class UserApiGetUserProfileTrophyListResponse(ResponseBase):
+    trophyList: List[UserProfileTrophyRecord] = None
 class UserApiGetOtherUserProfileDataResponse(ResponseBase):
     otherUserParamData: UserUserParamDataRecord = None
     otherUserProfileData: UserUserProfileDataRecord = None
@@ -605,6 +662,7 @@ class UserApiGetOtherUserProfileDataResponse(ResponseBase):
     otherTalismanDataList: List[TalismanTalismanDataRecord] = None
     otherCollectionParamUpAchieveData: CollectionCollectionParamUpAchieveDataRecord = None
     createdTime: str = None
+    otherUserProfileSlotDataList: List[UserUserProfileSlotDataRecord] = None
 class UserApiSetNameResponse(ResponseBase):
     userParamData: UserUserParamDataRecord = None
 class UserApiSetCommentResponse(ResponseBase):
@@ -615,6 +673,10 @@ class UserApiSetFavoriteInfoResponse(ResponseBase):
 class UserApiSetDisplayUserTitleResponse(ResponseBase):
     userProfileData: UserUserProfileDataRecord = None
     userParamData: UserUserParamDataRecord = None
+class UserApiSetUserProfileResponse(ResponseBase):
+    userProfileData: UserUserProfileDataRecord = None
+    userParamData: UserUserParamDataRecord = None
+    userProfileSlotDataList: List[UserUserProfileSlotDataRecord] = None
 class UserApiSetStaminaRecoverResponse(ResponseBase):
     userParamData: UserUserParamDataRecord = None
     itemDataList: List[ItemItemDataRecord] = None
@@ -656,6 +718,11 @@ class UserApiLoadOptionResponse(ResponseBase):
     showNotifyExpiryItemPopupTimestamp: int = None
     styleRentalAutoSelectInfo: UserStyleRentalAutoSelectInfo = None
     isUseGuestStyle: bool = None
+    multiRaidLikeAll: bool = None
+    characterBuildDetailPublishMultiRaid: bool = None
+    characterBuildDetailPublishScoreAttack: bool = None
+    characterBuildDetailPublishSoloRaid: bool = None
+    dollhouseRandomInfo: UserDollhouseRandomInfo = None
 class UserApiUserSearchResponse(ResponseBase):
     userParamDataList: List[UserUserParamDataRecord] = None
     userProfileDataList: List[UserUserProfileDataRecord] = None
@@ -712,6 +779,7 @@ class MultiRaidApiGetMultiRaidStageDataListResponse(ResponseBase):
     multiRaidStageDataList: List[MultiRaidMultiRaidStageDataRecord] = None
     multiRaidRoomDataList: List[MultiRaidMultiRaidRoomDataRecord] = None
     joinUserInfoList: List[MultiRaidJoinUserInfo] = None
+    hostBattleClearCountByDay: List[MultiRaidHostBattleClearCountByDay] = None
 class MultiRaidApiInitializeStageResponse(ResponseBase):
     initializeStatus: int = None
     multiRaidStageData: MultiRaidMultiRaidStageDataRecord = None
@@ -731,6 +799,9 @@ class MultiRaidApiFinalizeStageForUserResponse(ResponseBase):
     multiRaidUserSeasonData: MultiRaidMultiRaidUserSeasonDataRecord = None
     objectDataRecord: ObjectObjectDataRecord = None
     userQuestStageData: QuestOutGameUserQuestStageDataRecord = None
+    rentalCharacterBuildSummary: StyleRentalRentalCharacterBuildSummary = None
+    styleRentalBorrowingData: StyleRentalStyleRentalBorrowingDataRecord = None
+    styleRentalBattleFinalizeInfo: StyleRentalStyleRentalBattleFinalizeInfo = None
 class MultiRaidApiGetMultiRaidInfoResponse(ResponseBase):
     stageInfo: QuestBattleStageInfo = None
     multiRaidRoomData: MultiRaidMultiRaidRoomDataRecord = None
@@ -738,9 +809,12 @@ class MultiRaidApiGetMultiRaidInfoResponse(ResponseBase):
     allyBattleUnitList: List[QuestBattleBattleUnit] = None
     allyCharacterBuildDetailList: List[PartyCharacterBuildDetail] = None
     joinUserInfoList: List[MultiRaidJoinUserInfo] = None
+    questBuff: QuestBattleQuestBuff = None
 class MultiRaidApiSendRescueResponse(ResponseBase):
     result: bool = None
 class MultiRaidApiRetireResponse(ResponseBase):
+    multiRaidUserSeasonData: MultiRaidMultiRaidUserSeasonDataRecord = None
+class MultiRaidApiSetStaminaBoostResponse(ResponseBase):
     multiRaidUserSeasonData: MultiRaidMultiRaidUserSeasonDataRecord = None
 class MultiRaidApiRecoverStaminaResponse(ResponseBase):
     multiRaidUserData: MultiRaidMultiRaidUserDataRecord = None
@@ -767,6 +841,8 @@ class MultiRaidApiIdSearchResponse(ResponseBase):
     multiRaidStageDataList: List[MultiRaidMultiRaidStageDataRecord] = None
     multiRaidRoomDataList: List[MultiRaidMultiRaidRoomDataRecord] = None
     joinUserInfoList: List[MultiRaidJoinUserInfo] = None
+class MultiRaidApiGetRaidUserCharacterBuildDetailResponse(ResponseBase):
+    characterBuildDetailList: List[PartyCharacterBuildDetail] = None
 class MissionApiGetMissionDataListResponse(ResponseBase):
     currentMissionTitleMstId: int = None
     missionDataList: List[MissionMissionDataRecord] = None
@@ -775,6 +851,7 @@ class MissionApiGetMissionDataListResponse(ResponseBase):
     guildMissionDataList: List[GuildMissionGuildMissionDataRecord] = None
     guildUserData: GuildGuildUserDataRecord = None
     enableComebackButton: bool = None
+    defaultBingoMissionMstId: int = None
 class MissionApiReceiveResponse(ResponseBase):
     missionDataList: List[MissionMissionDataRecord] = None
     objectDataRecord: ObjectObjectDataRecord = None
@@ -782,6 +859,14 @@ class MissionApiReceiveResponse(ResponseBase):
     currentMissionTitleMstId: int = None
     partyDataList: List[PartyPartyDataRecord] = None
     rewardReceivableMissionTypeList: List[int] = None
+    expireTimeOverNum: int = None
+class MissionApiGetBingoMissionTopResponse(ResponseBase):
+    missionDataList: List[MissionMissionDataRecord] = None
+    bingoMissionDataList: List[MissionBingoMissionDataRecord] = None
+    objectDataRecord: ObjectObjectDataRecord = None
+    receivedObjectDataList: List[MissionreceivedObjectData] = None
+    partyDataList: List[PartyPartyDataRecord] = None
+    clearedMissionMstIds: List[int] = None
     expireTimeOverNum: int = None
 class TutorialApiUpdateTutorialStepResponse(ResponseBase):
     objectDataRecord: ObjectObjectDataRecord = None
@@ -820,6 +905,8 @@ class InvitationApiGetTopResponse(ResponseBase):
 class InvitationApiInviteResponse(ResponseBase):
     isSuccess: bool = None
     inviteeRewardConditionDataList: List[InvitationInviteeRewardConditionDataRecord] = None
+class HomeApiGetGemRewardListResponse(ResponseBase):
+    cellList: List[GemRewardCell] = None
 class HomeApiGetHomeInfoResponse(ResponseBase):
     viewData: HomeHomeViewData = None
     loginBonusDataList: List[HomeLoginBonusRecord] = None
@@ -1135,6 +1222,8 @@ class GachaApiGachaExecResponse(ResponseBase):
     gachaBonusGaugeList: List[GachaGachaBonusGaugeRecord] = None
     candidateRarityList: List[int] = None
     specialDirectionInfo: GachaSpecialDirectionInfo = None
+class GachaApiSelectWishlistResponse(ResponseBase):
+    gachaWishlistSelectionDataList: List[GachaGachaWishlistSelectionDataRecord] = None
 class GachaApiUpdateAlreadyViewResponse(ResponseBase):
     newBadgeGachaSeriesMstIdList: List[int] = None
 class GachaApiGetGachaGemTextListResponse(ResponseBase):
@@ -1233,6 +1322,9 @@ class ConfigApiGetConfigResponse(ResponseBase):
     styleRentalConfig: StyleRentalStyleRentalConfig = None
     gachaConfig: GachaGachaConfig = None
     alternativeStoryConfig: AlternativeStoryAlternativeStoryConfig = None
+    explorationConfig: ExplorationExplorationConfig = None
+    gemRewardConfig: GemRewardGemRewardConfig = None
+    dailySkipConfig: DailySkipDailySkipConfig = None
 class CollectionApiGetCollectionDataListResponse(ResponseBase):
     collectionDataList: List[CollectionCollectionDataRecord] = None
     collectionIllustAchieveDataList: List[CollectionCollectionIllustAchieveDataRecord] = None
@@ -1305,6 +1397,8 @@ class PartyApiSavePartyForRecommendResponse(ResponseBase):
     partyData: PartyPartyDataRecord = None
     userParamData: UserUserParamDataRecord = None
 class PartyApiGetRecommendPartyDataResponse(ResponseBase):
+    recommendPartyData: PartyPartyDataRecord = None
+class PartyApiGetRecommendPartyDataV2Response(ResponseBase):
     recommendPartyData: PartyPartyDataRecord = None
 class PartyApiGetRecommendSubStyleResponse(ResponseBase):
     recommendSubStyleMstIdList: List[int] = None
@@ -1397,6 +1491,7 @@ class QuestBattleApiFinalizeStageForUserResponse(ResponseBase):
     userQuestCharacterHeartPartySaveData: QuestOutGameUserQuestCharacterHeartPartySaveDataRecord = None
     canQuestCharacterHeartNextStage: bool = None
     userTowerData: TowerUserTowerDataRecord = None
+    userTowerThemeData: TowerUserTowerThemeDataRecord = None
     acquiredRewardMoney: int = None
     isSkipTrainingQuestNotClearUnderNowRank: bool = None
     selectionAbilityDataList: List[SelectionAbilitySelectionAbilityDataRecord] = None
@@ -1404,6 +1499,7 @@ class QuestBattleApiFinalizeStageForUserResponse(ResponseBase):
     selectionAbilityConversionItemDataList: List[SelectionAbilitySelectionAbilityConversionItemData] = None
     isUserExpStoredMessage: bool = None
     selectionAbilityMultiLotteryItemNum: int = None
+    itemDataList: List[ItemItemDataRecord] = None
 class QuestBattleApiRetireResponse(ResponseBase):
     isSuccess: bool = None
     userParamData: UserUserParamDataRecord = None
@@ -1436,6 +1532,7 @@ class QuestBattleApiSkipQuestBattleResponse(ResponseBase):
     userQuestCharacterHeartPartySaveData: QuestOutGameUserQuestCharacterHeartPartySaveDataRecord = None
     acquiredRewardMoney: int = None
     isUserExpStoredMessage: bool = None
+    itemDataList: List[ItemItemDataRecord] = None
 class QuestBattleApiGetBackGroundInfoResponse(ResponseBase):
     questRoomData: QuestBattleQuestRoomData = None
     userQuestStageData: QuestOutGameUserQuestStageDataRecord = None
@@ -1510,6 +1607,7 @@ class ExplorationApiSkipFieldPointResponse(ResponseBase):
     objectDataRecordByBattle: ObjectObjectDataRecord = None
     partyDataListByBattle: List[PartyPartyDataRecord] = None
     miniTutorialDataByBattle: TutorialMiniTutorialDataRecord = None
+    battleResultList: List[ExplorationBattleExplorationBattleResult] = None
 class ExplorationApiClearFieldPointStoryResponse(ResponseBase):
     fieldStageUserData: ExplorationFieldStageUserDataRecord = None
     achievedConditionGroupIds: List[int] = None
