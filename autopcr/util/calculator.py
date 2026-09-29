@@ -2,6 +2,7 @@ from ..model.models import *
 from ..db.database import db
 from .linq import flow
 import json
+from typing import List
 
 class param:
     hp: int

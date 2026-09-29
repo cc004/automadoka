@@ -5,6 +5,7 @@ from .sessionmgr import sessionmgr
 from .misc import errorhandler, mutexhandler
 from .datamgr import datamgr
 from enum import Enum
+from typing import Optional
 from ..db.database import db
 from datetime import datetime, timedelta, timezone
 from ..constants import USER_TZ as user_tz

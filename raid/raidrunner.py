@@ -1,6 +1,6 @@
 import json
 from .raidworker import raidworker
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 from autopcr.db.database import db
 from autopcr.model.models import *
 import asyncio

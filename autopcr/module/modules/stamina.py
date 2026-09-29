@@ -3,6 +3,7 @@ from ..config import *
 from ...core.pcrclient import pcrclient
 from ...model.models import *
 import math
+from typing import Dict, List
 
 ONCE_STAMINA_COST = 10
 

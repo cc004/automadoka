@@ -1,5 +1,6 @@
 ﻿from datetime import datetime, timedelta, timezone
 import asyncio
+from typing import Dict, List
 
 from ..modulebase import *
 from ..config import *

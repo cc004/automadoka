@@ -3,6 +3,7 @@ from ..config import *
 from ...core.pcrclient import pcrclient
 from ...model.models import *
 from datetime import datetime, timezone
+from typing import Callable, Dict
 
 
 def item(category, item_mst_id, is_infinite):

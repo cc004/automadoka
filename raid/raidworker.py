@@ -1,7 +1,7 @@
 from autopcr.core import pcrclient
 from autopcr.core.sdkclient import account, platform, sdkclient
 from autopcr.model.models import *
-from typing import Tuple, Type
+from typing import List, Tuple, Type
 import asyncio
 
 class raidworker:

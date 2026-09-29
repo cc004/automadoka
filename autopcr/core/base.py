@@ -1,4 +1,4 @@
-from typing import List, Callable, Coroutine, Any
+from typing import List, Callable, Coroutine, Any, Generic, TypeVar
 from ..model.modelbase import *
 
 T = TypeVar('T', bound="Container")
