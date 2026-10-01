@@ -3,20 +3,50 @@ import aiohttp
 import os
 import shutil
 
+from autopcr.http_server.version import (
+    APP_VERSION_MAJOR, APP_VERSION_MINOR, is_compatible_release,
+    parse_release_version,
+)
+
+
+def select_compatible_release(releases):
+    """Select the highest stable patch release supported by this backend."""
+    compatible = []
+    for release in releases:
+        tag = release.get('tag_name', '')
+        if (release.get('draft') or release.get('prerelease')
+                or not is_compatible_release(tag)):
+            continue
+        urls = [asset['browser_download_url']
+                for asset in release.get('assets', [])
+                if asset.get('name', '').endswith('.zip')
+                and asset.get('browser_download_url')]
+        if urls:
+            compatible.append((parse_release_version(tag), tag, urls))
+    if not compatible:
+        raise RuntimeError(
+            f"没有找到后端兼容的前端 {APP_VERSION_MAJOR}.{APP_VERSION_MINOR}.x，"
+            "请检查 AutoPCR_Web releases；不要安装不兼容的最新版本。"
+        )
+    _, tag, urls = max(compatible, key=lambda release: release[0])
+    return tag, urls
+
+
 async def get_latest_release_info(owner, repo):
-    url = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
+    # /releases/latest may belong to an incompatible API minor version.
+    url = f"https://api.github.com/repos/{owner}/{repo}/releases"
+    releases = []
     async with aiohttp.ClientSession() as session:
-        async with session.get(url, ssl=False) as response:
-            if response.ok:
-                release_info = await response.json()
-                tag_name = release_info['tag_name']
-                assets = release_info['assets']
-                asset_download_urls = [asset['browser_download_url'] for asset in assets]
-                return tag_name, asset_download_urls
-            else:
-                print(response.status)
-                print(await response.json())
-                return None, None
+        page = 1
+        while True:
+            async with session.get(url, params={'per_page': 100, 'page': page}) as response:
+                response.raise_for_status()
+                batch = await response.json()
+            releases.extend(batch)
+            if len(batch) < 100:
+                break
+            page += 1
+    return select_compatible_release(releases)
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,7 +57,8 @@ async def check_version(version):
         with open(web_version, "r") as f:
             now_version = f.read().strip()
     version = version.strip()
-    if not now_version or now_version != version:
+    index = os.path.join(path, "autopcr", "http_server", "ClientApp", "index.html")
+    if not now_version or now_version != version or not os.path.isfile(index):
         return True
     return False
 
@@ -79,7 +110,8 @@ async def do_download():
     repo = 'AutoPCR_Web'
     latest_release_tag, asset_download_urls = await get_latest_release_info(owner, repo)
     if latest_release_tag and asset_download_urls:
-        print(f"Latest release tag: {latest_release_tag}")
+        print(f"Latest compatible release tag: {latest_release_tag} "
+              f"(backend API {APP_VERSION_MAJOR}.{APP_VERSION_MINOR})")
         if await check_version(latest_release_tag):
             filepaths = await download_assets(asset_download_urls)
             await extract_web(filepaths)

@@ -5,9 +5,11 @@
 自动清日常
 bug反馈/意见/交流群: 885228564
 
-请先运行一次`python3 _download_web.py`下载前端资源。
+请先运行一次`python3 _download_web.py`下载前端资源。脚本会选择与后端 API 主版本、次版本匹配的最新前端补丁版本，而不是直接安装上游最新版本。
 
-如果网络不好，可自行[下载压缩包](https://github.com/Lanly109/AutoPCR_Web/releases/latest)，然后`python3 _download_web.py /path/to/zip`安装。
+如果网络不好，可从[前端发布列表](https://github.com/Lanly109/AutoPCR_Web/releases)下载与 `autopcr/http_server/version.py` 中版本匹配的 `web.zip`（当前为 **1.7.x**），然后`python3 _download_web.py /path/to/zip`安装。不要直接下载 `latest`，它可能与本后端不兼容。
+
+如果登录或注册提示“后端期望前端版本为…”，重新运行 `python3 _download_web.py` 安装匹配的前端，再刷新网页。无需关闭后端版本校验，也无需修改游戏安装包或版本指纹。
 
 ## HTTP 服务器模式
 
