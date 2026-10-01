@@ -47,7 +47,8 @@ class LikeApiExecLikeListResponse(
             medal_once = next(
                 x.num
                 for x in mgr.config.friendConfig.friendMedal
-                if x.type == 'ExecLike'
+                # Older generated caches store this field as type_ with alias 'type'.
+                if x.dict(by_alias=True)['type'] == 'ExecLike'
             )
 
             medal_total = (

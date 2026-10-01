@@ -11,7 +11,8 @@ PRIMITIVES = {'System.DateTime': 'int', 'System.DateTimeOffset': 'str',
                   ('Double', 'float'), ('String', 'str')]}}
 CONTAINERS = {'System.Collections.Generic.List`1': 'List', 'System.Collections.Generic.Dictionary`2': 'Dict',
               'System.Nullable`1': 'Optional', 'List': 'List'}
-RESERVED = set(keyword.kwlist) | {'json', 'schema', 'dict', 'copy', 'validate', 'construct', 'type',
+# Builtins such as 'type' are valid model fields; only escape keywords/methods.
+RESERVED = set(keyword.kwlist) | {'json', 'schema', 'dict', 'copy', 'validate', 'construct',
                                 'parse_obj', 'parse_raw', 'parse_file', 'from_orm', 'schema_json', 'update_forward_refs'}
 
 

@@ -70,7 +70,7 @@ class PythonCodecTests(unittest.TestCase):
 
     def test_generated_aliases_nested_enum_and_master_response(self):
         schema = {'enums': {'Mode': {'Idle': 0, 'None_': -1}},
-                  'common': {'Node': {'children': 'List[Node]', 'mode': 'Mode', 'json': 'str', 'from': 'int'}},
+                  'common': {'Node': {'children': 'List[Node]', 'mode': 'Mode', 'json': 'str', 'from': 'int', 'type': 'str'}},
                   'apis': [{'url': '/api/test', 'request': 'TestRequest', 'response': 'TestResponse',
                             'request_fields': {'type': 'int'}, 'response_fields': {'node': 'Node'}},
                            {'url': '/api/master', 'request': 'MasterRequest', 'response': 'MasterResponse',
@@ -80,7 +80,12 @@ class PythonCodecTests(unittest.TestCase):
             self.assertEqual(counts, {'enums': 1, 'common': 1, 'responses': 1, 'requests': 2})
             gen = registry.load_generation(tmp, 'test')
             try:
-                node = gen.classes['common']['Node'].parse_obj({'json': 'v', 'from': 5, 'mode': -1, 'children': [{}]})
+                node = gen.classes['common']['Node'].parse_obj({'json': 'v', 'from': 5, 'mode': -1, 'children': [{}], 'type': 'ExecLike'})
+                self.assertEqual(node.type, 'ExecLike')
+                self.assertEqual(node.dict(by_alias=True)['type'], 'ExecLike')
+                request = gen.classes['requests']['TestRequest'](type=7)
+                self.assertEqual(request.type, 7)
+                self.assertEqual(request.dict(by_alias=True)['type'], 7)
                 self.assertEqual(node.json_, 'v')
                 self.assertEqual(node.dict(by_alias=True)['from'], 5)
                 self.assertEqual(node.mode.name, 'None_')
@@ -123,8 +128,10 @@ class PythonGeneratorParityTests(unittest.TestCase):
                                                  {n: v.value for n, v in after.__members__.items()})
                                 continue
                             def fields(cls):
-                                return {n: (f.alias, type_signature(f.outer_type_), f.required, f.allow_none, f.default)
-                                        for n, f in cls.__fields__.items()}
+                                # Compare wire fields: the old C# generator escaped 'type'
+                                # unnecessarily as 'type_', while Python now preserves it.
+                                return {f.alias: (type_signature(f.outer_type_), f.required, f.allow_none, f.default)
+                                        for f in cls.__fields__.values()}
                             self.assertEqual(fields(before), fields(after))
                             if kind == 'requests':
                                 self.assertEqual(before().url, after().url)

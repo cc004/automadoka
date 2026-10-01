@@ -30,6 +30,14 @@ class RealModelsTests(unittest.TestCase):
                 asyncio.run(initial.update(manager, request))
                 self.assertIs(manager.resp, initial)
                 self.assertIs(type(initial.userParamData), generation.classes['common']['UserUserParamDataRecord'])
+                manager.config = generation.classes['responses']['ConfigApiGetConfigResponse'].parse_obj({
+                    'friendConfig': {'friendMedal': [{'type': 'ExecLike', 'num': 10}],
+                                     'gainTodayFriendMedalMaxNum': 100}})
+                initial.userParamData.todayFriendMedalCount = 95
+                likes = generation.classes['responses']['LikeApiExecLikeListResponse'].parse_obj({
+                    'resultList': [{'isFriendMedalAcquired': True}]})
+                asyncio.run(likes.update(manager, None))
+                self.assertEqual(initial.userParamData.todayFriendMedalCount, 100)
                 results.append((generation, request))
             first, second = results[0][0], results[1][0]
             added = set(second.classes['requests']) - set(first.classes['requests'])
