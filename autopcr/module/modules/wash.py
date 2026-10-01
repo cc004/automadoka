@@ -161,7 +161,7 @@ class super_wash(Module):
                 req.lockIds = []
                 req.permanentLockIds = permanent_lockIds_list
                 req.maxAttemptCount = repeat_times_per_time
-                req.conditions = SelectionAbilityApiLearnSubSelectionAbilityRepeatConditions(
+                req.conditions = SelectionAbilityLearnSubSelectionAbilityRepeatConditions(
                     subRarityGroups=sub_rarity_groups,
                     effectIds=effect_ids,
                 )
