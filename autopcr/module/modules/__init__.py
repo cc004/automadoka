@@ -9,6 +9,7 @@ from .collection import eventscenario, collection
 from .tool import clear_dungeon_event, secret, auto_register, super_sweep
 from .wash import super_wash
 from .raid import raid_reward, self_raid, support_raid, raid_support, like_raid
+from .solo_raid_battle import solo_raid_battle
 from .gacha import freegacha
 from typing import List
 from dataclasses import dataclass
@@ -91,6 +92,7 @@ danger_modules = ModuleList(
     '危险',
     'danger',
     [
+        solo_raid_battle,
     ]
 )
 
