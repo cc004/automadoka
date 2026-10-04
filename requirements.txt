@@ -17,3 +17,4 @@ dataclasses_json~=0.6.4
 PuLP~=2.8.0
 cryptography~=41.0.2
 pyelftools==0.32
+PyJWT~=2.8
