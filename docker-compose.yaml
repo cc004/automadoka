@@ -1,6 +1,15 @@
 services:
   automadoka:
     image: ghcr.io/cc004/automadoka:latest
+    # 本地构建时取消下面的注释。构建过程要访问 GitHub API 下载前端，
+    # 匿名限额只有 60 次/小时，容易 403 rate limit exceeded：
+    #   GITHUB_TOKEN  走认证请求，限额 5000 次/小时（只读公开仓库无需 scope）
+    #   WEB_ZIP       离线安装，需先把匹配的 web.zip 放到项目根目录
+    # build:
+    #   context: .
+    #   args:
+    #     GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    #     # WEB_ZIP: web.zip
     ports:
       - 13200:13200
     restart: always

@@ -55,7 +55,22 @@ COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/pytho
 COPY . .
 
 # 预下载或执行可能会生成大的临时文件的步骤
-RUN python3 _download_web.py || (echo "Failed to download web file" && exit 1)
+#
+# 下载前端要走 GitHub API，匿名请求限额只有 60 次/小时，在 Docker 构建、
+# 共享出口 IP 或代理环境下很容易 403 rate limit exceeded。两个可选参数：
+#
+#   GITHUB_TOKEN  走认证请求（限额 5000 次/小时）。只读公开仓库无需任何 scope：
+#                   docker build --build-arg GITHUB_TOKEN=ghp_xxx -t automadoka .
+#
+#   WEB_ZIP       完全跳过网络。先把与后端匹配的 web.zip 放进构建上下文：
+#                   docker build --build-arg WEB_ZIP=web.zip -t automadoka .
+ARG GITHUB_TOKEN
+ARG WEB_ZIP
+RUN if [ -n "$WEB_ZIP" ]; then \
+        python3 _download_web.py "$WEB_ZIP"; \
+    else \
+        GITHUB_TOKEN="$GITHUB_TOKEN" python3 _download_web.py; \
+    fi || (echo "Failed to download web file" && exit 1)
 
 EXPOSE 13200
 
