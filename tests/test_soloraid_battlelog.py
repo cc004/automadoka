@@ -5,14 +5,18 @@ import unittest
 from autopcr.util.soloraid_battlelog import (
     BattleUnit,
     build_solo_raid_battle_log,
+    KILL_TIME_JITTER,
     MODE_MINIMAL,
     MODE_SIMULATE,
+    SoloRaidBattleLogBuilder,
     TIMING_INSTANT,
     TIMING_LAST,
     TIMING_MIDDLE,
 )
 
 BOSS_HP = 150_000_000
+N_ALLIES = 5
+LIMIT_ROUND = 3
 
 
 def make_allies():
@@ -61,7 +65,7 @@ def make_enemies():
     return enemies
 
 
-def build(timing, mode=MODE_SIMULATE, limit_round=3):
+def build(timing, mode=MODE_SIMULATE, limit_round=LIMIT_ROUND):
     return build_solo_raid_battle_log(
         make_allies(),
         make_enemies(),
@@ -72,6 +76,16 @@ def build(timing, mode=MODE_SIMULATE, limit_round=3):
         season_buff_turn_gauge=15.76,
         mode=mode,
         seed=1234,
+    )
+
+
+def count_ally_actions(log):
+    """日志里我方一共行动了几次（每名我方单位一次技能指令 = 一次行动）。"""
+    return sum(
+        1
+        for command in log["Commands"]
+        if command["$type"].endswith("CommandSkill, Assembly-CSharp")
+        and command["ActUnitId"] > 0
     )
 
 
@@ -92,9 +106,15 @@ def main_target_damage(log):
 
 class BattleLogTests(unittest.TestCase):
     def test_kill_timing_controls_round(self):
+        """斩杀回合由时机决定：instant 第 1 回合、middle 第 2 回合、last 第 3 回合。
+
+        ±10% 的波动作用在整个战斗的行动序列上，本用例里 5 名我方单位、上限 3 回合，
+        名义斩杀点是第 1 / 8 / 15 个我方行动，波动后最多挪动 ±1.5 个行动，
+        所以只会改变「回合内的第几个行动」，不会跨回合。
+        """
         expected = {
             TIMING_INSTANT: 1,
-            TIMING_MIDDLE: 2,
+            TIMING_MIDDLE: 2,  # ceil(3 / 2)
             TIMING_LAST: 3,
         }
         for timing, rounds in expected.items():
@@ -159,11 +179,115 @@ class BattleLogTests(unittest.TestCase):
         for _ in range(3):
             built = build_solo_raid_battle_log(
                 allies, enemies, boss_max_hp=BOSS_HP,
-                kill_timing=TIMING_LAST, limit_round=3, wave=2, seed=5,
+                kill_timing=TIMING_LAST, limit_round=LIMIT_ROUND, wave=2, seed=5,
             )
             log = json.loads(built["battleLog"])
             self.assertEqual(len(log["Commands"]) > 0, True)
             self.assertEqual(log["ResultRound"], 3)
+
+
+class KillTimeJitterTests(unittest.TestCase):
+    """斩杀时间波动：斩杀点落在整个战斗的我方行动序列上，围绕名义位置上下浮动 ±10%。"""
+
+    # 5 名我方单位、上限 3 回合时，各时机的名义斩杀点（第几个我方行动）
+    NOMINAL = {
+        TIMING_INSTANT: 1,
+        TIMING_MIDDLE: 8,
+        TIMING_LAST: 15,
+    }
+
+    def builder(self, timing, *, jitter=KILL_TIME_JITTER, seed=1234):
+        return SoloRaidBattleLogBuilder(
+            make_allies(),
+            make_enemies(),
+            boss_max_hp=BOSS_HP,
+            kill_timing=timing,
+            limit_round=LIMIT_ROUND,
+            wave=2,
+            seed=seed,
+            kill_time_jitter=jitter,
+        )
+
+    def bounds(self, nominal):
+        """名义位置 ±10% 之后，允许落在的闭区间。"""
+        total = LIMIT_ROUND * N_ALLIES
+        low = max(1, int(round(nominal * (1 - KILL_TIME_JITTER))))
+        high = min(total, int(round(nominal * (1 + KILL_TIME_JITTER))))
+        return low, high
+
+    def test_nominal_kill_point(self):
+        """波动设为 0 时，斩杀点就是名义位置，且回合号与行动序号自洽。"""
+        for timing, nominal in self.NOMINAL.items():
+            with self.subTest(timing=timing):
+                index, round_ = self.builder(timing, jitter=0.0).plan_kill()
+                self.assertEqual(index, nominal)
+                self.assertEqual(round_, (nominal - 1) // N_ALLIES + 1)
+
+    def test_jitter_stays_within_ten_percent(self):
+        """换任意随机种子，斩杀点都被夹在名义位置的 ±10% 区间内，不越界。"""
+        for timing, nominal in self.NOMINAL.items():
+            low, high = self.bounds(nominal)
+            for seed in range(200):
+                with self.subTest(timing=timing, seed=seed):
+                    index, _ = self.builder(timing, seed=seed).plan_kill()
+                    self.assertGreaterEqual(index, low)
+                    self.assertLessEqual(index, high)
+
+    def test_jitter_actually_varies_the_kill_point(self):
+        """波动确实让斩杀点散开，而不是每次都卡在同一个行动上。"""
+        for timing in (TIMING_MIDDLE, TIMING_LAST):
+            with self.subTest(timing=timing):
+                points = {
+                    self.builder(timing, seed=seed).plan_kill()[0]
+                    for seed in range(200)
+                }
+                self.assertGreater(
+                    len(points), 1, f"{timing} 的斩杀点在 200 个种子下没有变化"
+                )
+                # 散开的范围必须仍在 ±10% 内
+                low, high = self.bounds(self.NOMINAL[timing])
+                self.assertGreaterEqual(min(points), low)
+                self.assertLessEqual(max(points), high)
+
+    def test_jitter_input_is_clamped(self):
+        """波动幅度被夹到 [0, 1]，传离谱的值也不会炸。"""
+        for value, expected in ((5.0, 1.0), (-3.0, 0.0), (0.25, 0.25)):
+            with self.subTest(value=value):
+                self.assertEqual(
+                    self.builder(TIMING_LAST, jitter=value).kill_time_jitter, expected
+                )
+        # 拉满波动时，斩杀点依然落在合法区间，且回合号推导一致
+        index, round_ = self.builder(TIMING_LAST, jitter=1.0, seed=7).plan_kill()
+        self.assertGreaterEqual(index, 1)
+        self.assertLessEqual(index, LIMIT_ROUND * N_ALLIES)
+        self.assertEqual(round_, (index - 1) // N_ALLIES + 1)
+
+    def test_simulated_log_matches_planned_kill_point(self):
+        """模拟出的日志里，我方行动次数正好等于计划好的斩杀点。"""
+        for timing, nominal in self.NOMINAL.items():
+            low, high = self.bounds(nominal)
+            for seed in (1, 2, 3):
+                with self.subTest(timing=timing, seed=seed):
+                    builder = self.builder(timing, seed=seed)
+                    log = json.loads(builder.build()["battleLog"])
+                    actions = count_ally_actions(log)
+                    self.assertGreaterEqual(actions, low)
+                    self.assertLessEqual(actions, high)
+                    # 报告出来的回合数必须和实际打了几个行动对得上
+                    self.assertEqual(
+                        log["ResultRound"], (actions - 1) // N_ALLIES + 1
+                    )
+
+    def test_minimal_mode_uses_same_jitter_rule(self):
+        """极简模式没有行动指令，但 ResultRound 走同一套波动规则。"""
+        rounds = {
+            json.loads(self.builder(TIMING_LAST, seed=seed).build_minimal()["battleLog"])[
+                "ResultRound"
+            ]
+            for seed in range(200)
+        }
+        self.assertTrue(rounds)
+        self.assertTrue(rounds.issubset({1, 2, 3}))
 
 
 if __name__ == "__main__":
