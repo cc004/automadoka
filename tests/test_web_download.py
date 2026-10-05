@@ -1,3 +1,4 @@
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -61,6 +62,8 @@ class DownloaderTests(unittest.IsolatedAsyncioTestCase):
         calls = []
 
         class Response:
+            status = 200
+
             def __init__(self, page):
                 self.page = page
 
@@ -76,7 +79,12 @@ class DownloaderTests(unittest.IsolatedAsyncioTestCase):
             async def json(self):
                 return pages[self.page - 1]
 
+        session_kwargs = []
+
         class Session:
+            def __init__(self, **kwargs):
+                session_kwargs.append(kwargs)
+
             async def __aenter__(self):
                 return self
 
@@ -93,6 +101,72 @@ class DownloaderTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(calls), 2)
         self.assertTrue(all(call[0].endswith('/releases') for call in calls))
         self.assertTrue(all('ssl' not in call[1] for call in calls))
+        # 请求头（含可选的 Authorization）挂在 session 上
+        self.assertEqual(len(session_kwargs), 1)
+        self.assertIn('headers', session_kwargs[0])
+
+    def test_github_token_header(self):
+        with patch.dict(os.environ, {}, clear=False):
+            for key in ('GITHUB_TOKEN', 'GH_TOKEN'):
+                os.environ.pop(key, None)
+            headers = download.github_headers()
+            self.assertNotIn('Authorization', headers)
+            self.assertTrue(headers['User-Agent'])
+
+            os.environ['GITHUB_TOKEN'] = 'ghp_x'
+            self.assertEqual(download.github_headers()['Authorization'], 'Bearer ghp_x')
+
+            del os.environ['GITHUB_TOKEN']
+            os.environ['GH_TOKEN'] = 'ghp_y'
+            self.assertEqual(download.github_headers()['Authorization'], 'Bearer ghp_y')
+
+    async def test_rate_limited_page_is_retried_then_reported(self):
+        async def no_sleep(_delay):
+            return None
+
+        class FakeAsyncio:
+            # 直接替换模块里的 asyncio，跳过退避等待（改 asyncio.sleep 会递归）
+            sleep = staticmethod(no_sleep)
+
+        class Response:
+            def __init__(self, status):
+                self.status = status
+                self.headers = {}
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *args):
+                pass
+
+            async def text(self):
+                return '{"message":"API rate limit exceeded"}'
+
+            async def json(self):
+                return [release('1.7.1')]
+
+            def raise_for_status(self):
+                if self.status >= 400:
+                    raise AssertionError('限流响应不应走到 raise_for_status')
+
+        class Session:
+            def __init__(self, **kwargs):
+                self.seen = 0
+
+            def get(self, url, **kwargs):
+                self.seen += 1
+                return Response(403 if self.seen <= 2 else 200)
+
+        session = Session()
+        with patch.object(download, 'asyncio', FakeAsyncio):
+            batch = await download.fetch_releases_page(session, 'http://x', 1)
+        self.assertEqual(session.seen, 3)
+        self.assertEqual(batch, [release('1.7.1')])
+
+        session = Session()
+        with patch.object(download, 'asyncio', FakeAsyncio):
+            with self.assertRaisesRegex(RuntimeError, 'GITHUB_TOKEN'):
+                await download.fetch_releases_page(session, 'http://x', 1, retries=1)
 
     async def test_installed_version_check_repairs_missing_frontend(self):
         with tempfile.TemporaryDirectory() as directory, patch.object(download, 'path', directory):

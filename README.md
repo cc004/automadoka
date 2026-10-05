@@ -11,6 +11,25 @@ bug反馈/意见/交流群: 885228564
 
 如果登录或注册提示“后端期望前端版本为…”，重新运行 `python3 _download_web.py` 安装匹配的前端，再刷新网页。无需关闭后端版本校验，也无需修改游戏安装包或版本指纹。
 
+## Docker 构建
+
+镜像构建过程中会执行 `_download_web.py`，这一步要访问 GitHub API。匿名请求限额只有 **60 次/小时**，在 Docker 构建、共享出口 IP 或代理环境下很容易报 `403 rate limit exceeded`。两个可选构建参数可以规避：
+
+| 构建参数           | 说明                                                        |
+|----------------|-----------------------------------------------------------|
+| `GITHUB_TOKEN` | 走认证请求，限额提升到 5000 次/小时。只读公开仓库无需任何 scope，传一个最小权限 token 即可 |
+| `WEB_ZIP`      | 完全跳过网络：把与后端匹配的 `web.zip` 放进构建上下文，构建时直接解压安装                 |
+
+```bash
+# 方式一：带 token 构建（推荐）
+docker build --build-arg GITHUB_TOKEN=ghp_xxx -t automadoka .
+
+# 方式二：离线，先把 web.zip 放到项目根目录
+docker build --build-arg WEB_ZIP=web.zip -t automadoka .
+```
+
+注意 `--build-arg` 的值会留在镜像历史里，别传长期有效的个人 token；建议用只读的 fine-grained token。
+
 ## HTTP 服务器模式
 
 ```bash

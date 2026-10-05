@@ -43,6 +43,25 @@ DIFFICULTY_ORDER: List[int] = [1, 2, 3, 4, 5, 6]
 SETTLE_BATTLE_LOG = "battlelog"
 SETTLE_SKIP = "skip"
 
+# 高难度的队伍战力门槛。战力明显不达标却能结算出击杀，结算记录上一眼就能看出来，
+# 所以打这三个难度前先卡一道门槛，不达标直接拒绝执行。
+MIN_PARTY_POWER: Dict[int, int] = {
+    4: 60000,   # very hard
+    5: 70000,   # extra
+    6: 80000,   # crisis
+}
+
+# 战力不达标时的提示语
+POWER_NOT_ENOUGH_MESSAGE = "xdx，战力不够容易被别人看出开挂，请到达战力标准再使用"
+
+
+def format_power(value: int) -> str:
+    """按中文习惯显示战力：10000 的整数倍用「万」，否则退回千分位。"""
+    if value >= 10000 and value % 10000 == 0:
+        return f"{value // 10000}万"
+    return f"{value:,}"
+
+
 # 总力战依赖的协议类。游戏大版本更新时 autopcr 会整体重新生成协议模型
 # （见 autopcr/model/registry.py），若某个类被改名或移除，这里能第一时间给出
 # 可读提示，而不是抛一个难以理解的 ProtocolError。
@@ -359,6 +378,39 @@ async def resolve_party_id(client: pcrclient, party: Any) -> Optional[int]:
         if data.name == party:
             return data.partyDataId
     return None
+
+
+def get_party_power(client: pcrclient, party_data_id: int) -> int:
+    """读取指定队伍的队伍战力；找不到队伍时返回 0。"""
+    for data in client.data.resp.partyDataList or []:
+        if data.partyDataId == party_data_id:
+            return int(data.partyPower or 0)
+    return 0
+
+
+def check_party_power(difficulty: int, power: int) -> Optional[tuple]:
+    """战力不够时返回 ``(当前战力, 要求战力)``；够打、或该难度没有门槛时返回 ``None``。
+
+    纯函数，不碰客户端，方便离线测试。
+    """
+    required = MIN_PARTY_POWER.get(difficulty)
+    if not required or power >= required:
+        return None
+    return power, required
+
+
+def build_difficulty_candidates() -> List[str]:
+    """难度下拉的候选项，格式 ``"值:显示名"``（沿用项目里 wash 模块的写法）。
+
+    有战力门槛的难度把要求直接标在名字后面，界面上就能看到该练到多少。
+    """
+    return [
+        f"{d}: {DIFFICULTY_NAMES[d]}" + (
+            f"（需战力 {format_power(MIN_PARTY_POWER[d])}）"
+            if d in MIN_PARTY_POWER else ""
+        )
+        for d in DIFFICULTY_ORDER
+    ]
 
 
 async def _initialize_room(

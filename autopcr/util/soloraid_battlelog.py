@@ -24,7 +24,7 @@ from __future__ import annotations
 import json
 import math
 import random
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 # ---------------------------------------------------------------------------
 # 指令类型（与服务端序列化字符串保持一致）
@@ -55,6 +55,10 @@ MODE_SIMULATE = "simulate"   # 模拟一份完整战斗日志（推荐）
 MODE_MINIMAL = "minimal"     # 极简日志（Commands 为空，和现有魔女功能同思路，最保守）
 
 BATTLE_LOG_MODES = [MODE_SIMULATE, MODE_MINIMAL]
+
+# 斩杀时间的波动幅度：斩杀点在整个战斗的我方行动序列上，围绕名义位置上下浮动这个比例。
+# 不加波动的话每次都在同一个行动上收尾，日志会显得太整齐。
+KILL_TIME_JITTER = 0.10
 
 
 # ---------------------------------------------------------------------------
@@ -253,6 +257,7 @@ class SoloRaidBattleLogBuilder:
         limit_round: int = 1,
         wave: int = 1,
         season_buff_turn_gauge: float = 0.0,
+        kill_time_jitter: float = KILL_TIME_JITTER,
         seed: Optional[int] = None,
     ) -> None:
         # 生成器可被复用，这里把传入单位的状态重置干净
@@ -268,21 +273,60 @@ class SoloRaidBattleLogBuilder:
         self.limit_round = max(1, int(limit_round))
         self.wave = max(1, int(wave))
         self.season_buff_turn_gauge = float(season_buff_turn_gauge or 0.0)
+        self.kill_time_jitter = max(0.0, min(1.0, float(kill_time_jitter)))
         self.rng = random.Random(seed)
+        # 斩杀落在第几回合，由 plan_kill() 在模拟开始前定下
+        self.kill_round = self.target_round
 
         # 主目标（打伤害的那个部位），没有标记时取第一个敌人
         self.main_target = next(
             (e for e in self.enemies if e.is_main_target), None
         ) or (self.enemies[0] if self.enemies else None)
 
-    # -- 目标回合数 --------------------------------------------------------
+    # -- 斩杀时机 ----------------------------------------------------------
     @property
     def target_round(self) -> int:
+        """名义上在第几回合收尾（未加波动）。"""
         if self.kill_timing == TIMING_INSTANT:
             return 1
         if self.kill_timing == TIMING_MIDDLE:
             return max(1, math.ceil(self.limit_round / 2))
         return self.limit_round
+
+    def _nominal_slot(self, n_allies: int) -> int:
+        """名义上由本回合的第几个我方行动完成斩杀（0 起算）。"""
+        if self.kill_timing == TIMING_INSTANT:
+            return 0
+        if self.kill_timing == TIMING_MIDDLE:
+            return n_allies // 2
+        return max(0, n_allies - 1)
+
+    def plan_kill(self) -> Tuple[int, int]:
+        """定下斩杀点，返回 ``(第几个我方行动, 所在回合)``，行动序号从 1 起算。
+
+        名义位置 = 目标回合之前的全部我方行动 + 该回合内的名义槽位；再乘一个
+        ``1 ± kill_time_jitter`` 的随机因子，最后夹回
+        ``[1, 目标回合内的我方行动总数]``。所以斩杀点会在名义位置上下浮动，
+        不会每次都卡在同一个行动上。
+
+        波动是在**整个战斗的行动序列**上算的，不是按回合算——回合是整数，
+        对 ±10% 不敏感（3 回合的 ±10% 还不到半回合）。
+
+        ``instant`` 的名义位置就是第 1 个行动，±10% 之后仍是 1：秒杀本来就该是
+        第一刀，这里不做特殊处理。
+        """
+        n_allies = len(self.allies)
+        if n_allies <= 0:
+            return 1, 1
+        nominal = (
+            (self.target_round - 1) * n_allies + self._nominal_slot(n_allies) + 1
+        )
+        total = self.target_round * n_allies
+        factor = 1.0 + self.rng.uniform(
+            -self.kill_time_jitter, self.kill_time_jitter
+        )
+        index = max(1, min(total, int(round(nominal * factor))))
+        return index, (index - 1) // n_allies + 1
 
     # -- 主流程 ------------------------------------------------------------
     def build(self) -> Dict[str, Any]:
@@ -304,7 +348,7 @@ class SoloRaidBattleLogBuilder:
         battle_log = {
             "Commands": commands,
             "ResultBattleUnits": result_units,
-            "ResultRound": self.target_round,
+            "ResultRound": self.kill_round,
         }
         return {
             "battleLog": json.dumps(battle_log, ensure_ascii=False),
@@ -312,13 +356,17 @@ class SoloRaidBattleLogBuilder:
         }
 
     def build_minimal(self) -> Dict[str, Any]:
-        """极简日志：只报告"boss 已阵亡"，不带行动指令。"""
+        """极简日志：只报告"boss 已阵亡"，不带行动指令。
+
+        没有行动指令可算，但 ``ResultRound`` 仍然按同样的波动规则给出，
+        免得极简模式和模拟模式报的回合数口径不一致。
+        """
         result_units = [u.to_result_unit() for u in self.allies]
         result_units += [u.to_result_unit(dead=True) for u in self.enemies]
         battle_log = {
             "Commands": [],
             "ResultBattleUnits": result_units,
-            "ResultRound": self.target_round,
+            "ResultRound": self.plan_kill()[1],
         }
         return {
             "battleLog": json.dumps(battle_log, ensure_ascii=False),
@@ -343,8 +391,9 @@ class SoloRaidBattleLogBuilder:
     def _simulate(self) -> List[Dict[str, Any]]:
         """逐回合推进：每回合所有存活单位按速度从高到低行动一次。
 
-        斩杀发生在目标回合的第 ``kill_slot`` 个我方行动上：
-        秒杀 -> 第 1 个我方行动；中期 -> 该回合中间的我方行动；最后 -> 最后一个我方行动。
+        斩杀点先由 :meth:`plan_kill` 定下——它是**整个战斗行动序列**上的绝对序号
+        （只数我方行动，从 1 起算），带着 ±``kill_time_jitter`` 的波动。模拟时用一个
+        跨回合累加的我方行动计数器去对齐这个序号，命中即停。
         """
         units: List[BattleUnit] = list(self.allies) + list(self.enemies)
         for u in units:
@@ -357,28 +406,19 @@ class SoloRaidBattleLogBuilder:
         pending_hits: List[int] = []
         info_id = 1
         elapsed = 0.0
-        target_round = self.target_round
+        kill_index, self.kill_round = self.plan_kill()
+        # 跨回合累加的我方行动数，从 0 起算，+1 后即"第几个我方行动"
+        ally_seq = 0
         killed = False
 
-        for current_round in range(1, target_round + 1):
+        for current_round in range(1, self.kill_round + 1):
             order = sorted(
                 (u for u in units if u.alive),
                 key=lambda u: (not u.is_ally, -u.speed, u.unit_id),
             )
-            ally_order = [u for u in order if u.is_ally]
-            if not ally_order:
+            if not any(u.is_ally for u in order):
                 break
 
-            if current_round != target_round:
-                kill_slot = -1
-            elif self.kill_timing == TIMING_INSTANT:
-                kill_slot = 0
-            elif self.kill_timing == TIMING_MIDDLE:
-                kill_slot = len(ally_order) // 2
-            else:
-                kill_slot = len(ally_order) - 1
-
-            ally_index = 0
             for position, actor in enumerate(order):
                 delta = self.rng.uniform(0.2, 2.0)
                 elapsed += delta
@@ -394,12 +434,12 @@ class SoloRaidBattleLogBuilder:
                     commands.append(self._common_act(actor, info_id))
                     info_id += 1
                     commands.append(
-                        self._ally_skill(actor, info_id, pending_hits, ally_index)
+                        self._ally_skill(actor, info_id, pending_hits, ally_seq)
                     )
                     info_id += 1
-                    if ally_index == kill_slot:
+                    ally_seq += 1
+                    if ally_seq >= kill_index:
                         killed = True
-                    ally_index += 1
                 else:
                     commands.append(self._common_act(actor, info_id))
                     info_id += 1

@@ -32,16 +32,65 @@ def select_compatible_release(releases):
     return tag, urls
 
 
+def github_headers():
+    """GitHub API 请求头。
+
+    配置 GITHUB_TOKEN（或 GH_TOKEN）后走认证请求，限额从 60 次/小时
+    提升到 5000 次/小时。Docker 构建、共享出口 IP 或代理环境下很容易
+    撞到匿名限额（403 rate limit exceeded），建议传一个只读 token。
+    """
+    headers = {
+        'Accept': 'application/vnd.github+json',
+        'User-Agent': 'autopcr-download-web',
+    }
+    token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
+    if token:
+        headers['Authorization'] = f'Bearer {token}'
+    return headers
+
+
+def _rate_limit_hint(response):
+    import datetime
+    parts = []
+    if github_headers().get('Authorization'):
+        parts.append('已配置 GITHUB_TOKEN')
+    else:
+        parts.append('未配置 GITHUB_TOKEN，匿名请求仅 60 次/小时')
+    reset = response.headers.get('x-ratelimit-reset')
+    if reset and reset.isdigit():
+        parts.append('限额将于 %s 重置' % datetime.datetime.fromtimestamp(
+            int(reset)).strftime('%Y-%m-%d %H:%M:%S'))
+    return '；'.join(parts)
+
+
+async def fetch_releases_page(session, url, page, retries=4):
+    """拉取一页 releases；遇到限流或临时错误按指数退避重试。"""
+    delay = 2
+    for attempt in range(retries + 1):
+        async with session.get(url, params={'per_page': 100, 'page': page}) as response:
+            if response.status in (403, 429):
+                body = await response.text()
+                if attempt >= retries:
+                    raise RuntimeError(
+                        f'GitHub API 返回 {response.status}（{_rate_limit_hint(response)}）。\n'
+                        f'可设置环境变量 GITHUB_TOKEN 后重试。\n{body[:300]}')
+                print(f'GitHub API 限流（{response.status}），{delay}s 后重试'
+                      f'（{attempt + 1}/{retries}）：{_rate_limit_hint(response)}')
+                await asyncio.sleep(delay)
+                delay *= 2
+                continue
+            response.raise_for_status()
+            return await response.json()
+
+
 async def get_latest_release_info(owner, repo):
     # /releases/latest may belong to an incompatible API minor version.
     url = f"https://api.github.com/repos/{owner}/{repo}/releases"
     releases = []
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(headers=github_headers()) as session:
         page = 1
         while True:
-            async with session.get(url, params={'per_page': 100, 'page': page}) as response:
-                response.raise_for_status()
-                batch = await response.json()
+            batch = await fetch_releases_page(session, url, page)
             releases.extend(batch)
             if len(batch) < 100:
                 break
