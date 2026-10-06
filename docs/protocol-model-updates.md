@@ -37,6 +37,18 @@ python _version_update.py --apk 'D:\path\game.xapk' --cache-dir cache\protocol-t
 
 服务内的 HTTP 428 路径会直接更新当前进程。单独运行 CLI 会更新磁盘状态；其他已运行进程需要重启，或在它自己的 428 更新流程中加载新版。服务重启时按 `version.json` 的模型指针直接加载，不重新 Dump。`AUTOPCR_CACHE_DIR` 可配置缓存目录。
 
+## 避免重复下载
+
+一次完整的协议更新要拉整个 XAPK，比解码本身慢得多，所以两处顺序做了调整。
+
+**缓存判断提前到下载之前。** `prepare_models` 先用 `archive_digest()` 给包做个指纹：只读 ZIP 中央目录里各 split APK 的 `file_size` / `compress_size` / `CRC`，不取任何 APK 内容。中央目录在打开 archive 时已经读过，所以这一步不产生额外网络请求。`cache/protocol/<版本>-<指纹>/input.json` 里记下这个指纹、工具指纹和 manifest，只要三者与当前包一致且 `complete.json` 存在，就直接加载已有模型返回，完全不下载。中央目录的 CRC 变了就说明包换了内容，所以这个判断不依赖"版本号相同即内容相同"。
+
+`input.json` 是在构建之前写的，旧版缓存没有 `archive_sha256` 字段，因此第一次升级后会照旧走一遍完整流程，同时把记录补齐，之后才走快速路径。工具指纹（`il2cpp/*.py` 与 `update.py`）变化会让所有缓存失效，这是有意的。
+
+**下载分块落盘，可续传。** `streamzip.DiskCacheReader` 把每个 1MB 分块写到 `cache/download/<指纹>/`，指纹取自解重定向后的 URL、文件大小和 `ETag`（没有就退到 `Last-Modified`），因此新版不会被旧版的缓存顶上。分块先写 `.part` 再 `os.replace` 就位，写到一半被杀不会留下会被误信的半块；下次运行命中已有分块就直接从磁盘读。600 秒超时或容器重启都不会再从零开始。
+
+更新成功后 `prune_download_cache()` 只保留最近两份 spool，旧版本占的空间会被回收。
+
 ## 动态类代理
 
 原有 `autopcr.model.requests/responses/common/enums` 导入路径保持可用。公开名称是稳定的类代理，构造、`parse_obj` 等类方法以及枚举访问在调用时查找实际类。生成结果写入缓存，源码 `_bundled/` 保存首次运行的模型。
@@ -69,7 +81,7 @@ actual_class = resolve("requests", "LoginApiLoginRequest")
 - `protocol.py`：提取协议结构并生成四个模型模块。
 - `autopcr/model/update.py`：复用下载入口，管理缓存、日志和模型校验。
 
-缓存目录 `cache/protocol/<版本>-<指纹>/` 保存 `input.json`（输入及实现校验值）、`pipeline.log`、`analysis/`（恢复中间结果）、`extracted/il2cpp/libil2cpp.restored.so`、`models/`（四个 Python 模块、`protocol.json` 计数、`protocol.schema.json` 协议结构）及 `complete.json`（模型校验值）。实现代码改变会影响缓存指纹。
+缓存目录 `cache/protocol/<版本>-<指纹>/` 保存 `input.json`（输入及实现校验值，含包的中央目录指纹、sign 与 libcount）、`pipeline.log`、`analysis/`（恢复中间结果）、`extracted/il2cpp/libil2cpp.restored.so`、`models/`（四个 Python 模块、`protocol.json` 计数、`protocol.schema.json` 协议结构）及 `complete.json`（模型校验值）。实现代码改变会影响缓存指纹。下载分块保存在 `cache/download/<指纹>/`，更新成功后只保留最近两份。
 
 这个实现覆盖自动协议更新所需的 IL2CPP 内容，直接生成模型，不导出完整 DummyDll、方法反汇编或 IDA 脚本。元数据布局和压缩常量参考 Il2CppDumper 的 MIT 源码，许可保存在 `autopcr/model/il2cpp/LICENSE.Il2CppDumper`；协议映射规则移植自现有 `MagiaExedra/ProtocolGen`。本工作区的旧工具已归档到 `cache/legacy-protocol-tools/`，不参与运行、版本管理或 Docker 构建。
 

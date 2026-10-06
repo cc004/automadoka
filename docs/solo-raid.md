@@ -188,19 +188,46 @@ isSeasonBuffActive, seasonBuffPoint, seasonBuffTurnGaugeValue, nextEnemyIndex
 | `ROUND_TIME` | 115.0 | 一个回合对应的行动时间 |
 | `ACTION_GAUGE` | 1000.0 | 行动槽填满所需距离，速度越快间隔越短 |
 | `GAUGE_SCALE` | 0.1 | 日志里 `GaugeValue` 的量纲缩放 |
+| `KILL_TIME_JITTER` | 0.10 | 斩杀点在行动序列上的上下波动幅度 |
 
 每回合所有存活单位按"我方优先、速度从高到低"排一次序，逐个产生
 `BeginTurn` + `CommonAct` + `Skill` 三条指令。
 
 ### 斩杀时机与伤害分摊
 
-斩杀时机决定 `ResultRound` 落在第几回合：
+斩杀时机决定斩杀点落在**整个战斗的我方行动序列**上的哪个位置。先把时机换算成一个
+"名义斩杀点"，再叠一个 ±`KILL_TIME_JITTER`（默认 10%）的随机波动：
 
-| 时机 | 目标回合 | 斩杀发生在该回合的第几个我方行动 |
+| 时机 | 名义目标回合 | 名义斩杀点（第几个我方行动，1 起算） |
 |---|---|---|
-| `instant` 秒杀 | 1 | 第 1 个 |
-| `middle` 中间 | `ceil(limit_round / 2)` | 中间那个 |
-| `last` 最后关头 | `limit_round` | 最后一个 |
+| `instant` 秒杀 | 1 | 1 |
+| `middle` 中间 | `ceil(limit_round / 2)` | 目标回合之前的全部我方行动 + 该回合中间那个 |
+| `last` 最后关头 | `limit_round` | 目标回合之前的全部我方行动 + 该回合最后一个 |
+
+具体算法（`SoloRaidBattleLogBuilder.plan_kill()`）：
+
+```python
+nominal = (target_round - 1) * n_allies + slot + 1     # slot: 回合内的名义槽位
+total   = target_round * n_allies                      # 名义回合内的我方行动总数
+index   = clamp(round(nominal * (1 ± jitter)), 1, total)
+round   = (index - 1) // n_allies + 1
+```
+
+**波动为什么算在行动序列上、而不是按回合算**：回合是整数，对 ±10% 根本不敏感
+（3 回合的 ±10% 还不到半回合），所以只有把斩杀点落到"第几个我方行动"上，
+波动才真的能散开。以 5 名我方单位、上限 3 回合为例：
+
+| 时机 | 名义斩杀点 | 波动后实际范围（300 个随机种子实测） | 回合 |
+|---|---|---|---|
+| `instant` | 1 | 恒为 1（±10% 后仍取整为 1，秒杀语义保留） | 1 |
+| `middle` | 8 | 7 / 8 / 9 | 2 |
+| `last` | 15 | 14 / 15（上界被 `total` 夹住） | 3 |
+
+不加波动的话每次都在同一个行动上收尾，日志会显得太整齐；加上之后斩杀点会浮动，
+但**永远落在目标回合内**（`instant` 除外，它本来就该是第一刀）。
+
+`kill_time_jitter` 可调，取值会被夹到 `[0.0, 1.0]`；传 `0` 就退回完全确定的名义位置，
+方便复现问题。
 
 伤害分摊的规则是：总伤害取 `boss_max_hp * 1.02`，前面的命中合计分摊 35%
 （越靠后权重越高），**最后一击独占剩余 65%** 并负责斩杀，标记 `IsDead`。
@@ -307,7 +334,10 @@ python -m unittest discover -s tests -p "test_hide_party.py" -v
 ```
 
 - `test_soloraid_battlelog.py`：斩杀时机与回合数、伤害是否致命、终局单位状态、
-  指令结构、`battleInfo` 终局标记、极简模式、builder 复用同一批单位对象时是否互相污染。
+  指令结构、`battleInfo` 终局标记、极简模式、builder 复用同一批单位对象时是否互相污染；
+  另有 `KillTimeJitterTests` 专门覆盖波动——`jitter=0` 时的名义斩杀点、200 个随机种子下
+  斩杀点是否始终落在 ±10% 区间内、波动是否真的让斩杀点散开、幅度参数是否被夹到 `[0,1]`、
+  模拟日志里的我方行动次数与计划斩杀点是否一致、极简模式是否走同一套规则。
 - `test_hide_party.py`：`save_option` 必须整体写回（含"只发一个字段会把其余 39 个
   写成 `null`"的反例）、开关翻转与字段保留、战力门槛边界值（刚好达标通过、差 1 点拒绝）、
   战力的「万」显示与退化格式、队伍战力读取的容错、难度选项标注文案。
