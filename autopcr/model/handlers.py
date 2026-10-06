@@ -2,6 +2,7 @@ from . import responses
 from .common import *
 from ..core.datamgr import datamgr
 from .registry import register_handler
+from ..util.raidoption import medal_per_like
 
 def handles(cls):
     register_handler(cls.__base__._name, cls.update)
@@ -44,12 +45,13 @@ class LikeApiExecLikeListResponse(
             if not item.isFriendMedalAcquired:
                 continue
 
-            medal_once = next(
-                x.num
-                for x in mgr.config.friendConfig.friendMedal
-                # Older generated caches store this field as type_ with alias 'type'.
-                if x.dict(by_alias=True)['type'] == 'ExecLike'
-            )
+            medal_once = medal_per_like(mgr.config.friendConfig.friendMedal)
+            if not medal_once:
+                # 配置里没有 ExecLike 这一行（或数量是 0）。
+                # ⚠️ 这里原来写的是 `next(...)` 且没给默认值 —— 一旦配置变了就抛
+                # `StopIteration`，从协程里逃出来会变成 `RuntimeError`，
+                # 「魔女点赞」整个模块直接报错。宁可少算计数也不能炸。
+                continue
 
             medal_total = (
                 mgr.config.friendConfig.gainTodayFriendMedalMaxNum
