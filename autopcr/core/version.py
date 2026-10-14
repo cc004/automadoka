@@ -85,6 +85,7 @@ def _update_version_sync(source=None, activate=True):
             atomic_json(PATH, state)
             version_info.apply(state)
         registry.activate(generation, commit=commit)
+        streamzip.prune_download_cache()
         print(f'Updated app and protocol models to {version}', flush=True)
         return generation, state
 

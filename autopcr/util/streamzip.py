@@ -1,9 +1,12 @@
-import zipfile, requests
+import hashlib, json, os, shutil, zipfile, requests
 import io
-from ..constants import PROXIES
+from pathlib import Path
+from ..constants import PROXIES, CACHE_DIR
 
 _global_session = requests.Session()
 _global_session.proxies = PROXIES
+
+DOWNLOAD_CACHE_KEEP = 2
 
 class RangeReader:
     def total_size(self):
@@ -18,12 +21,15 @@ class UrlRangeReader(RangeReader):
     def __init__(self, url):
         self.session = _global_session
         self.url = url
+        self.etag = ''
         while True:
             response = self.session.head(self.url, allow_redirects=False)
             if response.status_code in (301, 302, 303, 307, 308):
                 self.url = response.headers['Location']
             else:
                 self.size = int(response.headers.get('Content-Length', 0))
+                self.etag = (response.headers.get('ETag')
+                             or response.headers.get('Last-Modified') or '')
                 return
     
     def total_size(self):
@@ -55,9 +61,66 @@ class FileRangeReader(RangeReader):
     def close(self):
         self.file.close()
 
+class DiskCacheReader(RangeReader):
+    """Spool every fetched range to disk so an interrupted run resumes locally.
+
+    The spool is keyed by the resolved URL, its size and its validator, so a new
+    build can never be served out of an older build's spool. A chunk is written
+    to a temporary name and then moved into place, so a kill during the write
+    cannot leave a half chunk that a later run would trust.
+    """
+    def __init__(self, reader, key, root=None):
+        self.reader = reader
+        self.directory = Path(root if root is not None else Path(CACHE_DIR) / 'download') / key
+        self.directory.mkdir(parents=True, exist_ok=True)
+
+    def total_size(self):
+        return self.reader.total_size()
+
+    def chunk(self, start, size):
+        path = self.directory / ('%012d-%08d.bin' % (start, size))
+        try:
+            cached = path.read_bytes()
+        except OSError:
+            cached = None
+        if cached is not None and len(cached) == size:
+            return cached
+        data = self.reader.chunk(start, size)
+        temporary = path.with_name(path.name + '.part')
+        temporary.write_bytes(data)
+        os.replace(str(temporary), str(path))
+        return data
+
+    def close(self):
+        self.reader.close()
+
+def cache_key(reader):
+    """Identify a remote build by resolved URL, size and validator."""
+    identity = json.dumps([reader.url, reader.total_size(), getattr(reader, 'etag', '')],
+                          sort_keys=True)
+    return hashlib.sha256(identity.encode()).hexdigest()[:16]
+
+def prune_download_cache(root=None, keep=DOWNLOAD_CACHE_KEEP):
+    """Keep only the newest spools; a finished update never needs the older ones."""
+    root = Path(root if root is not None else Path(CACHE_DIR) / 'download')
+    try:
+        entries = [path for path in root.iterdir() if path.is_dir()]
+    except OSError:
+        return []
+    entries.sort(key=lambda path: path.stat().st_mtime, reverse=True)
+    removed = []
+    for path in entries[keep:]:
+        try:
+            shutil.rmtree(path)
+        except OSError:
+            continue
+        removed.append(path.name)
+    return removed
+
 def create_range_reader(source):
     if source.startswith('http://') or source.startswith('https://'):
-        return UrlRangeReader(source)
+        reader = UrlRangeReader(source)
+        return DiskCacheReader(reader, cache_key(reader))
     else:
         return FileRangeReader(source)
 
